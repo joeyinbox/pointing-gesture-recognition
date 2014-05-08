@@ -1,6 +1,7 @@
 #! /usr/bin/python
 from openni import *
 import numpy as np
+import cv2
 
 # Get the context and initialise it
 context = Context()
@@ -46,8 +47,18 @@ def update(src, id, pos, time):
 
     # Get the pixel's depth at these coordinates
     pixel = depthMap[int(handPosition[0]), int(handPosition[1])]
-
     print "map: %d | pos: %d" % (pixel, handPosition[2])
+    
+    # Create array from the raw depth map string
+    frame = np.fromstring(depth.get_raw_depth_map_8(), np.uint8).reshape(480, 640)
+    
+    # At 1m, the hand is surrounded with a shift of 75 pixels around the center of gravity
+    shift = int((1000/float(pixel))*75)
+    cv2.rectangle(frame, ((int(handPosition[0])-shift),(int(handPosition[1])-shift)), ((int(handPosition[0])+shift),(int(handPosition[1])+shift)), (255, 0, 0), 5)
+     
+    # Render in OpenCV
+    cv2.imshow("image", frame)
+    cv2.waitKey(30)
 
 
 def destroy(src, id, time):
