@@ -53,6 +53,7 @@ def update(src, id, pos, time):
     frame = np.fromstring(depth.get_raw_depth_map_8(), np.uint8).reshape(480, 640)
     
     # At 1m, the hand is surrounded with a shift of 75 pixels around the center of gravity
+    # TODO: divided by zero
     shift = int((1000/float(pixel))*75)
     cv2.rectangle(frame, ((int(handPosition[0])-shift),(int(handPosition[1])-shift)), ((int(handPosition[0])+shift),(int(handPosition[1])+shift)), (255, 0, 0), 5)
      
