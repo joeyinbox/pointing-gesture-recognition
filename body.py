@@ -20,29 +20,19 @@ user.create(context)
 
 # Obtain the skeleton & pose detection capabilities
 skel_cap = user.skeleton_cap
-pose_cap = user.pose_detection_cap
 
 
-# Set the skeleton pose to start calibration
-pose_to_use = 'Psi'
-
-
-# Declare the callbacks
+# Declare the callbacks to detect new users and start detection
 def new_user(src, id):
-    print "1/4 User {} detected. Raise your hands..." .format(id)
-    pose_cap.start_detection(pose_to_use, id)
-
-def pose_detected(src, pose, id):
-    print "2/4 Stand still user {}. Requesting calibration..." .format(pose,id)
-    pose_cap.stop_detection(id)
+    print "1/3 User {} detected." .format(id)
     skel_cap.request_calibration(id, True)
 
 def calibration_start(src, id):
-    print "3/4 Calibration started for user {}." .format(id)
+    print "2/3 Calibration started for user {}." .format(id)
 
 def calibration_complete(src, id, status):
     if status == CALIBRATION_STATUS_OK:
-        print "4/4 User {} calibrated successfully! Starting to track." .format(id)
+        print "3/3 User {} successfully calibrated! Starting to track." .format(id)
         skel_cap.start_tracking(id)
     else:
         print "ERR User {} failed to calibrate. Restarting process." .format(id)
@@ -54,7 +44,6 @@ def lost_user(src, id):
 
 # Register the callbacks
 user.register_user_cb(new_user, lost_user)
-pose_cap.register_pose_detected_cb(pose_detected)
 skel_cap.register_c_start_cb(calibration_start)
 skel_cap.register_c_complete_cb(calibration_complete)
 
