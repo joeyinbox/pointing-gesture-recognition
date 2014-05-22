@@ -65,15 +65,53 @@ def getDepthFromMap(depthMap, position):
     if x<0 or x>=depthMap.width or y<0 or y>=depthMap.height:
         return 0
     else:
-        return depthMap[int(position[0]), int(position[1])]
+        return depthMap[x, y]
 
 # Draw the boundaries around the hands
 def drawHandBoundaries(frame, position, shift, color):
     cv2.rectangle(frame, ((int(position[0])-shift),(int(position[1])-shift)), ((int(position[0])+shift),(int(position[1])+shift)), color, 5)
 
+# Draw the depth values of an hand
+def drawHandDepth(frame, data):
+    for x in range(len(data)):
+        for y in range(len(data[0])):
+            cv2.rectangle(frame, (x*2,y*2), (x*2+2,y*2+2), (int(255-float(data[x,y])*255), int(float(data[x,y])*255), 0), 2)
 
 
 
+
+# Extract depth data from a specifed area
+def extractDepthFromArea(depthMap, position, shift):
+    result = np.zeros(shape=(2*shift+1, 2*shift+1))
+    
+    i = 0
+    for x in range(int(position[0])-shift, int(position[0])+shift):
+        j = 0
+        for y in range(int(position[1])-shift, int(position[1])+shift):
+            if x>=0 and x<depthMap.width and y>=0 and y<depthMap.height:
+                result[i, j] = convertDepthToRange(depthMap[x, y])
+            j += 1
+        i += 1
+    
+    return result
+
+# Convert depth data to a value within the range 1-0 (with 1 for smallest values from 500 to 4000 mm)
+def convertDepthToRange(depth):
+    maxDepth = 4000
+    minDepth = 500
+    
+    if depth>=minDepth and depth<=maxDepth:
+        return round((maxDepth-float(depth))/(maxDepth-minDepth), 3)
+    return 0
+
+# Write array values to a file
+def writeToFile(data):
+    f = open('result.txt','w')
+    for x in xrange(len(data)):
+        f.write("[")
+        for y in xrange(len(data[0])):
+            f.write(("%.3f,"%(data[x,y])))
+        f.write("]\n")
 
 
 
@@ -85,10 +123,7 @@ skel_cap.set_profile(SKEL_PROFILE_ALL)
 context.start_generating_all()
 print "Starting to detect users.."
 
-
-
-
-
+inc = 0
 
 while True:
     # Update to next frame
@@ -126,7 +161,10 @@ while True:
             # Display a rectangle around both hands
             drawHandBoundaries(frame, leftHandPosition, leftShift, (50, 100, 255))
             drawHandBoundaries(frame, rightHandPosition, rightShift, (200, 70, 30))
+            
+            dataLeft = extractDepthFromArea(depthMap, leftHandPosition, leftShift)
+            dataRight = extractDepthFromArea(depthMap, rightHandPosition, rightShift)
     
     # Display the depth image
     cv2.imshow("image", frame)
-    cv2.waitKey(30)
+    cv2.waitKey(10)
