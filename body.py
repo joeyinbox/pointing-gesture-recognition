@@ -140,16 +140,30 @@ while True:
     for id in user.users:
         if skel_cap.is_tracking(id):
             
-            # Get the informations about the two hands of this user
+            # Get the skeleton joints informations needed
             # NB: Left and right are inverted on the skeleton
             leftHand = skel_cap.get_joint_position(id, SKEL_RIGHT_HAND)
             rightHand = skel_cap.get_joint_position(id, SKEL_LEFT_HAND)
+            head = skel_cap.get_joint_position(id, SKEL_HEAD)
+            leftElbow = skel_cap.get_joint_position(id, SKEL_RIGHT_ELBOW)
+            rightElbow = skel_cap.get_joint_position(id, SKEL_LEFT_ELBOW)
             
-            # Map the informations of the hands to the depth map
+            # Map the informations to the depth map
             leftHandPosition = depth.to_projective([leftHand.point])[0]
             rightHandPosition = depth.to_projective([rightHand.point])[0]
+            headPosition = depth.to_projective([head.point])[0]
+            leftElbowPosition = depth.to_projective([leftElbow.point])[0]
+            rightElbowPosition = depth.to_projective([rightElbow.point])[0]
+            
+            # Highlight the head
+            cv2.circle(frame, (int(headPosition[0]),int(headPosition[1])) , 5, (0,0,255), -1)
+            
+            # Display lines from elbows to the respective hands
+            cv2.line(frame, (int(leftElbowPosition[0]),int(leftElbowPosition[1])), (int(leftHandPosition[0]),int(leftHandPosition[1])), (0,0,0), 2)
+            cv2.line(frame, (int(rightElbowPosition[0]),int(rightElbowPosition[1])), (int(rightHandPosition[0]),int(rightHandPosition[1])), (0,0,0), 2)
+            
 
-            # Get the pixel's depth at these coordinates
+            # Get the pixel's depth from the coordinates of the hands
             leftPixel = getDepthFromMap(depthMap, leftHandPosition)
             rightPixel = getDepthFromMap(depthMap, rightHandPosition)
             print "Left hand depth: %d | Right hand depth: %d" % (leftPixel, rightPixel)
@@ -162,8 +176,8 @@ while True:
             drawHandBoundaries(frame, leftHandPosition, leftShift, (50, 100, 255))
             drawHandBoundaries(frame, rightHandPosition, rightShift, (200, 70, 30))
             
-            dataLeft = extractDepthFromArea(depthMap, leftHandPosition, leftShift)
-            dataRight = extractDepthFromArea(depthMap, rightHandPosition, rightShift)
+            #dataLeft = extractDepthFromArea(depthMap, leftHandPosition, leftShift)
+            #dataRight = extractDepthFromArea(depthMap, rightHandPosition, rightShift)
     
     # Display the depth image
     cv2.imshow("image", frame)
