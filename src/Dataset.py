@@ -1,11 +1,10 @@
 #! /usr/bin/python
-import json
+import json, utils
 
 
 class Dataset:
 	def __init__(self):
 		self.camera_height = 0
-		self.luminosity = 0
 		self.user = {
 			"arm_length": 0,
 			"height": 0,
@@ -23,54 +22,27 @@ class Dataset:
 			"thickness": 0
 		}
 		self.skeleton = {
-			"head": {
-		  		"x": 0,
-				"y": 0,
-				"z": 0
-			},
+			"head": [],
 			"shoulder": {
-				"left": {
-			  		"x": 0,
-					"y": 0,
-					"z": 0
-				},
-				"right": {
-			  		"x": 0,
-					"y": 0,
-					"z": 0
-				},
-				"center": {
-			  		"x": 0,
-					"y": 0,
-					"z": 0
-				}
+				"left": [],
+				"right": [],
+				"center": []
 			},
 			"elbow": {
-				"left": {
-			  		"x": 0,
-					"y": 0,
-					"z": 0
-				},
-				"right": {
-			  		"x": 0,
-					"y": 0,
-					"z": 0
-				}
+				"left": [],
+				"right": []
 			},
 			"hand": {
-				"left": {
-			  		"x": 0,
-					"y": 0,
-					"z": 0
-				},
-				"right": {
-			  		"x": 0,
-					"y": 0,
-					"z": 0
-				}
+				"left": [],
+				"right": []
 			}
 		}
 		self.depth_map = []
+		self.image = ""
 		
 	def to_JSON(self):
-		return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
+		# Update the depth map and the image to prepare them
+		self.depth_map = utils.convertOpenNIDepthMapToArray(self.depth_map)
+		self.image = utils.getBase64(self.image)
+		
+		return json.dumps(self, default=lambda o: o.__dict__, separators=(',', ':'))

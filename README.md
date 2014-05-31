@@ -6,10 +6,11 @@ Automatic Recognition of Pointing Gestures.
 - [Python](https://www.python.org) 2.7 or higher
 - [PyOpenNI](https://github.com/jmendeth/PyOpenNI)
 - [OpenCV](http://opencv.org) 2.4.9
-- Depth sensor (Kinect, Asus Xtion Live)
+- [PySDL2](https://bitbucket.org/marcusva/py-sdl2) 0.9.2 (which requires [PyPy](http://www.pypy.org) 1.8.0+)
+- Depth sensor (e.g. Kinect, Asus Xtion Live)
 
 ## Getting started ##
-- Open a terminal and execute the `body.py` file.
+- Open a terminal and execute the `main.py` file.
 - Stand up and point!
 
 ## Configuration ##

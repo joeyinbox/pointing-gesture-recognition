@@ -1,5 +1,5 @@
 #! /usr/bin/python
-import json
+import base64, cv2, json
 
 
 # Write array values to a file
@@ -28,6 +28,16 @@ def promptInt(question, default):
 	except: 
 		return int(default)
 
+# Convert an openNI depth map to a regular serializable array
+def convertOpenNIDepthMapToArray(depthMap):
+	result = [[0 for i in range(480)] for j in range(640)]
+    
+	for x in range(0, 639):
+		for y in range(0, 479):
+			result[x][y] = depthMap[x, y]
+    
+	return result
+
 
 # Dump the content of an object to a json file
 def dumpJsonToFile(data, filename):
@@ -40,3 +50,9 @@ def loadJsonFromFile(filename):
 	data = json.load(json_data)
 	json_data.close()
 	return data
+
+
+# Encode a frame to base64
+def getBase64(frame):
+	tmp = cv2.imencode('.png', frame)[1]
+	return base64.encodestring(tmp)

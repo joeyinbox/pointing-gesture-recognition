@@ -1,10 +1,10 @@
 #! /usr/bin/python
 from openni import *
 import numpy as np
+import sys, ctypes
 import cv2
-import ui
-import utils
-import hand
+import sdl2, sdl2.ext
+import hand, ui, Dataset, eventHandler, skeleton
 
 
 # Get the context and initialise it
@@ -17,105 +17,110 @@ depth.create(context)
 depth.set_resolution_preset(RES_VGA)
 depth.fps = 30
 
+# Create the image generator to get an RGB image of the scene
+image = ImageGenerator()
+image.create(context)
+image.set_resolution_preset(RES_VGA)
+image.fps = 30
+
 # Create the user generator to detect skeletons
 user = UserGenerator()
 user.create(context)
 
-# Get the skeleton capabilities
-skel_cap = user.skeleton_cap
-
-
-# Declare the callbacks to detect new users and start detection
-def new_user(src, id):
-    print "1/3 User {} detected." .format(id)
-    skel_cap.request_calibration(id, True)
-
-def calibration_start(src, id):
-    print "2/3 Calibration started for user {}." .format(id)
-
-def calibration_complete(src, id, status):
-    if status == CALIBRATION_STATUS_OK:
-        print "3/3 User {} successfully calibrated! Starting to track." .format(id)
-        skel_cap.start_tracking(id)
-    else:
-        print "ERR User {} failed to calibrate. Restarting process." .format(id)
-        new_user(user, id)
-
-def lost_user(src, id):
-    print "--- User {} lost." .format(id)
-
-
-# Register the callbacks
-user.register_user_cb(new_user, lost_user)
-skel_cap.register_c_start_cb(calibration_start)
-skel_cap.register_c_complete_cb(calibration_complete)
-
-# Set the profile
-skel_cap.set_profile(SKEL_PROFILE_ALL)
+# Initialise the skeleton tracking
+skeleton.init(user)
 
 # Start generating
 context.start_generating_all()
 print "Starting to detect users.."
 
-inc = 0
 
-while True:
-    # Update to next frame
-    context.wait_and_update_all()
+def run():
+	# Create a new window
+	window = ui.createWindow(1280,480)
     
-    # Get the whole depth map
-    depthMap = depth.map
-    
-    # Create the frame from the raw depth map string and convert it to RGB
-    frame = np.fromstring(depth.get_raw_depth_map_8(), np.uint8).reshape(480, 640)
-    frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2RGB);
+	# Create a new dataset item
+	data = Dataset.Dataset()
 
-    # Extract informations of each tracked user
-    for id in user.users:
-        if skel_cap.is_tracking(id):
-            
-            # Get the skeleton joints informations needed
-            # NB: Left and right are inverted on the skeleton
-            leftHand = skel_cap.get_joint_position(id, SKEL_RIGHT_HAND)
-            rightHand = skel_cap.get_joint_position(id, SKEL_LEFT_HAND)
-            head = skel_cap.get_joint_position(id, SKEL_HEAD)
-            leftElbow = skel_cap.get_joint_position(id, SKEL_RIGHT_ELBOW)
-            rightElbow = skel_cap.get_joint_position(id, SKEL_LEFT_ELBOW)
-            
-            # Map the informations to the depth map
-            leftHandPosition = depth.to_projective([leftHand.point])[0]
-            rightHandPosition = depth.to_projective([rightHand.point])[0]
-            headPosition = depth.to_projective([head.point])[0]
-            leftElbowPosition = depth.to_projective([leftElbow.point])[0]
-            rightElbowPosition = depth.to_projective([rightElbow.point])[0]
-            
-            
-            
-            # Get the pixel's depth from the coordinates of the hands
-            leftPixel = hand.getDepthFromMap(depthMap, leftHandPosition)
-            rightPixel = hand.getDepthFromMap(depthMap, rightHandPosition)
-            print "Left hand depth: %d | Right hand depth: %d" % (leftPixel, rightPixel)
+	running = True
+	event = sdl2.SDL_Event()
+	
+	while running:
+		
+		# Update to next frame
+		context.wait_and_update_all()
+		
+		# Extract informations of each tracked user
+		data = skeleton.track(user, depth, data)
+
+		# Get the whole depth map
+		data.depth_map = depth.map
+
+		# Create the frame from the raw depth map string and convert it to RGB
+		frame = np.fromstring(depth.get_raw_depth_map_8(), np.uint8).reshape(480, 640)
+		frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2RGB)
+	
+		# Get the RGB image of the scene
+		data.image = np.fromstring(image.get_raw_image_map_bgr(), dtype=np.uint8).reshape(480, 640, 3)
+
+		
+		
+		# 
+		if len(user.users) > 0 and len(data.skeleton["head"]) > 0:
+			# Highlight the head
+			ui.drawHeadPoint(frame, data.skeleton["head"])
     
-            # Get the shift of the boundaries around both hands
-            leftShift = hand.getHandBoundShift(leftPixel)
-            rightShift = hand.getHandBoundShift(rightPixel)
-            
-            #dataLeft = hand.extractDepthFromArea(depthMap, leftHandPosition, leftShift)
-            #dataRight = hand.extractDepthFromArea(depthMap, rightHandPosition, rightShift)
-            
-            
-            
-            # Highlight the head
-            ui.drawHeadPoint(frame, headPosition)
-            
-            # Display lines from elbows to the respective hands
-            ui.drawElbowLine(frame, leftElbowPosition, leftHandPosition)
-            ui.drawElbowLine(frame, rightElbowPosition, rightHandPosition)
-            
-            # Display a rectangle around both hands
-            ui.drawHandBoundaries(frame, leftHandPosition, leftShift, (50, 100, 255))
-            ui.drawHandBoundaries(frame, rightHandPosition, rightShift, (200, 70, 30))
+			# Display lines from elbows to the respective hands
+			ui.drawElbowLine(frame, data.skeleton["elbow"]["left"], data.skeleton["hand"]["left"])
+			ui.drawElbowLine(frame, data.skeleton["elbow"]["right"], data.skeleton["hand"]["right"])
+		
+			# Get the pixel's depth from the coordinates of the hands
+			leftPixel = hand.getDepthFromMap(data.depth_map, data.skeleton["hand"]["left"])
+			rightPixel = hand.getDepthFromMap(data.depth_map, data.skeleton["hand"]["right"])
+			#print "Left hand depth: %d | Right hand depth: %d" % (leftPixel, rightPixel)
+
+			# Get the shift of the boundaries around both hands
+			leftShift = hand.getHandBoundShift(leftPixel)
+			rightShift = hand.getHandBoundShift(rightPixel)
     
-    # Display the depth image
-    cv2.imshow("image", frame)
-    cv2.waitKey(10)
+			#dataLeft = hand.extractDepthFromArea(data.depth_map, leftHandPosition, leftShift)
+			#dataRight = hand.extractDepthFromArea(data.depth_map, rightHandPosition, rightShift)
+    
+			# Display a rectangle around both hands
+			ui.drawHandBoundaries(frame, data.skeleton["hand"]["left"], leftShift, (50, 100, 255))
+			ui.drawHandBoundaries(frame, data.skeleton["hand"]["right"], rightShift, (200, 70, 30))
+			
+		
+		# Blit new frames' informations to the window
+		window["array"] = ui.embedFrame(data.image, window["array"], 0, 0)
+		window["array"] = ui.embedFrame(frame, window["array"], 640, 0)
+		
+		# Refresh the window
+		ui.refresh(window["screen"])
+		
+		# Handle eventual events and wait 10ms
+		running = eventHandler.handleEvent(event, data)
+		sdl2.SDL_Delay(10)
+	
+	
+	# The application now needs to exit
+	freeResources()
+	sdl2.SDL_DestroyWindow(window["screen"])
+	sdl2.SDL_Quit()
+	return 0
+
+# Free used ressources
+def freeResources():
+	global context
+	global depth
+	global image
+	global user
+	
+	del context
+	del depth
+	del image
+	del user
+
+
+if __name__ == "__main__":
+	sys.exit(run())

@@ -1,6 +1,5 @@
 #! /usr/bin/python
-import utils
-import Dataset
+import utils, Dataset
 
 
 def promptAllQuestions(data):
@@ -9,17 +8,12 @@ def promptAllQuestions(data):
 	print "Luminosity is expressed in lux\n"
 	
 	data.camera_height = utils.promptInt("Camera height", 1800)
-	data = promptLuminosity(data)
 	
 	data = promptUserSpecs(data)
 	data = promptUserPosition(data)
 	
 	data = promptHandSpecs(data)
 	data = promptTargetPosition(data)
-	return data
-	
-def promptLuminosity(data):
-	data.luminosity = utils.promptInt("Luminosity", 0)
 	return data
 
 def promptUserPosition(data):
@@ -43,21 +37,3 @@ def promptTargetPosition(data):
 	data.target["angle"] = utils.promptInt("Target angle", 0)
 	data.target["height"] = utils.promptInt("Target height", 0)
 	return data
-
-
-# Create a new dataset item by prompting the user
-data = Dataset.Dataset()
-data = promptAllQuestions(data)
-
-data.skeleton["head"] = []
-data.skeleton["shoulder"]["left"] = []
-data.skeleton["shoulder"]["right"] = []
-data.skeleton["shoulder"]["center"] = []
-data.skeleton["elbow"]["left"] = []
-data.skeleton["elbow"]["right"] = []
-data.skeleton["hand"]["left"] = []
-data.skeleton["hand"]["right"] = []
-
-data.depth_map = []
-
-utils.writeToFile(data.to_JSON(), '../dataset/test.json')
