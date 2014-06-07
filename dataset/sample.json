@@ -3,18 +3,20 @@
 		[0,0],
 		[0,0]
 	],
+	"image": "",
 	"camera_height": 0,
 	"user": {
 		"distance": 0,
 		"angle": 0,
+		"height": 0,
+		"arm_length": 0
+	},
+	"hand": {
+		"width": 0,
+		"thickness": 0,
 		"height": 0
 	},
-	"target": {
-		"distance": 0,
-		"angle": 0,
-		"height": 0
-	},
-	"arm_length": 0,
+	"finger_tip": [0,0,0],
 	"skeleton": {
 		"shoulder": {
 			"right": [0,0,0],
@@ -31,10 +33,9 @@
 			"left": [0,0,0]
 		}
 	},
-	"hand": {
-		"width": 0,
-		"thickness": 0,
+	"target": {
+		"distance": 0,
+		"angle": 0,
 		"height": 0
-	},
-	"image": ""
+	}
 }

@@ -1,5 +1,7 @@
 #! /usr/bin/python
-import cv2, sdl2, numpy as np
+import cv2, functools, numpy as np
+from PyQt5 import QtGui, QtWidgets, QtCore
+from classes.FormItem import *
 
 
 # Highlight the head
@@ -20,32 +22,124 @@ def drawHandDepth(frame, data):
         for y in range(len(data[0])):
             cv2.rectangle(frame, (x*2,y*2), (x*2+2,y*2+2), (int(255-float(data[x,y])*255), int(float(data[x,y])*255), 0), 2)
 
-# Embed an array in the frame
-def embedFrame(frame, data, x, y):
-	# Add an alpha channel and rotate values to fit into the initial shape
-	frame = np.insert(frame,3,255,axis=2)
-	frame = np.rot90(frame)
-	
-	data[x:x+frame.shape[0], y:y+frame.shape[1]] = frame
-	
-	return data
 
-# Create the SDL window
-def createWindow(width, height):
-	sdl2.SDL_Init(sdl2.SDL_INIT_VIDEO)
+# Convert an OpenCV frame to a QPixmap to be embedded as a QWidget
+def convertOpenCVFrameToQPixmap(frame):
+	# Convert the color
+	img = cv2.cvtColor(frame, cv2.cv.CV_BGR2RGB)
 	
-	data = {
-		"screen": sdl2.SDL_CreateWindow(b"Pointing Gesture Recognition", sdl2.SDL_WINDOWPOS_CENTERED, sdl2.SDL_WINDOWPOS_CENTERED, width, height, sdl2.SDL_WINDOW_SHOWN),
-		"surface":0,
-		"array":0
-	}
-	data["surface"] = sdl2.SDL_GetWindowSurface(data["screen"])
-	data["array"] = sdl2.ext.pixels3d(data["surface"].contents)
+	# Convert numpy mat to QPixmap image
+	qimg = QtGui.QImage(img.data, img.shape[1], img.shape[0], QtGui.QImage.Format_RGB888)
+	return QtGui.QPixmap.fromImage(qimg)
+
+
+# Create the acquisition interface form
+def create_acquision_form(layout, data):
+	vlayout = QtWidgets.QVBoxLayout()
+	hlayout = QtWidgets.QHBoxLayout()
 	
-	return data
+	groupbox = QtWidgets.QGroupBox()
+	groupbox.setTitle("Camera")
+	groupbox_layout = QtWidgets.QVBoxLayout()
+	add_text_field(groupbox_layout, "Height", 1500, data.setCameraHeight)
+	groupbox.setLayout(groupbox_layout)
+	hlayout.addWidget(groupbox)
+	
+	groupbox = QtWidgets.QGroupBox()
+	groupbox.setTitle("Arm")
+	groupbox_layout = QtWidgets.QVBoxLayout()
+	add_text_field(groupbox_layout, "Length", 0, data.setUserArmLength)
+	groupbox.setLayout(groupbox_layout)
+	hlayout.addWidget(groupbox)
+	
+	groupbox = QtWidgets.QGroupBox()
+	groupbox.setTitle("Target")
+	groupbox_layout = QtWidgets.QVBoxLayout()
+	add_text_field(groupbox_layout, "Distance", 0, data.setTargetDistance)
+	add_text_field(groupbox_layout, "Height", 0, data.setTargetHeight)
+	add_text_field(groupbox_layout, "Angle", 0, data.setTargetAngle)
+	groupbox.setLayout(groupbox_layout)
+	hlayout.addWidget(groupbox)
+	
+	vlayout.addLayout(hlayout)
+	hlayout = QtWidgets.QHBoxLayout()
+	
+	groupbox = QtWidgets.QGroupBox()
+	groupbox.setTitle("User")
+	groupbox_layout = QtWidgets.QVBoxLayout()
+	add_text_field(groupbox_layout, "Distance", 0, data.setUserDistance)
+	add_text_field(groupbox_layout, "Height", 0, data.setUserHeight)
+	add_text_field(groupbox_layout, "Angle", 0, data.setUserAngle)
+	groupbox.setLayout(groupbox_layout)
+	hlayout.addWidget(groupbox)
+	
+	groupbox = QtWidgets.QGroupBox()
+	groupbox.setTitle("Hand")
+	groupbox_layout = QtWidgets.QVBoxLayout()
+	add_text_field(groupbox_layout, "Height", 0, data.setHandHeight)
+	add_text_field(groupbox_layout, "Width", 0, data.setHandWidth)
+	add_text_field(groupbox_layout, "Thickness", 0, data.setHandThickness)
+	groupbox.setLayout(groupbox_layout)
+	hlayout.addWidget(groupbox)
+	
+	add_options(hlayout, data)
+	
+	vlayout.addLayout(hlayout)
+	layout.addLayout(vlayout)
 
-# Refresh the SDL window
-def refresh(window):
-	sdl2.SDL_UpdateWindowSurface(window)
 
-# Initialise the SDL window
+# Add a text input and its corresponding label to the layout
+def add_text_field(parent_layout, title, value, function):
+	hlayout = QtWidgets.QHBoxLayout()
+	
+	text_label = QtWidgets.QLabel(title)
+	text_label.setFixedWidth(70)
+	text_field = QtWidgets.QLineEdit()
+	
+	hlayout.addWidget(text_label)
+	hlayout.addWidget(text_field)
+	parent_layout.addLayout(hlayout)
+	
+	# Create a form item and connect changed signal to the GUI element
+	obj = FormItem(value)
+	action = functools.partial(function, obj)
+	obj.value.changed.connect(action)
+	obj.value.changed.connect(text_field.setText)
+	text_field.textChanged.connect(obj.value.set_value)
+	
+	# Set the text field value and trigger the value update
+	text_field.setText(str(value))
+
+
+# Add the options section to the layout
+def add_options(parent_layout, data):
+	vlayout = QtWidgets.QVBoxLayout()
+	
+	label = QtWidgets.QLabel("Dataset #42")
+	label.setFixedWidth(405)
+	label.setAlignment(QtCore.Qt.AlignCenter)
+	vlayout.addWidget(label)
+	
+	add_radio_button(vlayout, "Training", data.toggleTraining, True)
+	add_radio_button(vlayout, "Positive testing", data.togglePositiveTesting)
+	add_radio_button(vlayout, "Negative testing", data.toggleNegativeTesting)
+	
+	save = QtWidgets.QPushButton('Save', clicked=data.save)
+	vlayout.addWidget(save)
+	
+	parent_layout.addLayout(vlayout)
+
+
+# Add a radio button to the layout
+def add_radio_button(parent_layout, title, function, selected=False):
+	radioButton = QtWidgets.QRadioButton(title)
+	parent_layout.addWidget(radioButton)
+	
+	obj = FormItem(selected)
+	action = functools.partial(function, obj)
+	# connect signals to gui elements
+	obj.value.changed.connect(action)
+	radioButton.toggled.connect(obj.value.set_value)
+	
+	if selected == True:
+		radioButton.toggle()
