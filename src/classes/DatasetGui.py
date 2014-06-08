@@ -11,6 +11,7 @@ from classes.FormItem import *
 class DatasetGui(QtWidgets.QWidget):
 	def __init__(self):
 		super(DatasetGui, self).__init__()
+		self.setWindowTitle("Pointing Gesture Recognition - Dataset recording")
 		
 
 		# Get the context and initialise it
@@ -44,10 +45,10 @@ class DatasetGui(QtWidgets.QWidget):
 		self.data = Dataset()
 		
 		self.imageLabel = QtWidgets.QLabel()
-		self.imageLabel.setGeometry(10, 10, 400, 100)
+		self.imageLabel.setGeometry(10, 10, 640, 480)
 		
 		self.imageLabel2 = QtWidgets.QLabel()
-		self.imageLabel2.setGeometry(10, 10, 400, 100)
+		self.imageLabel2.setGeometry(10, 10, 640, 480)
 		
 		layout = QtWidgets.QVBoxLayout(self)
 		hlayout = QtWidgets.QHBoxLayout()
@@ -55,7 +56,7 @@ class DatasetGui(QtWidgets.QWidget):
 		hlayout.addWidget(self.imageLabel2)
 		layout.addLayout(hlayout)
 		
-		ui.create_acquision_form(layout, self.data)
+		ui.create_acquision_form(layout, self.data, [])
 		
 		self.timerScreen = QtCore.QTimer()
 		self.timerScreen.setInterval(30)

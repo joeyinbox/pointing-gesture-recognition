@@ -75,34 +75,34 @@ class Dataset:
 	
 	
 	def setCameraHeight(self, obj, value):
-		self.camera_height = obj.value
+		self.camera_height = int(obj.value.value)
 	
 	def setUserArmLength(self, obj, value):
-		self.user["arm_length"] = obj.value
+		self.user["arm_length"] = int(obj.value.value)
 	
 	def setUserHeight(self, obj, value):
-		self.user["height"] = obj.value
+		self.user["height"] = int(obj.value.value)
 		
 	def setUserDistance(self, obj, value):
-		self.user["distance"] = obj.value
+		self.user["distance"] = int(obj.value.value)
 	
 	def setUserAngle(self, obj, value):
-		self.user["angle"] = obj.value
+		self.user["angle"] = int(obj.value.value)
 	
 	def setTargetHeight(self, obj, value):
-		self.target["height"] = obj.value
+		self.target["height"] = int(obj.value.value)
 		
 	def setTargetDistance(self, obj, value):
-		self.target["distance"] = obj.value
+		self.target["distance"] = int(obj.value.value)
 	
 	def setTargetAngle(self, obj, value):
-		self.target["angle"] = obj.value
+		self.target["angle"] = int(obj.value.value)
 	
 	def setHandHeight(self, obj, value):
-		self.hand["height"] = obj.value
+		self.hand["height"] = int(obj.value.value)
 	
 	def setHandWidth(self, obj, value):
-		self.hand["width"] = obj.value
+		self.hand["width"] = int(obj.value.value)
 		
 	def setHandThickness(self, obj, value):
-		self.hand["thickness"] = obj.value
+		self.hand["thickness"] = int(obj.value.value)

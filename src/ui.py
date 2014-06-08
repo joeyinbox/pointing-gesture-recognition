@@ -34,30 +34,30 @@ def convertOpenCVFrameToQPixmap(frame):
 
 
 # Create the acquisition interface form
-def create_acquision_form(layout, data):
+def create_acquision_form(layout, data, obj):
 	vlayout = QtWidgets.QVBoxLayout()
 	hlayout = QtWidgets.QHBoxLayout()
 	
 	groupbox = QtWidgets.QGroupBox()
 	groupbox.setTitle("Camera")
 	groupbox_layout = QtWidgets.QVBoxLayout()
-	add_text_field(groupbox_layout, "Height", 1500, data.setCameraHeight)
+	obj.append(add_text_field(groupbox_layout, "Height", 1500, data.setCameraHeight))
 	groupbox.setLayout(groupbox_layout)
 	hlayout.addWidget(groupbox)
 	
 	groupbox = QtWidgets.QGroupBox()
 	groupbox.setTitle("Arm")
 	groupbox_layout = QtWidgets.QVBoxLayout()
-	add_text_field(groupbox_layout, "Length", 0, data.setUserArmLength)
+	obj.append(add_text_field(groupbox_layout, "Length", 0, data.setUserArmLength))
 	groupbox.setLayout(groupbox_layout)
 	hlayout.addWidget(groupbox)
 	
 	groupbox = QtWidgets.QGroupBox()
 	groupbox.setTitle("Target")
 	groupbox_layout = QtWidgets.QVBoxLayout()
-	add_text_field(groupbox_layout, "Distance", 0, data.setTargetDistance)
-	add_text_field(groupbox_layout, "Height", 0, data.setTargetHeight)
-	add_text_field(groupbox_layout, "Angle", 0, data.setTargetAngle)
+	obj.append(add_text_field(groupbox_layout, "Distance", 0, data.setTargetDistance))
+	obj.append(add_text_field(groupbox_layout, "Height", 0, data.setTargetHeight))
+	obj.append(add_text_field(groupbox_layout, "Angle", 0, data.setTargetAngle))
 	groupbox.setLayout(groupbox_layout)
 	hlayout.addWidget(groupbox)
 	
@@ -67,22 +67,22 @@ def create_acquision_form(layout, data):
 	groupbox = QtWidgets.QGroupBox()
 	groupbox.setTitle("User")
 	groupbox_layout = QtWidgets.QVBoxLayout()
-	add_text_field(groupbox_layout, "Distance", 0, data.setUserDistance)
-	add_text_field(groupbox_layout, "Height", 0, data.setUserHeight)
-	add_text_field(groupbox_layout, "Angle", 0, data.setUserAngle)
+	obj.append(add_text_field(groupbox_layout, "Distance", 0, data.setUserDistance))
+	obj.append(add_text_field(groupbox_layout, "Height", 0, data.setUserHeight))
+	obj.append(add_text_field(groupbox_layout, "Angle", 0, data.setUserAngle))
 	groupbox.setLayout(groupbox_layout)
 	hlayout.addWidget(groupbox)
 	
 	groupbox = QtWidgets.QGroupBox()
 	groupbox.setTitle("Hand")
 	groupbox_layout = QtWidgets.QVBoxLayout()
-	add_text_field(groupbox_layout, "Height", 0, data.setHandHeight)
-	add_text_field(groupbox_layout, "Width", 0, data.setHandWidth)
-	add_text_field(groupbox_layout, "Thickness", 0, data.setHandThickness)
+	obj.append(add_text_field(groupbox_layout, "Height", 0, data.setHandHeight))
+	obj.append(add_text_field(groupbox_layout, "Width", 0, data.setHandWidth))
+	obj.append(add_text_field(groupbox_layout, "Thickness", 0, data.setHandThickness))
 	groupbox.setLayout(groupbox_layout)
 	hlayout.addWidget(groupbox)
 	
-	add_options(hlayout, data)
+	add_options(hlayout, data, obj)
 	
 	vlayout.addLayout(hlayout)
 	layout.addLayout(vlayout)
@@ -95,6 +95,7 @@ def add_text_field(parent_layout, title, value, function):
 	text_label = QtWidgets.QLabel(title)
 	text_label.setFixedWidth(70)
 	text_field = QtWidgets.QLineEdit()
+	text_field.setValidator(QtGui.QIntValidator(0, 31337))
 	
 	hlayout.addWidget(text_label)
 	hlayout.addWidget(text_field)
@@ -109,10 +110,12 @@ def add_text_field(parent_layout, title, value, function):
 	
 	# Set the text field value and trigger the value update
 	text_field.setText(str(value))
+	
+	return obj
 
 
 # Add the options section to the layout
-def add_options(parent_layout, data):
+def add_options(parent_layout, data, obj):
 	vlayout = QtWidgets.QVBoxLayout()
 	
 	label = QtWidgets.QLabel("Dataset #42")
@@ -120,9 +123,9 @@ def add_options(parent_layout, data):
 	label.setAlignment(QtCore.Qt.AlignCenter)
 	vlayout.addWidget(label)
 	
-	add_radio_button(vlayout, "Training", data.toggleTraining, True)
-	add_radio_button(vlayout, "Positive testing", data.togglePositiveTesting)
-	add_radio_button(vlayout, "Negative testing", data.toggleNegativeTesting)
+	obj.append(add_radio_button(vlayout, "Training", data.toggleTraining, True))
+	obj.append(add_radio_button(vlayout, "Positive testing", data.togglePositiveTesting))
+	obj.append(add_radio_button(vlayout, "Negative testing", data.toggleNegativeTesting))
 	
 	save = QtWidgets.QPushButton('Save', clicked=data.save)
 	vlayout.addWidget(save)
@@ -143,3 +146,5 @@ def add_radio_button(parent_layout, title, function, selected=False):
 	
 	if selected == True:
 		radioButton.toggle()
+	
+	return obj
