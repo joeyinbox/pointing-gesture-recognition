@@ -49,7 +49,8 @@ def loadJsonFromFile(filename):
 	json_data = open(filename)
 	data = json.load(json_data)
 	json_data.close()
-	return data
+	
+	return json.loads(data)
 
 
 # Encode a frame to base64
