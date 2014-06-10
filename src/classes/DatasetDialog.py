@@ -77,7 +77,7 @@ class DatasetDialog(QtWidgets.QDialog):
 			self.parent.data.save()
 		
 			# Close the dialog
-			self.close()
+			self.reject()
 		else:
 			# Display an error
 			self.messageBox.exec_()
@@ -85,8 +85,12 @@ class DatasetDialog(QtWidgets.QDialog):
 	
 	@QtCore.pyqtSlot()
 	def reject(self):
-		# Restart the GUI screen timer
+		# Reset an eventual finger tip position
+		self.fingerTip = []
+		
+		# Restart the GUI screen timer and update the dataset number label
 		self.parent.timerScreen.start()
+		self.parent.updateDatasetNumberLabel()
 		
 		# Close the dialog
 		super(DatasetDialog, self).reject()

@@ -1,5 +1,5 @@
 #! /usr/bin/python
-import base64, cv2, json
+import base64, cv2, json, os, re
 
 
 # Write array values to a file
@@ -57,3 +57,15 @@ def loadJsonFromFile(filename):
 def getBase64(frame):
 	tmp = cv2.imencode('.png', frame)[1]
 	return base64.encodestring(tmp)
+
+
+# Return the number of files within a folder
+def getFileNumberInFolder(folder):
+	total = 0
+	
+	for root, dirs, files in os.walk(folder):
+		for file in files:
+			if re.match(r"(.+)\.json$", file):
+				total += 1
+	
+	return total

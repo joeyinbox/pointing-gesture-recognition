@@ -1,5 +1,7 @@
 #! /usr/bin/python
 import json, utils
+from copy import deepcopy
+from classes.Settings import *
 
 
 class Dataset:
@@ -12,6 +14,8 @@ class Dataset:
 	NO_HAND = 2
 	
 	def __init__(self):
+		self.settings = Settings()
+		
 		self.camera_height = 1500
 		self.user = {
 			"arm_length": 0,
@@ -57,12 +61,29 @@ class Dataset:
 		self.depth_map = utils.convertOpenNIDepthMapToArray(self.depth_map)
 		self.image = utils.getBase64(self.image)
 		
-		return json.dumps(self, default=lambda o: o.__dict__, separators=(',', ':'))
+		obj = deepcopy(self)
+		del obj.settings
+		
+		return json.dumps(obj, default=lambda o: o.__dict__, separators=(',', ':'))
 	
 	
 	def save(self):
 		print "Saving dataset informations..."
-		utils.dumpJsonToFile(self.to_JSON(), "../dataset/yay.json")
+		
+		# Save the dataset to the right folder
+		if self.type == Dataset.TYPE_TRAINING:
+			filename = self.settings.getTrainingFolder()
+		elif self.type == Dataset.TYPE_TESTING_POSITIVE:
+			filename = self.settings.getPositiveTestingFolder()
+		elif self.type == Dataset.TYPE_TESTING_NEGATIVE:
+			filename = self.settings.getNegativeTestingFolder()
+		else:
+			filename = ""
+		
+		# Retrieve the number of files saved so far
+		# Be careful that due to the sample file, the counter does not need to be incremented. Otherwise, the files would replace each others
+		filename += str(utils.getFileNumberInFolder(self.settings.getDatasetFolder())).zfill(3)+".json"
+		utils.dumpJsonToFile(self.to_JSON(), filename)
 		
 		# Re-initialise the finger-tip position
 		self.finger = []
@@ -79,7 +100,6 @@ class Dataset:
 			self.type = Dataset.TYPE_TESTING_POSITIVE
 	
 	def toggleNegativeTesting(self, obj, value):
-		if value == True:
 			self.type = Dataset.TYPE_TESTING_NEGATIVE
 	
 	
