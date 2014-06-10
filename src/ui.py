@@ -5,8 +5,8 @@ from classes.FormItem import *
 
 
 # Highlight the head
-def drawHeadPoint(frame, position):
-    cv2.circle(frame, (int(position[0]),int(position[1])), 5, (0,0,255), -1)
+def drawPoint(frame, x, y, width):
+    cv2.circle(frame, (int(x),int(y)), width, (0,0,255), -1)
 
 # Display lines from elbows to the respective hands
 def drawElbowLine(frame, elbow, hand):
@@ -34,44 +34,19 @@ def convertOpenCVFrameToQPixmap(frame):
 
 
 # Create the acquisition interface form
-def create_acquision_form(layout, data, obj):
+def create_acquision_form(app, layout, data, obj):
+	globalLayout = QtWidgets.QHBoxLayout()
 	vlayout = QtWidgets.QVBoxLayout()
-	hlayout = QtWidgets.QHBoxLayout()
 	
 	groupbox = QtWidgets.QGroupBox()
-	groupbox.setTitle("Camera")
+	groupbox.setTitle("Pointing hand")
 	groupbox_layout = QtWidgets.QVBoxLayout()
-	obj.append(add_text_field(groupbox_layout, "Height", 1500, data.setCameraHeight))
+	buttonGroup = QtWidgets.QButtonGroup(groupbox_layout)
+	obj.append(add_radio_button(buttonGroup, groupbox_layout, "Left hand", data.toggleLeftHand, True))
+	obj.append(add_radio_button(buttonGroup, groupbox_layout, "Right hand", data.toggleRightHand))
+	obj.append(add_radio_button(buttonGroup, groupbox_layout, "No hand", data.toggleNoHand))
 	groupbox.setLayout(groupbox_layout)
-	hlayout.addWidget(groupbox)
-	
-	groupbox = QtWidgets.QGroupBox()
-	groupbox.setTitle("Arm")
-	groupbox_layout = QtWidgets.QVBoxLayout()
-	obj.append(add_text_field(groupbox_layout, "Length", 0, data.setUserArmLength))
-	groupbox.setLayout(groupbox_layout)
-	hlayout.addWidget(groupbox)
-	
-	groupbox = QtWidgets.QGroupBox()
-	groupbox.setTitle("Target")
-	groupbox_layout = QtWidgets.QVBoxLayout()
-	obj.append(add_text_field(groupbox_layout, "Distance", 0, data.setTargetDistance))
-	obj.append(add_text_field(groupbox_layout, "Height", 0, data.setTargetHeight))
-	obj.append(add_text_field(groupbox_layout, "Angle", 0, data.setTargetAngle))
-	groupbox.setLayout(groupbox_layout)
-	hlayout.addWidget(groupbox)
-	
-	vlayout.addLayout(hlayout)
-	hlayout = QtWidgets.QHBoxLayout()
-	
-	groupbox = QtWidgets.QGroupBox()
-	groupbox.setTitle("User")
-	groupbox_layout = QtWidgets.QVBoxLayout()
-	obj.append(add_text_field(groupbox_layout, "Distance", 0, data.setUserDistance))
-	obj.append(add_text_field(groupbox_layout, "Height", 0, data.setUserHeight))
-	obj.append(add_text_field(groupbox_layout, "Angle", 0, data.setUserAngle))
-	groupbox.setLayout(groupbox_layout)
-	hlayout.addWidget(groupbox)
+	vlayout.addWidget(groupbox)
 	
 	groupbox = QtWidgets.QGroupBox()
 	groupbox.setTitle("Hand")
@@ -80,12 +55,50 @@ def create_acquision_form(layout, data, obj):
 	obj.append(add_text_field(groupbox_layout, "Width", 0, data.setHandWidth))
 	obj.append(add_text_field(groupbox_layout, "Thickness", 0, data.setHandThickness))
 	groupbox.setLayout(groupbox_layout)
-	hlayout.addWidget(groupbox)
+	vlayout.addWidget(groupbox)
 	
-	add_options(hlayout, data, obj)
+	globalLayout.addLayout(vlayout)
+	vlayout = QtWidgets.QVBoxLayout()
 	
-	vlayout.addLayout(hlayout)
-	layout.addLayout(vlayout)
+	groupbox = QtWidgets.QGroupBox()
+	groupbox.setTitle("User")
+	groupbox_layout = QtWidgets.QVBoxLayout()
+	obj.append(add_text_field(groupbox_layout, "Distance", 0, data.setUserDistance))
+	obj.append(add_text_field(groupbox_layout, "Height", 0, data.setUserHeight))
+	obj.append(add_text_field(groupbox_layout, "Angle", 0, data.setUserAngle))
+	groupbox.setLayout(groupbox_layout)
+	vlayout.addWidget(groupbox)
+	
+	groupbox = QtWidgets.QGroupBox()
+	groupbox.setTitle("Target")
+	groupbox_layout = QtWidgets.QVBoxLayout()
+	obj.append(add_text_field(groupbox_layout, "Distance", 0, data.setTargetDistance))
+	obj.append(add_text_field(groupbox_layout, "Height", 0, data.setTargetHeight))
+	obj.append(add_text_field(groupbox_layout, "Angle", 0, data.setTargetAngle))
+	groupbox.setLayout(groupbox_layout)
+	vlayout.addWidget(groupbox)
+	
+	globalLayout.addLayout(vlayout)
+	vlayout = QtWidgets.QVBoxLayout()
+	
+	groupbox = QtWidgets.QGroupBox()
+	groupbox.setTitle("Camera")
+	groupbox_layout = QtWidgets.QVBoxLayout()
+	obj.append(add_text_field(groupbox_layout, "Height", 1500, data.setCameraHeight))
+	groupbox.setLayout(groupbox_layout)
+	vlayout.addWidget(groupbox)
+	
+	groupbox = QtWidgets.QGroupBox()
+	groupbox.setTitle("Arm")
+	groupbox_layout = QtWidgets.QVBoxLayout()
+	obj.append(add_text_field(groupbox_layout, "Length", 0, data.setUserArmLength))
+	groupbox.setLayout(groupbox_layout)
+	vlayout.addWidget(groupbox)
+	
+	add_options(app, vlayout, data, obj)
+	
+	globalLayout.addLayout(vlayout)
+	layout.addLayout(globalLayout)
 
 
 # Add a text input and its corresponding label to the layout
@@ -115,7 +128,7 @@ def add_text_field(parent_layout, title, value, function):
 
 
 # Add the options section to the layout
-def add_options(parent_layout, data, obj):
+def add_options(app, parent_layout, data, obj):
 	vlayout = QtWidgets.QVBoxLayout()
 	
 	label = QtWidgets.QLabel("Dataset #42")
@@ -123,20 +136,22 @@ def add_options(parent_layout, data, obj):
 	label.setAlignment(QtCore.Qt.AlignCenter)
 	vlayout.addWidget(label)
 	
-	obj.append(add_radio_button(vlayout, "Training", data.toggleTraining, True))
-	obj.append(add_radio_button(vlayout, "Positive testing", data.togglePositiveTesting))
-	obj.append(add_radio_button(vlayout, "Negative testing", data.toggleNegativeTesting))
+	buttonGroup = QtWidgets.QButtonGroup(vlayout)
+	obj.append(add_radio_button(buttonGroup, vlayout, "Training", data.toggleTraining, True))
+	obj.append(add_radio_button(buttonGroup, vlayout, "Positive testing", data.togglePositiveTesting))
+	obj.append(add_radio_button(buttonGroup, vlayout, "Negative testing", data.toggleNegativeTesting))
 	
-	save = QtWidgets.QPushButton('Save', clicked=data.save)
+	save = QtWidgets.QPushButton('Save', clicked=app.record)
 	vlayout.addWidget(save)
 	
 	parent_layout.addLayout(vlayout)
 
 
 # Add a radio button to the layout
-def add_radio_button(parent_layout, title, function, selected=False):
+def add_radio_button(group, parent_layout, title, function, selected=False):
 	radioButton = QtWidgets.QRadioButton(title)
 	parent_layout.addWidget(radioButton)
+	group.addButton(radioButton)
 	
 	obj = FormItem(selected)
 	action = functools.partial(function, obj)

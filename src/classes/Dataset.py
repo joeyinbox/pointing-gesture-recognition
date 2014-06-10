@@ -7,6 +7,10 @@ class Dataset:
 	TYPE_TESTING_POSITIVE = 1
 	TYPE_TESTING_NEGATIVE = 2
 	
+	LEFT_HAND = 0
+	RIGHT_HAND = 1
+	NO_HAND = 2
+	
 	def __init__(self):
 		self.camera_height = 1500
 		self.user = {
@@ -21,6 +25,7 @@ class Dataset:
 			"height": 0
 		}
 		self.hand = {
+			"type": Dataset.LEFT_HAND,
 			"height": 0,
 			"width": 0,
 			"thickness": 0
@@ -45,7 +50,8 @@ class Dataset:
 		self.depth_map = []
 		self.image = ""
 		self.type = Dataset.TYPE_TRAINING
-		
+	
+	
 	def to_JSON(self):
 		# Update the depth map and the image to prepare them
 		self.depth_map = utils.convertOpenNIDepthMapToArray(self.depth_map)
@@ -57,6 +63,9 @@ class Dataset:
 	def save(self):
 		print "Saving dataset informations..."
 		utils.dumpJsonToFile(self.to_JSON(), "../dataset/yay.json")
+		
+		# Re-initialise the finger-tip position
+		self.finger = []
 	
 	
 	
@@ -72,6 +81,19 @@ class Dataset:
 	def toggleNegativeTesting(self, obj, value):
 		if value == True:
 			self.type = Dataset.TYPE_TESTING_NEGATIVE
+	
+	
+	def toggleLeftHand(self, obj, value):
+		if value == True:
+			self.hand["type"] = Dataset.LEFT_HAND
+	
+	def toggleRightHand(self, obj, value):
+		if value == True:
+			self.hand["type"] = Dataset.RIGHT_HAND
+	
+	def toggleNoHand(self, obj, value):
+		if value == True:
+			self.hand["type"] = Dataset.NO_HAND
 	
 	
 	def setCameraHeight(self, obj, value):
