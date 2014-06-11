@@ -24,12 +24,9 @@ class ObservableVariable(QtCore.QObject):
 	
 	# Setter of the value
 	def set_value(self, new_val):
-		try:
-			self._value = int(new_val)
-			self.changed.emit(new_val)
-		except ValueError:
-			pass
-		
+		self._value = new_val
+		self.changed.emit(str(new_val))
+	
 	
 	# Apply getter and setter to the value
 	value = property(get_value, set_value)

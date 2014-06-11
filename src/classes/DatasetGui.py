@@ -1,5 +1,5 @@
 #!/usr/bin/python
-from PyQt5 import QtCore, QtWidgets, QtGui
+from PyQt5 import QtCore, QtWidgets, QtGui, QtMultimedia
 from openni import *
 import numpy as np
 import cv2, ctypes, functools, hand, skeleton, ui
@@ -18,6 +18,10 @@ class DatasetGui(QtWidgets.QWidget):
 		
 		# Retrieve all settings
 		self.settings = Settings()
+		
+		# Load sounds
+		self.countdownSound = QtMultimedia.QSound(self.settings.getResourceFolder()+"countdown.wav")
+		self.countdownEndedSound = QtMultimedia.QSound(self.settings.getResourceFolder()+"countdown-ended.wav")
 		
 
 		# Get the context and initialise it
@@ -50,6 +54,14 @@ class DatasetGui(QtWidgets.QWidget):
 		
 		# Create a new dataset item
 		self.data = Dataset()
+		
+		
+		# Create a timer for an eventual countdown before recording the data
+		self.countdownTimer = QtCore.QTimer()
+		self.countdownRemaining = 5
+		self.countdownTimer.setInterval(1000)
+		self.countdownTimer.setSingleShot(True)
+		self.countdownTimer.timeout.connect(self.recordCountdown)
 		
 		
 		# Create the global layout
@@ -107,6 +119,9 @@ class DatasetGui(QtWidgets.QWidget):
 		
 		
 		if len(self.user.users) > 0 and len(self.data.skeleton["head"]) > 0:
+			# Adjust the value of the user distance
+			self.userDistanceField.value.value = int(self.data.skeleton["head"][2])
+			
 			# Highlight the head
 			ui.drawPoint(frame, self.data.skeleton["head"][0], self.data.skeleton["head"][1], 5)
     		
@@ -156,6 +171,23 @@ class DatasetGui(QtWidgets.QWidget):
 			# Display the dialog window
 			self.dialogWindow.exec_()
 	
+	def recordCountdown(self):
+		# Decrease the countdown and check if it needs to continue
+		self.countdownRemaining -= 1
+		
+		if self.countdownRemaining <= 0:
+			# Re-initialise the timer and record the data
+			self.countdownTimer.stop()
+			self.countdownEndedSound.play()
+			self.countdownButton.setText("Saving..")
+			self.countdownRemaining = 5
+			self.record([])
+		else:
+			self.countdownTimer.start()
+			self.countdownSound.play()
+		
+		# Display the actual reminaining
+		self.countdownButton.setText("Save in %ds"%(self.countdownRemaining))
 	
 	
 	# Create the acquisition interface form
@@ -230,10 +262,15 @@ class DatasetGui(QtWidgets.QWidget):
 		self.trainingRadio = self.add_radio_button(buttonGroup, vlayout2, "Training", self.data.toggleTraining, True)
 		self.positiveTestingRadio = self.add_radio_button(buttonGroup, vlayout2, "Positive testing", self.data.togglePositiveTesting)
 		self.negativeTestingRadio = self.add_radio_button(buttonGroup, vlayout2, "Negative testing", self.data.toggleNegativeTesting)
-	
-		save = QtWidgets.QPushButton('Save', clicked=self.record)
-		vlayout2.addWidget(save)
-	
+		
+		hLayout = QtWidgets.QHBoxLayout()
+		
+		self.countdownButton = QtWidgets.QPushButton('Save in 5s', clicked=self.countdownTimer.start)
+		self.saveButton = QtWidgets.QPushButton('Save', clicked=self.record)
+		hLayout.addWidget(self.countdownButton)
+		hLayout.addWidget(self.saveButton)
+		
+		vlayout2.addLayout(hLayout)
 		vlayout.addLayout(vlayout2)
 		globalLayout.addLayout(vlayout)
 		self.layout.addLayout(globalLayout)

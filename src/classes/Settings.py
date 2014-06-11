@@ -11,11 +11,16 @@ class Settings:
 		elif __file__:
 			self.application_path = os.path.dirname(__file__)+"/../../"
 		
+		self._resource_folder = "res/"
+		
 		self._dataset_folder = "dataset/"
 		self._training_folder = self._dataset_folder + "training/"
 		self._positive_testing_folder = self._dataset_folder + "testing/positive/"
 		self._negative_testing_folder = self._dataset_folder + "testing/negative/"
 	
+	
+	def getResourceFolder(self):
+		return os.path.join(self.application_path, self._resource_folder)
 	
 	def getDatasetFolder(self):
 		return os.path.join(self.application_path, self._dataset_folder)
