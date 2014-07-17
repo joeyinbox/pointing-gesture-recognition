@@ -13,7 +13,7 @@ class DatasetDialog(QtWidgets.QDialog):
 		self.parent = parent
 		self.setWindowTitle("Indicate the pointing finger tip position")
 		
-		self.Layout = QtWidgets.QVBoxLayout(self)
+		self.layout = QtWidgets.QVBoxLayout(self)
 		
 		# Reserve some space for the depth image
 		self.depthImage = SensorWidget()
@@ -33,9 +33,16 @@ class DatasetDialog(QtWidgets.QDialog):
 		self.buttonBox.button(QtWidgets.QDialogButtonBox.Cancel).clicked.connect(self.reject)
 		self.buttonBox.button(QtWidgets.QDialogButtonBox.Ok).clicked.connect(self.accept)
 		
+		hlayout = QtWidgets.QHBoxLayout()
+		self.pickedDepth = QtWidgets.QLabel("")
+		
+		hlayout.addWidget(self.pickedDepth)
+		hlayout.addWidget(self.buttonBox)
+		
+		
 		# Insert all elements to the layout
-		self.Layout.addWidget(self.depthImage)
-		self.Layout.addWidget(self.buttonBox)
+		self.layout.addWidget(self.depthImage)
+		self.layout.addLayout(hlayout)
 		
 		
 		# This will assert that the image has been clicked before saving
@@ -59,6 +66,10 @@ class DatasetDialog(QtWidgets.QDialog):
 	@QtCore.pyqtSlot()
 	def imageClicked(self, obj, event):
 		self.fingerTip = [event.x(), event.y()]
+		
+		# Get the depth value and show it
+		depth = hand.getDepthFromMap(self.parent.data.depth_map, self.fingerTip)
+		self.pickedDepth.setText("Finger tip at %d mm away"%(int(depth)))
 		
 		# Ignore all previous drawings by doing a deep copy of the naked frame and add the new position dot
 		frame = deepcopy(self.naked_frame)
@@ -87,6 +98,7 @@ class DatasetDialog(QtWidgets.QDialog):
 	def reject(self):
 		# Reset an eventual finger tip position
 		self.fingerTip = []
+		self.pickedDepth.setText("")
 		
 		# Restart the GUI screen timer and update the dataset number label
 		self.parent.timerScreen.start()

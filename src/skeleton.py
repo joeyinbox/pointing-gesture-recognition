@@ -38,9 +38,11 @@ def calibration_complete(src, id, status):
         print "3/3 User {} successfully calibrated! Starting to track." .format(id)
         skel_cap.start_tracking(id)
     else:
-        print "ERR User {} failed to calibrate. Restarting process." .format(id)
-		# TODO: decide to relaunch the process or wait to be discovered again
-        #new_user(user, id)
+        print "ERR User {} failed to calibrate." .format(id)
+
+def clear(users):
+    for id in users:
+        skel_cap.stop_tracking(id)
 
 
 # Callback called when a user is lost

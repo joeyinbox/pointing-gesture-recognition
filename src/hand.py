@@ -2,12 +2,12 @@
 import numpy as np
 
 
-# At 1m, the hand is surrounded with a shift of 75 pixels around its center of gravity
+# At 1m, the hand is surrounded with a shift of 90 pixels around its center of gravity
 def getHandBoundShift(depth):
 	if depth == 0:
 		return 75
 	else:
-		return int((1000/float(depth))*75)
+		return int((1000/float(depth))*90)
 
 # Return the depth value of a point from the depth map
 def getDepthFromMap(depthMap, position):

@@ -13,10 +13,18 @@ class Settings:
 		
 		self._resource_folder = "res/"
 		
-		self._dataset_folder = "dataset/"
+		self._dataset_folder = "dataset/full/"
 		self._training_folder = self._dataset_folder + "training/"
 		self._positive_testing_folder = self._dataset_folder + "testing/positive/"
 		self._negative_testing_folder = self._dataset_folder + "testing/negative/"
+		
+		self._light_dataset_folder = "dataset/light/"
+		self._positive_light_folder = self._light_dataset_folder + "positive/"
+		self._negative_light_folder = self._light_dataset_folder + "negative/"
+		
+		self._free_dataset_folder = "dataset/free/"
+		self._positive_free_folder = self._free_dataset_folder + "positive/"
+		self._negative_free_folder = self._free_dataset_folder + "negative/"
 	
 	
 	def getResourceFolder(self):
@@ -33,3 +41,25 @@ class Settings:
 	
 	def getNegativeTestingFolder(self):
 		return os.path.join(self.application_path, self._negative_testing_folder)
+	
+	
+	
+	def getLightDatasetFolder(self):
+		return os.path.join(self.application_path, self._light_dataset_folder)
+	
+	def getPositiveLightFolder(self):
+		return os.path.join(self.application_path, self._positive_light_folder)
+	
+	def getNegativeLightFolder(self):
+		return os.path.join(self.application_path, self._negative_light_folder)
+	
+	
+	
+	def getFreeDatasetFolder(self):
+		return os.path.join(self.application_path, self._free_dataset_folder)
+	
+	def getPositiveFreeFolder(self):
+		return os.path.join(self.application_path, self._positive_free_folder)
+	
+	def getNegativeFreeFolder(self):
+		return os.path.join(self.application_path, self._negative_free_folder)

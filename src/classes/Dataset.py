@@ -92,28 +92,35 @@ class Dataset:
 	
 	
 	def toggleTraining(self, obj, value):
-		if value == True:
+		if value == "True":
 			self.type = Dataset.TYPE_TRAINING
+			print "Training"
 	
 	def togglePositiveTesting(self, obj, value):
-		if value == True:
+		if value == "True":
 			self.type = Dataset.TYPE_TESTING_POSITIVE
+			print "Positive testing"
 	
 	def toggleNegativeTesting(self, obj, value):
+		if value == "True":
 			self.type = Dataset.TYPE_TESTING_NEGATIVE
+			print "Negative testing"
 	
 	
 	def toggleLeftHand(self, obj, value):
-		if value == True:
+		if value == "True":
 			self.hand["type"] = Dataset.LEFT_HAND
+			print "Left hand"
 	
 	def toggleRightHand(self, obj, value):
-		if value == True:
+		if value == "True":
 			self.hand["type"] = Dataset.RIGHT_HAND
+			print "Right hand"
 	
 	def toggleNoHand(self, obj, value):
-		if value == True:
+		if value == "True":
 			self.hand["type"] = Dataset.NO_HAND
+			print "No hand"
 	
 	
 	def setCameraHeight(self, obj, value):

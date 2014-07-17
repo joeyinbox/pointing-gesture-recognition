@@ -21,7 +21,6 @@ def drawHandDepth(frame, data):
         for y in range(len(data[0])):
             cv2.rectangle(frame, (x*2,y*2), (x*2+2,y*2+2), (int(255-float(data[x,y])*255), int(float(data[x,y])*255), 0), 2)
 
-
 # Convert an OpenCV frame to a QPixmap to be embedded as a QWidget
 def convertOpenCVFrameToQPixmap(frame):
 	# Convert the color

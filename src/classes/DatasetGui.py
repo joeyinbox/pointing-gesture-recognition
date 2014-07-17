@@ -14,7 +14,7 @@ from classes.Settings import *
 class DatasetGui(QtWidgets.QWidget):
 	def __init__(self):
 		super(DatasetGui, self).__init__()
-		self.setWindowTitle("Pointing Gesture Recognition - Dataset recording")
+		self.setWindowTitle("Pointing Gesture Recognition - Full dataset recording")
 		
 		# Retrieve all settings
 		self.settings = Settings()
@@ -58,7 +58,7 @@ class DatasetGui(QtWidgets.QWidget):
 		
 		# Create a timer for an eventual countdown before recording the data
 		self.countdownTimer = QtCore.QTimer()
-		self.countdownRemaining = 5
+		self.countdownRemaining = 10
 		self.countdownTimer.setInterval(1000)
 		self.countdownTimer.setSingleShot(True)
 		self.countdownTimer.timeout.connect(self.recordCountdown)
@@ -128,7 +128,7 @@ class DatasetGui(QtWidgets.QWidget):
 			# Display lines from elbows to the respective hands
 			ui.drawElbowLine(frame, self.data.skeleton["elbow"]["left"], self.data.skeleton["hand"]["left"])
 			ui.drawElbowLine(frame, self.data.skeleton["elbow"]["right"], self.data.skeleton["hand"]["right"])
-		
+			
 			# Get the pixel's depth from the coordinates of the hands
 			leftPixel = hand.getDepthFromMap(self.data.depth_map, self.data.skeleton["hand"]["left"])
 			rightPixel = hand.getDepthFromMap(self.data.depth_map, self.data.skeleton["hand"]["right"])
@@ -180,7 +180,7 @@ class DatasetGui(QtWidgets.QWidget):
 			self.countdownTimer.stop()
 			self.countdownEndedSound.play()
 			self.countdownButton.setText("Saving..")
-			self.countdownRemaining = 5
+			self.countdownRemaining = 10
 			self.record([])
 		else:
 			self.countdownTimer.start()
@@ -208,9 +208,9 @@ class DatasetGui(QtWidgets.QWidget):
 		groupbox = QtWidgets.QGroupBox()
 		groupbox.setTitle("Hand")
 		groupbox_layout = QtWidgets.QVBoxLayout()
-		self.handHeightField = self.add_text_field(groupbox_layout, "Height", 0, self.data.setHandHeight)
-		self.handWidthField = self.add_text_field(groupbox_layout, "Width", 0, self.data.setHandWidth)
-		self.handThicknessField = self.add_text_field(groupbox_layout, "Thickness", 0, self.data.setHandThickness)
+		self.handHeightField = self.add_text_field(groupbox_layout, "Height", 185, self.data.setHandHeight)
+		self.handWidthField = self.add_text_field(groupbox_layout, "Width", 85, self.data.setHandWidth)
+		self.handThicknessField = self.add_text_field(groupbox_layout, "Thickness", 70, self.data.setHandThickness)
 		groupbox.setLayout(groupbox_layout)
 		vlayout.addWidget(groupbox)
 	
@@ -221,8 +221,8 @@ class DatasetGui(QtWidgets.QWidget):
 		groupbox.setTitle("User")
 		groupbox_layout = QtWidgets.QVBoxLayout()
 		self.userDistanceField = self.add_text_field(groupbox_layout, "Distance", 0, self.data.setUserDistance)
-		self.userHeightField = self.add_text_field(groupbox_layout, "Height", 0, self.data.setUserHeight)
-		self.userAngleField = self.add_text_field(groupbox_layout, "Angle", 0, self.data.setUserAngle)
+		self.userHeightField = self.add_text_field(groupbox_layout, "Height", 1840, self.data.setUserHeight)
+		self.userAngleField = self.add_text_field(groupbox_layout, "Angle", 90, self.data.setUserAngle)
 		groupbox.setLayout(groupbox_layout)
 		vlayout.addWidget(groupbox)
 	
@@ -248,7 +248,7 @@ class DatasetGui(QtWidgets.QWidget):
 		groupbox = QtWidgets.QGroupBox()
 		groupbox.setTitle("Arm")
 		groupbox_layout = QtWidgets.QVBoxLayout()
-		self.userArmLengthField = self.add_text_field(groupbox_layout, "Length", 0, self.data.setUserArmLength)
+		self.userArmLengthField = self.add_text_field(groupbox_layout, "Length", 630, self.data.setUserArmLength)
 		groupbox.setLayout(groupbox_layout)
 		vlayout.addWidget(groupbox)
 		
@@ -265,7 +265,7 @@ class DatasetGui(QtWidgets.QWidget):
 		
 		hLayout = QtWidgets.QHBoxLayout()
 		
-		self.countdownButton = QtWidgets.QPushButton('Save in 5s', clicked=self.countdownTimer.start)
+		self.countdownButton = QtWidgets.QPushButton("Save in %ds"%(self.countdownRemaining), clicked=self.countdownTimer.start)
 		self.saveButton = QtWidgets.QPushButton('Save', clicked=self.record)
 		hLayout.addWidget(self.countdownButton)
 		hLayout.addWidget(self.saveButton)
