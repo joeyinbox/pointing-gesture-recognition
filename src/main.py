@@ -2,19 +2,30 @@
 from PyQt5 import QtWidgets
 from classes.DatasetGui import *
 from classes.LightDatasetGui import *
+from classes.LiveGui import *
 import sys
 
 
 
 try:
-	print str(sys.argv[1])
-	
-	# Create a new Dataset GUI window and display it
-	app = QtWidgets.QApplication([])
-	gui = LightDatasetGui()
-	gui.show()
+	if str(sys.argv[1])=="live":
+		# Create a live GUI window and display it
+		app = QtWidgets.QApplication([])
+		gui = LiveGui()
+		gui.show()
 
-	app.exec_()
+		app.exec_()
+		
+		
+	else:
+		# Create a new Dataset GUI window and display it
+		app = QtWidgets.QApplication([])
+		gui = LightDatasetGui()
+		gui.show()
+
+		app.exec_()
+	
+	
 	
 	
 except IndexError:

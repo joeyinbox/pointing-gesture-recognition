@@ -41,6 +41,7 @@ class BackPropagationNetwork:
 		# Layer information
 		self.layerCount = len(layerSize)-1
 		self.shape = layerSize
+		self.weights = []
 		
 		if layerFunctions is None:
 			lFuncs = []
@@ -132,3 +133,10 @@ class BackPropagationNetwork:
 			self._previousWeightDelta[index] = weightDelta
 		
 		return error
+	
+	# Get the weights
+	def getWeights(self):
+		return self.weights
+	
+	def setWeights(self, weights):
+		self.weights = weights
