@@ -1,5 +1,6 @@
 #! /usr/bin/python
 import base64, cv2, json, os, re
+import numpy as np
 
 
 # Write array values to a file
@@ -30,13 +31,12 @@ def promptInt(question, default):
 
 # Convert an openNI depth map to a regular serializable array
 def convertOpenNIDepthMapToArray(depthMap):
-	result = [[0 for i in range(480)] for j in range(640)]
+	result = np.zeros(307200)
+	
+	for i in range(307200):
+		result[i] = depthMap[i]
     
-	for x in range(0, 639):
-		for y in range(0, 479):
-			result[x][y] = depthMap[x, y]
-    
-	return result
+	return result.reshape(640, 480)
 
 
 # Dump the content of an object to a json file

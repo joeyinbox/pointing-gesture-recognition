@@ -10,6 +10,7 @@ import sys, math
 import scipy.stats, scipy.ndimage
 import cv2
 from copy import deepcopy
+import time
 
 
 class BPNHandler():
@@ -43,6 +44,14 @@ class BPNHandler():
 			self.bpn = BackPropagationNetwork((6, 15, 4), lFuncs)
 			self.bpn.setWeights(self.getWeights())
 			
+			self.thresholdBinary = np.vectorize(self.thresholdBinary)
+			self.thresholdExtracted = np.vectorize(self.thresholdExtracted)
+	
+	def thresholdBinary(self, x, start, end):
+	    return 0 if x<start or x>end or x==0 else 1
+	
+	def thresholdExtracted(self, x, start, end):
+	    return np.NaN if x<start or x>end or x==0 else x
 	
 	def loadPositive(self, positive, target):
 		print
@@ -1769,10 +1778,6 @@ class BPNHandler():
 	
 	
 	def getFeaturesLive(self, data):
-		# Retrieve the depth map and convert it to a numpy array of floats
-		depthMap = np.array(utils.convertOpenNIDepthMapToArray(data.depth_map)).astype(float)
-		
-	
 		# Retrieve the position of the pointing hand
 		if data.hand==LiveDataset.LEFT_HAND:
 			v,h,d = map(int, data.skeleton["hand"]["left"])
@@ -1805,21 +1810,15 @@ class BPNHandler():
 	
 		max = (2*shift)+1
 		self.currentExtracted = np.zeros(max*max).reshape(max, max)
-		self.currentExtracted[startV:endV, startH:endH] = depthMap[y1:y2, x1:x2]
+		self.currentExtracted[startV:endV, startH:endH] = data.depth_map[y1:y2, x1:x2]
 		self.currentBinary = np.copy(self.currentExtracted)
 	
 		# Extract the hand from the background with a threshold
 		start = d-100
 		end = d+100
 		
-		x,y = self.currentBinary.shape
-		for j in range(x):
-			for k in range(y):
-				if self.currentBinary[j][k]<start or self.currentBinary[j][k]>end or self.currentBinary[j][k]==0:
-					self.currentBinary[j][k] = 0
-					self.currentExtracted[j][k] = np.NaN
-				else:
-					self.currentBinary[j][k] = 1
+		self.currentBinary = self.thresholdBinary(self.currentBinary, start, end)
+		self.currentExtracted = self.thresholdExtracted(self.currentExtracted, start, end)
 		
 		# Remove all zeros columns and rows from both matrices
 		self.removeEmptyColumnsRows()
@@ -1829,10 +1828,12 @@ class BPNHandler():
 		
 		self.tarExtracted()
 		
+		
 		# /----------------------------------------\
 		# | Depth map of the hand is now extracted |
 		# |        Starting getting features       |
 		# \----------------------------------------/
+		
 		
 		
 		# Hold the ratio
