@@ -26,23 +26,27 @@ class BPNHandler():
 	currentBinary, currentExtracted = [], []
 	
 	# Hold the transformations applied to the current input
-	top, left, bottom, right = 0, 0, 0, 0
-	angle = 0
+	cropTop, cropLeft, cropBottom, cropRight = 0, 0, 0, 0
+	emptyTop, emptyLeft, emptyBottom, emptyRight = 0, 0, 0, 0
+	rotationAngle = 0
+	
+	# The current fingertip
+	fingerTip = [0,0]
 	
 	target = []
 	count = 0
 	
 	bpn = None
 	
-	def __init__(self, live=False):
+	def __init__(self, live=False, features=6, hiddenLayers=15, output=4):
 		# Initialise the network if in live mode
 		if live:
 			# Define the functions that will be used
 			lFuncs = [None, gaussian, sgm]
 		
 			# Create the network
-			self.bpn = BackPropagationNetwork((6, 15, 4), lFuncs)
-			self.bpn.setWeights(self.getWeights())
+			self.bpn = BackPropagationNetwork((features, hiddenLayers, output), lFuncs)
+			self.bpn.setWeights(self.getRestrained1Weights())
 			
 			self.thresholdBinary = np.vectorize(self.thresholdBinary)
 			self.thresholdExtracted = np.vectorize(self.thresholdExtracted)
@@ -54,8 +58,8 @@ class BPNHandler():
 	    return np.NaN if x<start or x>end or x==0 else x
 	
 	def loadPositive(self, positive, target):
-		print
-		print "Loading positive data"
+		#print
+		#print "Loading positive data"
 		
 		for i in range(len(positive)):
 			for j in positive[i]:
@@ -67,8 +71,8 @@ class BPNHandler():
 				self.count += 1
 	
 	def loadNegative(self, negative, targetLength):
-		print
-		print "Loading negative data"
+		#print
+		#print "Loading negative data"
 		
 		# Create the negative target thanks to the positive one
 		negativeTarget = np.zeros(targetLength).astype(int)
@@ -719,7 +723,7 @@ class BPNHandler():
 		
 	
 	
-	def onlySubRegionPercents(self):
+	def onlySubRegionPercentsRestrained1(self):
 		self.trainingInput = np.array([
 			[-1.0,-0.687931510632,-0.372549019608,-0.681303507318,-0.382491024579,-0.875724937862],
 			[-0.560793465578,-0.510851808635,-0.965460910152,-0.937456242707,-0.651808634772,-0.373628938156],
@@ -957,6 +961,244 @@ class BPNHandler():
 		])
 		
 	
+	
+	def onlySubRegionPercentsMixed1(self):
+		self.trainingInput = np.array([
+			[-1.0,-0.687931510632,-0.372549019608,-0.681303507318,-0.382491024579,-0.875724937862],
+			[-0.560793465578,-0.510851808635,-0.965460910152,-0.937456242707,-0.651808634772,-0.373628938156],
+			[-0.999078057775,-0.565150583897,-0.333435771358,-0.532267977873,-0.570067609096,-1.0],
+			[-0.954022988506,-0.277279168635,-0.59313493938,-0.45740828216,-0.718154621319,-1.0],
+			[-0.478260869565,-0.638198757764,-0.961180124224,-0.919254658385,-0.712732919255,-0.290372670807],
+			[-1.0,-0.772004889976,-0.318459657702,-0.570904645477,-0.401589242054,-0.937041564792],
+			[-0.940496822646,-0.487579433853,-0.390525707683,-0.560947429232,-0.620450606586,-1.0],
+			[-0.627801911381,-0.452302345786,-0.93570807993,-0.978105994787,-0.661511728931,-0.344569939183],
+			[-0.69019248396,-0.580201649863,-0.971280171097,-0.870760769936,-0.488237091353,-0.399327833792],
+			[-0.973558152903,-0.597240850738,-0.361563517915,-0.665069936769,-0.522130676375,-0.8804368653],
+			[-0.729283240075,-0.534239275246,-0.662136957101,-0.909405808686,-0.567279509726,-0.597655209166],
+			[-0.762094102054,-0.474486414844,-0.675281643472,-1.0,-0.561298873426,-0.526838966203],
+			[-0.640901771337,-0.42769726248,-0.457004830918,-0.969404186795,-0.85346215781,-0.65152979066],
+			[-0.717999559374,-0.636483807006,-0.697730777704,-0.918484247632,-0.513989865609,-0.515311742675],
+			[-0.675229357798,-0.601834862385,-0.671559633028,-0.809174311927,-0.563302752294,-0.678899082569],
+			[-0.693320171109,-0.563672260612,-0.603817045081,-0.915761763738,-0.597894044093,-0.625534715367],
+			[-0.617272208484,-0.409168727411,-0.710861708199,-0.966901274491,-0.800266311585,-0.495529769831],
+			[-0.992824527071,-0.853228962818,-0.444553163731,-0.644161774299,-0.347358121331,-0.71787345075],
+			[-0.730897662542,-0.537222549597,-0.584757415046,-1.0,-0.576114712237,-0.571007660577],
+			[-0.763873775843,-0.270583968081,-0.519042437432,-1.0,-0.889009793254,-0.55749002539],
+			[-0.938842557493,-0.632549911549,-0.407632044478,-0.735658327015,-0.428860247662,-0.856456911802],
+			[-0.953757225434,-0.573614416865,-0.462087725264,-0.76946616797,-0.500850051003,-0.740224413465],
+			[-0.993410214168,-0.800658978583,-0.433278418451,-0.556836902801,-0.418451400329,-0.797364085667],
+			[-0.99369830642,-0.825915714848,-0.525797558094,-0.709334383616,-0.336746750689,-0.608507286333],
+			[-0.928277282086,-0.597803706246,-0.492793411119,-0.686341798216,-0.568634179822,-0.726149622512],
+			[-0.754603682946,-0.55164131305,-0.708967173739,-0.922337870296,-0.580064051241,-0.482385908727],
+			[-0.989040127276,-0.667668375464,-0.334983206647,-0.674385716811,-0.464733957928,-0.869188615874],
+			[-0.942764359651,-0.60178607672,-0.454028820783,-0.711386239091,-0.524254110006,-0.765780393749],
+			[-0.761904761905,-0.571428571429,-0.802197802198,-0.868131868132,-0.428571428571,-0.567765567766],
+			[-0.682604272635,-0.602238046796,-0.839267548321,-0.866734486267,-0.544252288911,-0.46490335707],
+			[-0.850049455984,-0.399802176063,-0.4215628091,-0.720672601385,-0.631256181998,-0.97665677547],
+			[-1.0,-0.853926963482,-0.254627313657,-0.618809404702,-0.315657828914,-0.956978489245],
+			[-0.608884596813,-0.74794785128,-1.0,-0.868662481893,-0.378078223081,-0.396426846934],
+			[-0.978623074505,-0.522791574976,-0.376296762025,-0.712668972021,-0.508330713612,-0.901288902861],
+			[-0.717171717172,-0.575757575758,-0.543434343434,-1.0,-0.587878787879,-0.575757575758],
+			[-0.797323135755,-0.46845124283,-0.483747609943,-1.0,-0.648183556405,-0.602294455067],
+			[-0.728710462287,-0.480535279805,-0.512165450122,-1.0,-0.591240875912,-0.687347931873],
+			[-0.761775852734,-0.461288576069,-0.612344342177,-1.0,-0.626962642122,-0.537628586898],
+			[-0.759590792839,-0.476555839727,-0.531116794544,-0.817561807332,-0.461210571185,-0.953964194373],
+			[-0.684210526316,-0.527459954233,-0.561784897025,-0.986270022883,-0.561784897025,-0.678489702517],
+			[-0.709525843657,-0.469457496796,-0.537804357112,-1.0,-0.655702691158,-0.627509611277],
+			[-0.913194444444,-0.659722222222,-0.597222222222,-0.590277777778,-0.277777777778,-0.961805555556],
+			[-0.618550724638,-0.702028985507,-0.99884057971,-0.653333333333,-0.317101449275,-0.710144927536],
+			[-0.952799121844,-0.612513721186,-0.397914379802,-0.651481888035,-0.650933040615,-0.734357848518],
+			[-0.523602033406,-0.443718228032,-0.921568627451,-0.98547567175,-0.750181554103,-0.375453885258],
+			[-1.0,-0.833712984055,-0.431662870159,-0.728929384966,-0.333712984055,-0.671981776765],
+			[-0.516164994426,-0.832032701598,-1.0,-0.698996655518,-0.419546636938,-0.53325901152],
+			[-0.67725376965,-0.567532884184,-0.95700994546,-0.982675649663,-0.408405518126,-0.407122232916],
+			[-0.963113875188,-0.761526914004,-0.326184859532,-0.553935234827,-0.463435556509,-0.93180355994],
+			[-0.960069444444,-0.652777777778,-0.428819444444,-0.616319444444,-0.543402777778,-0.798611111111],
+			[-0.787769784173,-0.44964028777,-0.571942446043,-0.640287769784,-0.643884892086,-0.906474820144],
+			[-0.693774537297,-0.588334268087,-0.813796971397,-0.960740325294,-0.43466068424,-0.508693213685],
+			[-0.703351179853,-0.621653777513,-0.948443386873,-0.915129883006,-0.436446559588,-0.374975213167],
+			[-0.667421668554,-0.666666666667,-0.962249905625,-0.867119667799,-0.428463571159,-0.408078520196],
+			[-0.677304964539,-0.237588652482,-0.962765957447,-1.0,-0.767730496454,-0.354609929078],
+			[-0.947084762371,-0.522782949535,-0.341499265066,-0.644292013719,-0.589416952474,-0.954924056835],
+			[-0.694189602446,-0.515290519878,-0.938073394495,-0.998470948012,-0.454128440367,-0.399847094801],
+			[-1.0,-0.618483412322,-0.536334913112,-0.710900473934,-0.556872037915,-0.577409162717],
+			[-0.93627031651,-0.744225834046,-0.479469632164,-0.59751924722,-0.491017964072,-0.751497005988],
+			[-1.0,-0.611911623439,-0.619596541787,-0.704130643612,-0.581171950048,-0.483189241114],
+			[-0.881235154394,-0.638954869359,-0.733966745843,-0.672209026128,-0.548693586698,-0.524940617577],
+			[-0.948201438849,-0.53381294964,-0.702158273381,-0.720863309353,-0.535251798561,-0.559712230216],
+			[-1.0,-0.75872600349,-0.522251308901,-0.788830715532,-0.359947643979,-0.570244328098],
+			[-1.0,-0.693069306931,-0.510891089109,-0.753663366337,-0.405544554455,-0.636831683168],
+			[-0.879899916597,-0.542952460384,-0.773144286906,-0.738115095913,-0.422852376981,-0.643035863219],
+			[-0.972789115646,-0.515063168124,-0.717201166181,-0.762876579203,-0.52380952381,-0.508260447036],
+			[-1.0,-0.475202885482,-0.565374211001,-0.710550045086,-0.635707844905,-0.613165013526],
+			[-0.651761517615,-0.318879855465,-0.812556458898,-0.991869918699,-0.80081300813,-0.424119241192],
+			[-0.753216374269,-0.391228070175,-0.83918128655,-1.0,-0.759064327485,-0.25730994152],
+			[-0.888788153521,-0.497733454216,-0.480205500151,-0.666364460562,-0.55696585071,-0.90994258084],
+			[-0.711053089643,-0.27589208007,-0.791122715405,-1.0,-0.808529155788,-0.413402959095],
+			[-0.720565149137,-0.419152276295,-0.447409733124,-0.679748822606,-0.755102040816,-0.978021978022],
+			[-0.865728207905,-0.518137520303,-0.457498646454,-0.662154845696,-0.55278830536,-0.943692474283],
+			[-0.67014069828,-0.620635747785,-0.805106826472,-0.945805106826,-0.551328817092,-0.406982803544],
+			[-0.727748691099,-0.583246073298,-0.679581151832,-0.916753926702,-0.571727748691,-0.520942408377],
+			[-0.86450492183,-0.563404748118,-0.396641574986,-0.483497394325,-0.691951360741,-1.0],
+			[-0.685990338164,-0.175845410628,-0.83768115942,-1.0,-0.901449275362,-0.399033816425],
+			[-0.775117571612,-0.456177853784,-0.485250106883,-0.551945275759,-0.731509191962,-1.0],
+			[-0.631547736707,-0.422415497134,-0.973512551888,-0.997232654675,-0.653686499308,-0.321605060289],
+			[-0.60993227991,-0.376523702032,-0.881264108352,-1.0,-0.79683972912,-0.335440180587],
+			[-0.627093954843,-0.478878368536,-0.898397669337,-0.970138383103,-0.640568099053,-0.384923525127],
+			[-0.995575221239,-0.642857142857,-0.21997471555,-0.413400758534,-0.728824273072,-0.999367888748],
+			[-0.811487481591,-0.347569955817,-0.471281296024,-0.538291605302,-0.831369661267,-1.0],
+			[-0.942583732057,-0.606060606061,-0.281233386497,-0.450292397661,-0.719829877725,-1.0],
+			[-0.924763542562,-0.627687016337,-0.717540842648,-0.687876182287,-0.515477214101,-0.526655202064],
+			[-0.864661654135,-0.56992481203,-0.603007518797,-0.709273182957,-0.589974937343,-0.663157894737],
+			[-0.866625501698,-0.60296387774,-0.643717196666,-0.667798703303,-0.607286199444,-0.611608521149],
+			[-0.905266438143,-0.588033655344,-0.633530694921,-0.6435026488,-0.604861327516,-0.624805235276],
+			[-0.806926297095,-0.492325256882,-0.712799695547,-0.63237346188,-0.597107700114,-0.758467588482],
+			[-0.614568925772,-0.276164130936,-0.765790686953,-1.0,-0.959428307976,-0.384047948363],
+			[-0.613913043478,-0.262111801242,-0.887701863354,-1.0,-0.914534161491,-0.321739130435],
+			[-0.616411592315,-0.290784760664,-0.804623901009,-1.0,-0.878215564963,-0.409964181049],
+			[-0.723878040425,-0.518328194587,-0.496402877698,-0.755395683453,-0.716341212744,-0.789653991093],
+			[-0.615568453397,-0.570501877774,-0.631956299078,-0.80607715944,-0.713895527484,-0.662000682827],
+			[-0.745010183299,-0.638289205703,-0.508757637475,-0.561710794297,-0.611405295316,-0.93482688391],
+			[-0.739292364991,-0.569832402235,-0.694599627561,-0.661080074488,-0.56052141527,-0.774674115456],
+			[-0.789995493466,-0.494366831906,-0.889139251915,-0.612438035151,-0.530419107706,-0.683641279856],
+			[-0.832707408672,-0.625810856948,-0.614885626494,-0.733697507682,-0.532946398088,-0.659952202117],
+			[-0.958435207824,-0.625101874491,-0.702526487368,-0.643031784841,-0.497962510187,-0.572942135289],
+			[-1.0,-1.0,-0.862767154106,-0.386951631046,-0.239595050619,-0.510686164229],
+			[-0.989827856025,-1.0,-0.754303599374,-0.35289514867,-0.397496087637,-0.505477308294],
+			[-0.538043478261,-0.385869565217,-0.804347826087,-0.915760869565,-0.633152173913,-0.722826086957],
+			[-0.867397260274,-0.661369863014,-0.635068493151,-0.684383561644,-0.523287671233,-0.628493150685],
+			[-0.375683060109,-0.255464480874,-0.430327868852,-0.99043715847,-0.994535519126,-0.953551912568],
+			[-0.704206642066,-0.493726937269,-0.62036900369,-0.870996309963,-0.659335793358,-0.651365313653],
+			[-0.682545521427,-0.600147139967,-0.541291153209,-0.59977929005,-0.681074121758,-0.895162773588],
+			[-0.662739322533,-0.592783505155,-0.69145802651,-0.70913107511,-0.617820324006,-0.726067746686],
+			[-0.89306751246,-0.683129436641,-0.709409454765,-0.666817701254,-0.485576196949,-0.561999697931],
+			[-0.544981145628,-0.625785598851,-0.902316394326,-0.696175255881,-0.672472616269,-0.558268989047],
+			[-0.545893719807,-0.521739130435,-0.95229468599,-0.774154589372,-0.678743961353,-0.527173913043],
+			[-0.803221424413,-0.766349699204,-0.557539297497,-0.491558315544,-0.599456627207,-0.781874636134],
+			[-0.817373587701,-0.531394702723,-0.769216521578,-0.808483052417,-0.634747175403,-0.438784960178],
+			[-0.673865138828,-0.583957690613,-0.810489202292,-0.827236668136,-0.576024680476,-0.528426619656],
+			[-0.713778128701,-0.605211212002,-0.893801816028,-0.707856296881,-0.587445716542,-0.491906829846],
+			[-0.799342741156,-0.552677363232,-0.6064179393,-0.747535279335,-0.637347767253,-0.656678909724]
+		])
+
+		self.target = np.array([
+			[1,0],
+			[1,0],
+			[1,0],
+			[1,0],
+			[1,0],
+			[1,0],
+			[1,0],
+			[1,0],
+			[1,0],
+			[1,0],
+			[1,0],
+			[1,0],
+			[1,0],
+			[1,0],
+			[1,0],
+			[1,0],
+			[1,0],
+			[1,0],
+			[1,0],
+			[1,0],
+			[1,0],
+			[1,0],
+			[1,0],
+			[1,0],
+			[1,0],
+			[1,0],
+			[1,0],
+			[1,0],
+			[1,0],
+			[1,0],
+			[1,0],
+			[1,0],
+			[1,0],
+			[1,0],
+			[1,0],
+			[1,0],
+			[1,0],
+			[1,0],
+			[1,0],
+			[1,0],
+			[1,0],
+			[1,0],
+			[1,0],
+			[1,0],
+			[1,0],
+			[1,0],
+			[1,0],
+			[0,1],
+			[0,1],
+			[0,1],
+			[0,1],
+			[0,1],
+			[0,1],
+			[0,1],
+			[0,1],
+			[0,1],
+			[0,1],
+			[0,1],
+			[0,1],
+			[0,1],
+			[0,1],
+			[0,1],
+			[0,1],
+			[0,1],
+			[0,1],
+			[0,1],
+			[0,1],
+			[0,1],
+			[0,1],
+			[0,1],
+			[0,1],
+			[0,1],
+			[0,1],
+			[0,1],
+			[0,1],
+			[0,1],
+			[0,1],
+			[0,1],
+			[0,1],
+			[0,1],
+			[0,1],
+			[0,1],
+			[0,1],
+			[0,1],
+			[0,1],
+			[0,1],
+			[0,1],
+			[0,1],
+			[0,1],
+			[0,1],
+			[0,1],
+			[0,1],
+			[0,0],
+			[0,0],
+			[0,0],
+			[0,0],
+			[0,0],
+			[0,0],
+			[0,0],
+			[0,0],
+			[0,0],
+			[0,0],
+			[0,0],
+			[0,0],
+			[0,0],
+			[0,0],
+			[0,0],
+			[0,0],
+			[0,0],
+			[0,0],
+			[0,0],
+			[0,0],
+			[0,0],
+			[0,0],
+			[0,0]
+		])
+		
 	
 	def onlyHistogram(self):
 		self.trainingInput = np.array([
@@ -1314,6 +1556,10 @@ class BPNHandler():
 		return np.average(distances)
 	
 	def removeEmptyColumnsRows(self):
+		# Re-initialise empty holders
+		self.emptyTop, self.emptyLeft, self.emptyBottom, self.emptyRight = 0, 0, 0, 0
+		
+		
 		# Remove all zeros columns and rows from both matrices
 		column = self.currentBinary.sum(axis=0).astype(int)
 		row = self.currentBinary.sum(axis=1).astype(int)
@@ -1323,6 +1569,7 @@ class BPNHandler():
 		while i<len(column) and column[i]==0:
 			self.currentExtracted = self.currentExtracted[:,1:]
 			self.currentBinary = self.currentBinary[:,1:]
+			self.emptyLeft += 1
 			i += 1
 
 		# Remove empty right columns
@@ -1330,6 +1577,7 @@ class BPNHandler():
 		while i>=0 and column[i]==0:
 			self.currentExtracted = self.currentExtracted[:,:-1]
 			self.currentBinary = self.currentBinary[:,:-1]
+			self.emptyRight += 1
 			i -= 1
 
 		# Remove empty top rows
@@ -1337,6 +1585,7 @@ class BPNHandler():
 		while i<len(row) and row[i]==0:
 			self.currentExtracted = self.currentExtracted[1:,:]
 			self.currentBinary = self.currentBinary[1:,:]
+			self.emptyTop += 1
 			i += 1
 
 		# Remove empty bottom rows
@@ -1344,6 +1593,7 @@ class BPNHandler():
 		while i>=0 and row[i]==0:
 			self.currentExtracted = self.currentExtracted[:-1,:]
 			self.currentBinary = self.currentBinary[:-1,:]
+			self.emptyBottom += 1
 			i -= 1
 		
 	
@@ -1352,22 +1602,22 @@ class BPNHandler():
 	def rotate(self, hand, elbow):
 		# The dataset can be oriented in 4 different ways that can be rotated back to form a vertical line between the hand and the elbow joints
 		
-		# First, determine the relative position of the elbow
+		# First, determine the relative position of the hand
 		if hand[0]-elbow[0]<0:
-			# the elbow is located in the lower part
+			# the hand is located in the lower part
 			v = elbow[0]-hand[0]
 			up = False
 		else:
-			# the elbow is located in the upper part
+			# the hand is located in the upper part
 			v = hand[0]-elbow[0]
 			up = True
 		
 		if hand[1]-elbow[1]<0:
-			# the elbow is located in the right part
+			# the hand is located in the right part
 			h = elbow[1]-hand[1]
 			left = False
 		else:
-			# the elbow is located in the left part
+			# the hand is located in the left part
 			h = hand[1]-elbow[1]
 			left = True
 		
@@ -1375,18 +1625,20 @@ class BPNHandler():
 		# Check if the elbow is on top/bottom extrems to determine the rotation degree
 		if v>h:
 			if not up:
-				rotation = 0
+				self.rotationAngle = 0
 			else:
-				rotation = 2
+				self.rotationAngle = 2
 		else:
 			if left:
-				rotation = 1
+				self.rotationAngle = 1
 			else:
-				rotation = -1
+				self.rotationAngle = -1
+		
 		
 		# Apply rotation
-		self.currentBinary = np.rot90(self.currentBinary, rotation)
-		self.currentExtracted = np.rot90(self.currentExtracted, rotation)
+		self.currentBinary = np.rot90(self.currentBinary, self.rotationAngle)
+		self.currentExtracted = np.rot90(self.currentExtracted, self.rotationAngle)
+		
 		
 		
 		# Debug
@@ -1407,7 +1659,7 @@ class BPNHandler():
 	
 	def sift(self, input):
 		data = np.copy(self.currentExtracted).astype(np.uint8)
-		gray = cv2.cvtColor(data, cv2.COLOR_GRAY2BGR)
+		gray = cv2.cvtColor(data, cv2.COLOR_GRAself.cropRightBGR)
 
 		sift = cv2.SIFT()
 		kp = sift.detect(gray, None)
@@ -1430,7 +1682,7 @@ class BPNHandler():
 	
 	def surf(self, input):
 		data = np.copy(self.currentExtracted).astype(np.uint8)
-		gray = cv2.cvtColor(data, cv2.COLOR_GRAY2BGR)
+		gray = cv2.cvtColor(data, cv2.COLOR_GRAself.cropRightBGR)
 		
 		surfDetector = cv2.FeatureDetector_create("SURF")
 		surfDescriptorExtractor = cv2.DescriptorExtractor_create("SURF")
@@ -1463,10 +1715,42 @@ class BPNHandler():
 					text += " "
 				else:
 					text += str(int(b[i,j]))
+					text += ","
 			print text
 		print
 	
-	
+	def displayHTML(self, b):
+		
+		old_min = float(np.min(b))
+		old_max = float(np.max(b))
+		
+		old_range = float(old_max - old_min)
+		new_min = -1
+		new_range = 1 - float(new_min)
+		
+		def f(n, old_min, old_range, new_range, new_min):
+		    return float((n - float(old_min)) / float(old_range) * float(new_range) + float(new_min))
+
+		f = np.vectorize(f)
+		b = f(b, old_min, old_range, new_range, new_min)
+		
+		
+		
+		x,y = b.shape
+		for i in range(x):
+			text = ""
+			for j in range(y):
+				if np.isnan(b[i,j]):
+					text += "ctx.fillStyle='rgba(0,0,0,0)'; ".format()
+					text += "ctx.fillRect({0},{1},2,2);\n".format(j*2,i*2)
+				else:
+					text += "ctx.fillStyle='rgba(0,0,0,{0:.2f})'; ".format(b[i,j])
+					text += "ctx.fillRect({0},{1},2,2);\n".format(j*2,i*2)
+			print text
+		print
+		
+		sys.exit(1)
+		
 	
 	
 	
@@ -1486,19 +1770,50 @@ class BPNHandler():
 		else:
 			return 0
 	
-	def diviseInSix(self, input, data):
-		h,w = data.shape
-		total = np.sum(data)
-	
-		input.append(self.countWithinArea(data, total, 0, 0, w/2, h/3)) # upper left
-		input.append(self.countWithinArea(data, total, 0, h/3, w/2, 2*(h/3))) # middle left
-		input.append(self.countWithinArea(data, total, 0, 2*(h/3), w/2, h)) # lower left
+	def diviseInSix(self):
+		h,w = self.currentBinary.shape
+		total = np.sum(self.currentBinary)
 		
-		input.append(self.countWithinArea(data, total, w/2, 0, w, h/3)) # upper right
-		input.append(self.countWithinArea(data, total, w/2, h/3, w, 2*(h/3))) # middle right
-		input.append(self.countWithinArea(data, total, w/2, 2*(h/3), w, h)) # lower right
-
-
+		output = []
+	
+		output.append(self.countWithinArea(self.currentBinary, total, 0, 0, w/2, h/3)) 			# upper left
+		output.append(self.countWithinArea(self.currentBinary, total, 0, h/3, w/2, 2*(h/3))) 	# middle left
+		output.append(self.countWithinArea(self.currentBinary, total, 0, 2*(h/3), w/2, h)) 		# lower left
+		
+		output.append(self.countWithinArea(self.currentBinary, total, w/2, 0, w, h/3)) 			# upper right
+		output.append(self.countWithinArea(self.currentBinary, total, w/2, h/3, w, 2*(h/3))) 	# middle right
+		output.append(self.countWithinArea(self.currentBinary, total, w/2, 2*(h/3), w, h)) 		# lower right
+		
+		return output
+	
+	
+	def getElbowHandAlignment(self, depth, hand_v, hand_h, elbow_v, elbow_h):
+		# Allow to discriminate gestures pointing left/right up, lateral and down
+		# Uses the disposition of the hand and the elbow
+		
+		# At 1m, a variation of 60 pixels indicates a position change
+		threshold = (60/float(depth))*1000
+		
+		# Right, Left or Front?
+		if hand_h > elbow_h+threshold:
+			h = 1	# Left (from user point of view)
+		elif hand_h+threshold < elbow_h:
+			h = -1	# Right (from user point of view)
+		else:
+			h = 0	# Front
+		
+		
+		# Up, Down or Lateral?
+		if hand_v > elbow_v+threshold:
+			v = 1	# up
+		elif hand_v+threshold < elbow_v:
+			v = -1	# down
+		else:
+			v = 0	# lateral
+		
+		return [h,v]
+		
+		
 	
 	def normalizeInput(self, input, old_min=0, old_max=100):
 		# Normalize the data in a range from -1 to 1
@@ -1508,155 +1823,16 @@ class BPNHandler():
 	
 		return [float((n - old_min) / float(old_range) * new_range + new_min) for n in input]
 	
-	def normalizeInput1(self, data):
-		# Retrieve the depth map and convert it to a numpy array of floats
-		depthMap = np.array(data["depth_map"]).astype(float)
-	
-	
-		# Retrieve the position of the pointing hand
-		if data["hand"]["type"]==LEFT_HAND:
-			v,h,d = map(int, data["skeleton"]["hand"]["left"])
-		elif data["hand"]["type"]==RIGHT_HAND:
-			v,h,d = map(int, data["skeleton"]["hand"]["right"])
-		else:
-			v,h,d = (0,0,0)
-	
-		# Determine the bounding box around the pointing hand. Here fixed to the biggest one for hands at least as far as 500mm
-		shift = 150
-	
-		# Determine the coordinates of the bounding box to extract
-		x1 = keepRange(int(h-shift), 480)
-		y1 = keepRange(int(v-shift), 640)
-		x2 = keepRange(int(h+shift)+1, 480)
-		y2 = keepRange(int(v+shift)+1, 640)
-	
-		# Extract the informations within the bounding box
-		startH = shift-h+x1
-		startV = shift-v+y1
-		endH = shift+x2-h
-		endV = shift+y2-v
-	
-		max = (2*shift)+1
-		extracted = np.zeros(max*max).reshape(max, max)
-		extracted[startV:endV, startH:endH] = depthMap[y1:y2, x1:x2]
-	
-		# Extract the hand from the background with a threshold
-		start = d-200
-		end = d+200
-	
-		x,y = extracted.shape
-		for j in range(x):
-			for k in range(y):
-				if extracted[j][k]<start or extracted[j][k]>end:
-					extracted[j][k] = 0
-				else:
-					extracted[j][k] = 1
-	
-	
-		# Count the number of occurences by row and columns
-		v1 = np.ravel(extracted.sum(axis=0))
-		v2 = np.ravel(extracted.sum(axis=1))
-	
-		# Concatenate these values
-		final = np.hstack((v1,v2))
-	
-	
-		# Convert all values to a 0-1 range-restricted pool (with 1 for close points and 0 for far ones)
-		#rangeRestricted = (Dmax-extracted)/(Dmax-Dmin)
-	
-		return final
-
-
-
-
-
-
-	def normalizeInput2(self, data):
-		# Retrieve the depth map and convert it to a numpy array of floats
-		depthMap = np.array(data["depth_map"]).astype(float)
-	
-	
-		# Retrieve the position of the pointing hand
-		if data["hand"]["type"]==Dataset.LEFT_HAND:
-			v,h,d = map(int, data["skeleton"]["hand"]["left"])
-		elif data["hand"]["type"]==Dataset.RIGHT_HAND:
-			v,h,d = map(int, data["skeleton"]["hand"]["right"])
-		else:
-			# Take arbitrarily the right hand
-			v,h,d = map(int, data["skeleton"]["hand"]["right"])
-	
-		# Determine the bounding box around the pointing hand. Here fixed to the biggest one for hands at least as far as 500mm
-		if d != 0:
-			shift = int((1000.0/d)*90)
-		else:
-			shift = 1
-	
-		# Determine the coordinates of the bounding box to extract
-		x1 = self.keepRange(int(h-shift), 480)
-		y1 = self.keepRange(int(v-shift), 640)
-		x2 = self.keepRange(int(h+shift)+1, 480)
-		y2 = self.keepRange(int(v+shift)+1, 640)
-	
-		# Extract the informations within the bounding box
-		startH = shift-h+x1
-		startV = shift-v+y1
-		endH = shift+x2-h
-		endV = shift+y2-v
-	
-		max = (2*shift)+1
-		extracted = np.zeros(max*max).reshape(max, max)
-		extracted[startV:endV, startH:endH] = depthMap[y1:y2, x1:x2]
-	
-		# Extract the hand from the background with a threshold
-		start = d-200
-		end = d+200
-		
-		x,y = extracted.shape
-		for j in range(x):
-			for k in range(y):
-				if extracted[j][k]<start or extracted[j][k]>end:
-					extracted[j][k] = 0
-				else:
-					extracted[j][k] = 1
-	
-		# Remove all zeros columns and rows
-		foo = np.rot90(extracted[~np.all(extracted == 0, axis=1)])
-		binary = np.rot90(foo[~np.all(foo == 0, axis=1)], -1)
-		
-		# Hold the ratio
-		self.currentH, self.currentW = binary.shape
-		
-		input = []
-		if self.currentW != 0:
-			input.append(self.currentH/float(self.currentW))
-		else: input.append(0)
-		
-
-		# Hold the percentage of actual data within sub-areas
-		input.append(self.countWithinArea(binary, 0, 0, self.currentW/2, self.currentH)) # left
-		input.append(self.countWithinArea(binary, self.currentW/2, 0, self.currentW, self.currentH)) # right
-		input.append(self.countWithinArea(binary, 0, 0, self.currentW, self.currentH/2)) # up
-		input.append(self.countWithinArea(binary, 0, self.currentH/2, self.currentW, self.currentH)) # down
-
-		# Hold the value for recursively divided areas
-		self.diviseInFour(input, binary, True)
-
-		# Hold the average distance between all actual data and the center
-		input.append(self.getAverageDistance(binary))
-		
-		return input
-	
-	
-	def getFeaturesLight(self, data):
+	def getFeaturesFull(self, data):
 		# Retrieve the depth map and convert it to a numpy array of floats
 		depthMap = np.array(data["depth_map"]).astype(float)
 		
 	
 		# Retrieve the position of the pointing hand
-		if data["hand"]==LightDataset.LEFT_HAND:
+		if data["hand"]==Dataset.LEFT_HAND:
 			v,h,d = map(int, data["skeleton"]["hand"]["left"])
 			v2,h2,d2 = map(int, data["skeleton"]["elbow"]["left"])
-		elif data["hand"]==LightDataset.RIGHT_HAND:
+		elif data["hand"]==Dataset.RIGHT_HAND:
 			v,h,d = map(int, data["skeleton"]["hand"]["right"])
 			v2,h2,d2 = map(int, data["skeleton"]["elbow"]["right"])
 		else:
@@ -1671,20 +1847,20 @@ class BPNHandler():
 			shift = 1
 	
 		# Determine the coordinates of the bounding box to extract
-		x1 = self.keepRange(int(h-shift), 480)
-		y1 = self.keepRange(int(v-shift), 640)
-		x2 = self.keepRange(int(h+shift)+1, 480)
-		y2 = self.keepRange(int(v+shift)+1, 640)
+		self.cropTop = self.keepRange(int(h-shift), 480)
+		self.cropLeft = self.keepRange(int(v-shift), 640)
+		self.cropBottom = self.keepRange(int(h+shift)+1, 480)
+		self.cropRight = self.keepRange(int(v+shift)+1, 640)
 	
 		# Extract the informations within the bounding box
-		startH = shift-h+x1
-		startV = shift-v+y1
-		endH = shift+x2-h
-		endV = shift+y2-v
+		startH = shift-h+self.cropTop
+		startV = shift-v+self.cropLeft
+		endH = shift+self.cropBottom-h
+		endV = shift+self.cropRight-v
 	
 		max = (2*shift)+1
 		self.currentExtracted = np.zeros(max*max).reshape(max, max)
-		self.currentExtracted[startV:endV, startH:endH] = depthMap[y1:y2, x1:x2]
+		self.currentExtracted[startV:endV, startH:endH] = depthMap[self.cropLeft:self.cropRight, self.cropTop:self.cropBottom]
 		self.currentBinary = np.copy(self.currentExtracted)
 	
 		# Extract the hand from the background with a threshold
@@ -1776,19 +1952,22 @@ class BPNHandler():
 		
 		return self.normalizeInput(input)
 	
+	def getFeaturesLight(self, data):
+		# Retrieve the depth map and convert it to a numpy array of floats
+		depthMap = np.array(data["depth_map"]).astype(float)
+		
 	
-	def getFeaturesLive(self, data):
 		# Retrieve the position of the pointing hand
-		if data.hand==LiveDataset.LEFT_HAND:
-			v,h,d = map(int, data.skeleton["hand"]["left"])
-			v2,h2,d2 = map(int, data.skeleton["elbow"]["left"])
-		elif data.hand==LiveDataset.RIGHT_HAND:
-			v,h,d = map(int, data.skeleton["hand"]["right"])
-			v2,h2,d2 = map(int, data.skeleton["elbow"]["right"])
+		if data["hand"]==LightDataset.LEFT_HAND:
+			v,h,d = map(int, data["skeleton"]["hand"]["left"])
+			v2,h2,d2 = map(int, data["skeleton"]["elbow"]["left"])
+		elif data["hand"]==LightDataset.RIGHT_HAND:
+			v,h,d = map(int, data["skeleton"]["hand"]["right"])
+			v2,h2,d2 = map(int, data["skeleton"]["elbow"]["right"])
 		else:
 			# Take arbitrarily the right hand
-			v,h,d = map(int, data.skeleton["hand"]["right"])
-			v2,h2,d2 = map(int, data.skeleton["elbow"]["right"])
+			v,h,d = map(int, data["skeleton"]["hand"]["right"])
+			v2,h2,d2 = map(int, data["skeleton"]["elbow"]["right"])
 	
 		# Determine the bounding box around the pointing hand regarding to the depth of the hand
 		if d != 0:
@@ -1797,28 +1976,36 @@ class BPNHandler():
 			shift = 1
 	
 		# Determine the coordinates of the bounding box to extract
-		x1 = self.keepRange(int(h-shift), 480)
-		y1 = self.keepRange(int(v-shift), 640)
-		x2 = self.keepRange(int(h+shift)+1, 480)
-		y2 = self.keepRange(int(v+shift)+1, 640)
+		self.cropTop = self.keepRange(int(h-shift), 480)
+		self.cropLeft = self.keepRange(int(v-shift), 640)
+		self.cropBottom = self.keepRange(int(h+shift)+1, 480)
+		self.cropRight = self.keepRange(int(v+shift)+1, 640)
 	
 		# Extract the informations within the bounding box
-		startH = shift-h+x1
-		startV = shift-v+y1
-		endH = shift+x2-h
-		endV = shift+y2-v
+		startH = shift-h+self.cropTop
+		startV = shift-v+self.cropLeft
+		endH = shift+self.cropBottom-h
+		endV = shift+self.cropRight-v
 	
 		max = (2*shift)+1
 		self.currentExtracted = np.zeros(max*max).reshape(max, max)
-		self.currentExtracted[startV:endV, startH:endH] = data.depth_map[y1:y2, x1:x2]
+		self.currentExtracted[startV:endV, startH:endH] = depthMap[self.cropLeft:self.cropRight, self.cropTop:self.cropBottom]
 		self.currentBinary = np.copy(self.currentExtracted)
 	
 		# Extract the hand from the background with a threshold
 		start = d-100
 		end = d+100
 		
-		self.currentBinary = self.thresholdBinary(self.currentBinary, start, end)
-		self.currentExtracted = self.thresholdExtracted(self.currentExtracted, start, end)
+		x,y = self.currentBinary.shape
+		for j in range(x):
+			for k in range(y):
+				if self.currentBinary[j][k]<start or self.currentBinary[j][k]>end or self.currentBinary[j][k]==0:
+					self.currentBinary[j][k] = 0
+					self.currentExtracted[j][k] = np.NaN
+				else:
+					self.currentBinary[j][k] = 1
+		
+		
 		
 		# Remove all zeros columns and rows from both matrices
 		self.removeEmptyColumnsRows()
@@ -1827,6 +2014,151 @@ class BPNHandler():
 		self.rotate([v,h], [v2,h2])
 		
 		self.tarExtracted()
+		
+		
+		
+		# /----------------------------------------\
+		# | Depth map of the hand is now extracted |
+		# |        Starting getting features       |
+		# \----------------------------------------/
+		
+		
+		
+		# /---------------\
+		# |   Feature 1   |
+		# |   Map ratio   |
+		# \---------------/
+		
+		
+		# Hold the ratio
+		self.currentH, self.currentW = self.currentBinary.shape
+		
+		input = []
+		#if self.currentW != 0:
+		#	input.append(self.currentH/float(self.currentW))
+		#else:
+		#	input.append(0)
+		
+		
+		
+		
+		# /------------------------------------\
+		# |          Feature 2 to 7            |
+		# |   Percent of data in sub-regions   |
+		# \------------------------------------/
+		
+		
+		
+		# Hold the percentage of actual data within sub-areas
+		input.append(self.normalizeInput(self.diviseInSix()))
+		
+		
+		
+		# /--------------------------------\
+		# |           Feature 8            |
+		# |   Average euclidian distance   |
+		# \--------------------------------/
+		
+		
+		
+		# Hold the average distance between all actual data and the center
+		#input.append(self.getAvgEuclidianDistance())
+		
+		
+		
+		# /----------------------\
+		# |   Feature 9 to 19    |
+		# |       Histogram      |
+		# \----------------------/
+		
+		
+		
+		# Histogram of the extracted hand
+		#input.extend(self.getHistogram())
+		
+		
+		
+		return input
+	
+	
+	def getFeaturesLive(self, data):
+		# Retrieve the position of the pointing hand
+		if data.hand==LiveDataset.LEFT_HAND:
+			h,v,d = map(int, data.skeleton["hand"]["left"])
+			h2,v2,d2 = map(int, data.skeleton["elbow"]["left"])
+		elif data.hand==LiveDataset.RIGHT_HAND:
+			h,v,d = map(int, data.skeleton["hand"]["right"])
+			h2,v2,d2 = map(int, data.skeleton["elbow"]["right"])
+		else:
+			# Take arbitrarily the right hand
+			h,v,d = map(int, data.skeleton["hand"]["right"])
+			h2,v2,d2 = map(int, data.skeleton["elbow"]["right"])
+	
+		# Determine the bounding box around the pointing hand regarding to the depth of the hand
+		if d != 0:
+			shift = int((1000.0/d)*90)
+		else:
+			shift = 1
+	
+		# Determine the coordinates of the bounding box to extract
+		self.cropTop = self.keepRange(int(v-shift), 480)
+		self.cropLeft = self.keepRange(int(h-shift), 640)
+		self.cropBottom = self.keepRange(int(v+shift)+1, 480)
+		self.cropRight = self.keepRange(int(h+shift)+1, 640)
+	
+		# Extract the informations within the bounding box
+		startV = shift-v+self.cropTop
+		startH = shift-h+self.cropLeft
+		endV = shift+self.cropBottom-v
+		endH = shift+self.cropRight-h
+	
+		max = (2*shift)+1
+		self.currentExtracted = np.zeros(max*max).reshape(max, max)
+		self.currentExtracted[startV:endV, startH:endH] = data.depth_map[self.cropTop:self.cropBottom, self.cropLeft:self.cropRight]
+		self.currentBinary = np.copy(self.currentExtracted)
+		
+	
+		# Extract the hand from the background with a threshold
+		start = d-100
+		end = d+100
+		
+		self.currentBinary = self.thresholdBinary(self.currentBinary, start, end)
+		self.currentExtracted = self.thresholdExtracted(self.currentExtracted, start, end)
+		
+		
+		# Remove all zeros columns and rows from both matrices
+		self.removeEmptyColumnsRows()
+		
+		
+		# Initialize the input features
+		input = []
+		
+		
+		
+		# /-------------------------------\
+		# |           Feature 1           |
+		# |     Hand / Elbow alignment    |
+		# \-------------------------------/
+		
+		
+		#input.extend(self.getElbowHandAlignment(d, v, h, v2, h2))
+		
+		
+		
+		
+		
+		# Rotate the hand to form a vertical line between the hand and the elbow
+		self.rotate([v,h], [v2,h2])
+		
+		self.tarExtracted()
+		
+		
+		
+		
+		
+		self.fingerTip = self.getFingerTip()
+		
+		
 		
 		
 		# /----------------------------------------\
@@ -1839,8 +2171,6 @@ class BPNHandler():
 		# Hold the ratio
 		self.currentH, self.currentW = self.currentBinary.shape
 		
-		input = []
-		
 		
 		# /------------------------------------\
 		# |          Feature 1 to 6            |
@@ -1850,13 +2180,43 @@ class BPNHandler():
 		
 		
 		# Hold the percentage of actual data within sub-areas
-		self.diviseInSix(input, self.currentBinary)
+		input.extend(self.normalizeInput(self.diviseInSix()))
 		
 		
 		
-		return self.normalizeInput(input)
+		return input
 	
 	
+	def getFingerTip(self):
+		# Prevent empty calls
+		if len(self.currentBinary)==0:
+			return [0,0]
+		
+		index = np.nonzero(self.currentBinary[0] == 1)
+		
+		output = []
+		
+		# Finger tip coordinates (once rotated!)
+		h = index[0][0]+int((index[0][-1]-index[0][0])/2)
+		v = 0
+		
+		
+		# Revert rotation to get the real coordinates
+		if self.rotationAngle == -1:
+			v = len(self.currentBinary[0])-1-h
+			h = 0
+		elif self.rotationAngle == 2:
+			h = len(self.currentBinary[0])-1-h
+			v = len(self.currentBinary)
+		elif self.rotationAngle == 1:
+			v = h
+			h = len(self.currentBinary)
+		
+		# Revert empty columns/rows and initial crop
+		return [self.cropLeft+h+self.emptyLeft, self.cropTop+v+self.emptyTop]
+		
+		
+		
 	def getData(self):
 		print "self.trainingInput = np.array(["
 		
@@ -1891,7 +2251,7 @@ class BPNHandler():
 		
 	
 	
-	def getWeights(self):
+	def getRestrained1Weights(self):
 		# Stopped at Iteration 30301
 		# Error: 9.953473
 		# Training rate: 0.1
@@ -1919,6 +2279,34 @@ class BPNHandler():
 				 [ -1.06058594e+01, -8.62836389e+00,  6.94702533e+00, 6.00818386e+00, -1.78716165e-01, -1.31542624e+01, -7.11069355e+00, -8.39639149e+00,  7.34747215e+00, -8.59198819e+00,  6.97229367e+00, -1.29081149e+01, 4.03522702e+00, -2.53825152e+01, -1.49094909e+01, -9.93461981e-01],
 				 [ 6.71137255e+00, -1.58075140e+01, -6.88131140e+00, 1.74982611e+00, -1.88290287e-01,  5.40611790e+00, -6.82979118e+00,  1.42737624e+01, -8.68425778e+00, -8.64200552e+00, -4.56467258e+00, -4.92117827e+00, 1.31714011e+00,  3.73637253e+00, -4.96067357e+00, -5.49140663e+00]])
 				]
+	def getMixed1Weights(self):
+		return [
+				np.array([[  1.49869284e+00,  -1.14224866e+01,   2.81753211e+00, 5.77644581e+00,   2.61263020e+00,  -1.33606287e+01, 2.90582901e+00],
+       			 [ -3.34930569e+00,  -9.83930467e+00,   8.70804123e+00, -8.99472755e+00,   5.72803115e+00,   5.12939091e+00, 6.52518128e-01],
+       			 [  9.16009985e+00,   6.57417965e+00,   1.51722719e+01, -2.29763170e+01,   4.99640655e+00,  -5.46781815e+00, -2.05780474e+00],
+       			 [  5.59321819e-01,   4.81680093e-01,   1.48764227e+00, -3.36426748e-01,   1.24112609e+00,   4.03172415e-01, -1.15680724e+00],
+       			 [  8.49017499e-02,  -3.74773140e+00,  -1.20578976e+01, 1.38949721e+01,  -7.43855268e+00,   1.88657359e+00, 1.74930378e+00],
+       			 [  1.62679349e+00,  -5.98581197e+00,  -1.78137185e+01, 1.09643748e+01,   2.98182783e+00,  -9.27537743e-01, 2.33717425e+00],
+       			 [ -6.63115623e+00,   2.01011003e+00,  -1.24793570e+00, -9.19004131e+00,   5.45832691e+00,   6.06952499e+00, 9.01107954e-01],
+       			 [  7.10109006e+00,   9.23818570e+00,  -5.91491438e+00, 7.19573606e+00,  -1.98143878e+01,   1.86679157e+00, 3.06098520e-01],
+       			 [  5.92469304e+00,  -8.72641660e-01,   2.63545073e+00, 8.00691449e+00,  -3.54998254e+00,  -7.74052284e+00, -1.22670348e+00],
+       			 [  6.82235656e-01,  -1.65434250e+00,   1.38879403e+01, -7.80455292e+00,  -3.79804018e+00,   2.21858483e+00, -9.61103120e-01],
+       			 [ -2.48167109e+01,   1.28438030e+01,   1.38182020e+01, -1.69230858e+01,   9.67849916e+00,   6.96930341e+00, -3.96801155e-01],
+       			 [ -4.77692695e+00,  -5.49202998e+00,   2.14123180e+01, -1.20191088e+01,   5.81092113e+00,  -1.32349466e+01, 2.15706548e+00],
+       			 [  8.64188949e+00,   1.33648713e+00,   8.90127473e+00, -1.72413798e+01,  -6.83449554e+00,   1.01231564e-01, 1.25056949e+00],
+       			 [  1.77539499e+01,  -5.07680054e+00,   6.47373298e+00, -2.60808573e+01,   9.46268553e+00,   2.57344881e+00, -1.42128544e+00],
+       			 [ -5.99970180e+00,  -5.67815685e+00,  -6.51143764e+00, 1.53666983e+01,   7.50820604e+00,   3.41980767e+00, -2.03276652e+00],
+       			 [  9.12808338e+00,  -6.39605248e+00,   2.67725342e-01, 3.33123738e+00,  -4.92859847e+00,  -1.06078212e+00, 7.38653155e-03],
+       			 [ -1.02870651e+01,   1.77897993e+00,  -3.17080244e+01, 2.11730231e+01,   2.23815963e+01,  -4.69217426e+00, 3.27184425e-01],
+       			 [  9.70038345e+00,  -2.16333188e+01,   1.08648246e+01, -2.26508656e+00,   1.76739718e+01,  -1.41640745e+01, -1.42169066e-01],
+       			 [  1.07818318e+01,   2.58578053e+00,  -1.49170825e+01, 8.08183654e-01,  -5.74769062e-01,   1.29609891e+01, -2.90271061e+00],
+       			 [  9.38942618e+00,  -6.47762889e+00,  -1.74426221e+01, 1.32137176e+01,   3.28356850e+00,  -1.69143021e+00, -1.37911353e-02],
+       			 [ -8.91030974e+00,   8.54744038e+00,   1.66297390e+00, 9.74280869e+00,   1.36603578e+01,  -1.28639457e+01, -3.14471034e+00],
+       			 [ -1.32871770e+01,   8.70229086e+00,  -9.32440929e+00, -1.23238586e+00,   3.22091923e+00,   1.03832451e+01, 5.36448026e-01],
+       			 [  1.55409219e+00,  -1.37433582e+01,  -2.09745016e+00, 6.87068179e+00,   1.27652175e+01,   5.14608330e-01, -1.45840358e+00]]), 
+	   			np.array([[-17.55560532, -14.06334928,   9.1209529 ,  -1.60991588, 8.77813951,   9.16387727, -10.46800869, -11.57884233, -4.64342434,   7.5171728 ,   0.79221006,  10.22852189, 1.91423363,  11.24922546,  -5.41617537,  -4.62846847, 8.96347156,   3.52327158,  12.12612932,   2.5647254 , 15.27567342,  -9.37293277,  15.97661967,  -7.01936577],
+       			 [ 15.73447201,   9.61203829, -11.32509828,   0.22279508, -9.22654189,  -6.92863116,   6.94563893, -10.00123817, 7.69131568,  -6.12322341, -11.9867817 ,  -9.75102198, -14.09880425,  -9.2353628 ,   7.35825189, -16.09645445, -8.10144382, -10.89882527,  -8.8323457 ,  -2.07172445, -13.17259355,   8.46721096, -10.02377965,   6.53057725]])
+				]
 	
 	def run(self):
 		lvInputOriginal = np.array(self.trainingInput)
@@ -1927,11 +2315,15 @@ class BPNHandler():
 		lFuncs = [None, gaussian, sgm]
 		
 		
-		ran = np.arange(50)
-		ran.fill(15)
+		#ran = np.arange(50)
+		#ran.fill(15)
+		
+		ran = np.arange(1, 50)
+		
+		ran = np.repeat(np.array([23, 26, 27, 32, 36]), 10)
 		
 		
-		# Try to change the number of hidden layers
+		# Allows to change the number of hidden layers
 		for hidden in ran:
 			print("{0} hidden layers with a training rate of {1} and a momentum of {2}".format(hidden, 0.1, 0.1))
 			######
@@ -1946,7 +2338,7 @@ class BPNHandler():
 			bpn = BackPropagationNetwork((len(self.trainingInput[0]), hidden, len(self.target[0])), lFuncs)
 
 			lnMax = 50000
-			lnErr = 10
+			lnErr = 0.002
 			errMax = 1e100
 			for i in range(lnMax+1):
 				err = bpn.trainEpoch(lvInput, lvTarget, trainingRate=0.1, momentum=0.05)
@@ -1971,12 +2363,6 @@ class BPNHandler():
 			print "weights:"
 			print bpn.getWeights()
 		
-		
-			#lvInput = np.array(self.testingInput)
-			#lvOutput = bpn.run(lvInput)
-			#for i in range(lvInput.shape[0]):
-			#	print("Ouput {0}: {1}".format(i, lvOutput[i]))
-		
 	def test(self, data):
 		# First, retrieve the features from the input
 		lvInput = np.array([self.getFeaturesLive(data)])
@@ -1987,17 +2373,7 @@ class BPNHandler():
 		for i in range(lvInput.shape[0]):
 			# If a gesture is recognised:
 			if lvOutput[i][np.argmax(lvOutput[i])] > 0.5:
-				# Determine which one:
-				if np.argmax(lvOutput[i]) == 0:
-					return "Right"
-				elif np.argmax(lvOutput[i]) == 1:
-					return "Front Right"
-				elif np.argmax(lvOutput[i]) == 2:
-					return "Front Left"
-				elif np.argmax(lvOutput[i]) == 3:
-					return "Left"
-				else:
-					return "Undetermined"
+				return str(np.argmax(lvOutput[i]))
 			else:
 				return "None"
 		return "Unknown"

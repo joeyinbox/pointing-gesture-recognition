@@ -42,7 +42,7 @@ class LiveGui(QtWidgets.QWidget):
 		
 		
 		# Create the neural network
-		self.bpn = BPNHandler(True)
+		self.bpn = BPNHandler(True, features=6, hiddenLayers=15, output=4)
 		
 		# Create a new dataset item
 		self.data = LiveDataset()
@@ -84,7 +84,7 @@ class LiveGui(QtWidgets.QWidget):
 
 		# Get the whole depth map
 		#self.data.depth_map = np.fromstring(self.depth.get_raw_depth_map_8(), np.uint8).reshape(480, 640)
-		self.data.depth_map = np.asarray(self.depth.get_tuple_depth_map()).reshape(640, 480)
+		self.data.depth_map = np.asarray(self.depth.get_tuple_depth_map()).reshape(480, 640)
 
 		# Create the frame from the raw depth map string and convert it to RGB
 		frame = np.fromstring(self.depth.get_raw_depth_map_8(), np.uint8).reshape(480, 640)
@@ -129,6 +129,9 @@ class LiveGui(QtWidgets.QWidget):
 			# Test the data against the neural network
 			result = self.bpn.test(self.data)
 			self.resultLabel.setText(result)
+			
+			# Highlight the finger tip
+			ui.drawPoint(frame, self.bpn.fingerTip[0], self.bpn.fingerTip[1], 5)
 			
 			
 		cv2.putText(frame, str(currentDepth), (5, 60), cv2.FONT_HERSHEY_SIMPLEX, 2, (50, 100, 255), 5)

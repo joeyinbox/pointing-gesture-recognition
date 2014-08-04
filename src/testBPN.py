@@ -9,6 +9,7 @@ import cv2
 
 
 # All positions with up, lateral and down declinasons 
+# ID:	complete1
 positive = np.array([
 	[79, 117, 119, 196, 224, 247], # Back right up
 	[80, 199, 225, 251], # Back right lateral
@@ -32,7 +33,6 @@ positive = np.array([
 	[84, 157, 206, 228, 258], # Back left lateral
 	[85, 158, 208, 229, 260] # Back left down
 ])
-
 positiveTarget = np.array([
 	[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
 	[0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
@@ -62,6 +62,7 @@ positiveTarget = np.array([
 
 
 # Group all position disregarding up, lateral or down
+# ID:	complete2
 positive = np.array([
 	[79, 117, 119, 196, 224, 247, 80, 199, 225, 251, 81, 201, 226, 253], # Back right
 	[1, 11, 37, 44, 48, 87, 122, 126, 136, 151, 2, 12, 38, 45, 49, 88, 123, 127, 137, 152, 3, 13, 50, 89, 124, 128, 138, 153], # Right
@@ -88,6 +89,7 @@ positiveTarget = np.array([
 
 
 # Few simple positions
+# ID:	restrained1
 positive = np.array([
 	[1, 11, 37, 44, 48, 87, 122, 126, 136, 151, 2, 12, 38, 45, 49, 88, 123, 127, 137, 152, 3, 13, 50, 89, 124, 128, 138, 153], # Right
 	[58, 97, 166, 195, 219, 242, 59, 60, 98, 167, 192, 221, 244, 61, 99, 168, 194, 223, 245], # Front right
@@ -101,12 +103,32 @@ positiveTarget = np.array([
 	[0,0,0,1]
 ])
 
-negative = np.array([0,1,2,3,4,5,6,7,8,9,12,15,16,17,20,21,22,23,24,26,33,42,43])
+
+
+
+
+
+# Few simple positions mixed
+# ID:	mixed1
+#positive = np.array([
+#	[1, 11, 37, 44, 48, 87, 122, 126, 136, 151, 2, 12, 38, 45, 49, 88, 123, 127, 137, 152, 3, 13, 50, 89, 124, 128, 138, 153, 58, 97, 166, 195, 219, 242, 59, 60, 98, 167, 192, 221, 244, 61, 99, 168, 194, 223, 245], # Right
+#	[16, 40, 53, 64, 102, 131, 161, 182, 215, 236, 17, 41, 54, 65, 103, 132, 162, 183, 216, 239, 8, 18, 42, 55, 66, 104, 133, 163, 185, 218, 241, 6, 32, 156, 210, 233, 262, 7, 211, 232, 264, 34, 212, 235, 265] # Left
+#])
+#positiveTarget = np.array([
+#	[1,0,],
+#	[0,1,]
+#])
+
+
+
+
+
 
 
 
 
 # Fewer simple positions
+# ID:	obvious1
 #positive = np.array([
 #	[2, 12, 38, 45, 49, 88, 123, 127, 137, 152], # Right lateral
 #	[7, 211, 232, 264] # Left lateral
@@ -118,12 +140,10 @@ negative = np.array([0,1,2,3,4,5,6,7,8,9,12,15,16,17,20,21,22,23,24,26,33,42,43]
 
 
 
-testing = []
-testingTarget = []
-negative = []
 
 
 
+negative = np.array([0,1,2,3,4,5,6,7,8,9,12,15,16,17,20,21,22,23,24,26,33,42,43])
 
 
 
@@ -131,7 +151,7 @@ bpn = BPNHandler()
 bpn.loadPositive(positive, positiveTarget)
 bpn.loadNegative(negative, len(positiveTarget[0]))
 #bpn.getData()
-#bpn.onlySubRegionPercents()
+#bpn.onlySubRegionPercentsMixed1()
 bpn.run()
 
 sys.exit(1)
