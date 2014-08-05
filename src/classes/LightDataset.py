@@ -50,7 +50,7 @@ class LightDataset:
 	
 	def to_JSON(self):
 		# Update the depth map and the image to prepare them
-		self.depth_map = utils.convertOpenNIDepthMapToArray(self.depth_map)
+		self.depth_map = self.depth_map.tolist()
 		self.image = utils.getBase64(self.image)
 		
 		obj = deepcopy(self)

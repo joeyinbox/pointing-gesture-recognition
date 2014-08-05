@@ -890,7 +890,7 @@ class BPNHandler():
 	def getFeaturesLight(self, data):
 		# Retrieve the depth map and convert it to a numpy array of floats
 		depthMap = np.array(data["depth_map"])
-		depthMap = np.fliplr(np.rot90(depthMap, -1)) # temporary fix to match previous shots
+		#depthMap = np.fliplr(np.rot90(depthMap, -1)) # temporary fix to match previous shots
 		
 		# Retrieve the position of the pointing hand
 		if data["hand"]==LightDataset.LEFT_HAND:

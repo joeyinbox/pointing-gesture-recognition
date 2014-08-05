@@ -83,7 +83,6 @@ class LiveGui(QtWidgets.QWidget):
 		self.data = skeleton.track(self.user, self.depth, self.data)
 
 		# Get the whole depth map
-		#self.data.depth_map = np.fromstring(self.depth.get_raw_depth_map_8(), np.uint8).reshape(480, 640)
 		self.data.depth_map = np.asarray(self.depth.get_tuple_depth_map()).reshape(480, 640)
 
 		# Create the frame from the raw depth map string and convert it to RGB

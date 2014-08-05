@@ -29,15 +29,6 @@ def promptInt(question, default):
 	except: 
 		return int(default)
 
-# Convert an openNI depth map to a regular serializable array
-def convertOpenNIDepthMapToArray(depthMap):
-	result = np.zeros(307200)
-	
-	for i in range(307200):
-		result[i] = depthMap[i]
-    
-	return result.reshape(640, 480)
-
 
 # Dump the content of an object to a json file
 def dumpJsonToFile(data, filename):

@@ -1,6 +1,6 @@
 # Pointing gesture recognition #
 
-Automatic Recognition of Pointing Gestures.
+Automatic Recognition of Pointing Gestures in Python using a depth sensor.
 
 ## Requirements ##
 - [Python](https://www.python.org) 2.7 or higher

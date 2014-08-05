@@ -108,7 +108,7 @@ class DatasetGui(QtWidgets.QWidget):
 		self.data = skeleton.track(self.user, self.depth, self.data)
 
 		# Get the whole depth map
-		self.data.depth_map = self.depth.map
+		self.data.depth_map = np.asarray(self.depth.get_tuple_depth_map()).reshape(480, 640)
 
 		# Create the frame from the raw depth map string and convert it to RGB
 		frame = np.fromstring(self.depth.get_raw_depth_map_8(), np.uint8).reshape(480, 640)
@@ -130,8 +130,8 @@ class DatasetGui(QtWidgets.QWidget):
 			ui.drawElbowLine(frame, self.data.skeleton["elbow"]["right"], self.data.skeleton["hand"]["right"])
 			
 			# Get the pixel's depth from the coordinates of the hands
-			leftPixel = hand.getDepthFromMap(self.data.depth_map, self.data.skeleton["hand"]["left"])
-			rightPixel = hand.getDepthFromMap(self.data.depth_map, self.data.skeleton["hand"]["right"])
+			leftPixel = hand.getDepthFromMap(self.depth.map, self.data.skeleton["hand"]["left"])
+			rightPixel = hand.getDepthFromMap(self.depth.map, self.data.skeleton["hand"]["right"])
 			print "Left hand depth: %d | Right hand depth: %d" % (leftPixel, rightPixel)
 			
 			# Get the shift of the boundaries around both hands
