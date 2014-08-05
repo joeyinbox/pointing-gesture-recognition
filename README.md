@@ -6,6 +6,7 @@ Automatic Recognition of Pointing Gestures.
 - [Python](https://www.python.org) 2.7 or higher
 - [PyOpenNI](https://github.com/jmendeth/PyOpenNI)
 - [OpenCV](http://opencv.org) 2.4.9
+- [NumPy](http://www.numpy.org) 1.8.x
 - [PyQt](http://www.riverbankcomputing.co.uk/software/pyqt/download5) 5.3 (which requires [SIP](http://www.riverbankcomputing.co.uk/software/sip/download) 4.16 and [Qt](http://qt-project.org/downloads) 5.3)
 - Depth sensor (e.g. Kinect, Asus Xtion Live)
 
