@@ -8,10 +8,10 @@ import sys
 
 
 try:
-	if str(sys.argv[1])=="live":
-		# Create a live GUI window and display it
+	if str(sys.argv[1])=="light":
+		# Create a new Light Dataset GUI window and display it
 		app = QtWidgets.QApplication([])
-		gui = LiveGui()
+		gui = LightDatasetGui()
 		gui.show()
 
 		app.exec_()
@@ -20,18 +20,16 @@ try:
 	else:
 		# Create a new Dataset GUI window and display it
 		app = QtWidgets.QApplication([])
-		gui = LightDatasetGui()
+		gui = DatasetGui()
 		gui.show()
 
 		app.exec_()
 	
 	
-	
-	
 except IndexError:
-	# Create a new Dataset GUI window and display it
+	# Create a live GUI window and display it
 	app = QtWidgets.QApplication([])
-	gui = DatasetGui()
+	gui = LiveGui()
 	gui.show()
 
 	app.exec_()

@@ -13,6 +13,10 @@ Automatic Recognition of Pointing Gestures.
 - Open a terminal and execute the `main.py` file.
 - Stand up and point!
 
+## Record new dataset items ##
+- Open a terminal and execute the `main.py` file with either `light` or `full` arguments.
+- Fill the form and shoot!
+
 ## Configuration ##
 - Auto-calibration needs to be enabled in the OpenNI file `FeatureExtraction.ini` by uncommenting and setting to 1 the line `UseAutoCalibration=1` under the **[LBS]** section.
 
