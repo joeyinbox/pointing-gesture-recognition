@@ -42,7 +42,7 @@ class LiveGui(QtWidgets.QWidget):
 		
 		
 		# Create the neural network
-		self.bpn = BPNHandler(True, features=6, hiddenLayers=15, output=4)
+		self.bpn = BPNHandler(True, features=6, hiddenLayers=33, output=4)
 		
 		# Create a new dataset item
 		self.data = LiveDataset()
@@ -95,11 +95,11 @@ class LiveGui(QtWidgets.QWidget):
 		
 		if len(self.user.users) > 0 and len(self.data.skeleton["head"]) > 0:
 			# Highlight the head
-			ui.drawPoint(frame, self.data.skeleton["head"][0], self.data.skeleton["head"][1], 5)
+			#ui.drawPoint(frame, self.data.skeleton["head"][0], self.data.skeleton["head"][1], 5)
     		
 			# Display lines from elbows to the respective hands
-			ui.drawElbowLine(frame, self.data.skeleton["elbow"]["left"], self.data.skeleton["hand"]["left"])
-			ui.drawElbowLine(frame, self.data.skeleton["elbow"]["right"], self.data.skeleton["hand"]["right"])
+			#ui.drawElbowLine(frame, self.data.skeleton["elbow"]["left"], self.data.skeleton["hand"]["left"])
+			#ui.drawElbowLine(frame, self.data.skeleton["elbow"]["right"], self.data.skeleton["hand"]["right"])
 			
 			# Get the pixel's depth from the coordinates of the hands
 			leftPixel = hand.getDepthFromMap(self.depth.map, self.data.skeleton["hand"]["left"])
@@ -114,15 +114,15 @@ class LiveGui(QtWidgets.QWidget):
 			if self.data.hand == LiveDataset.LEFT_HAND:
 				currentDepth = leftPixel
 				# Display a rectangle around the current hand
-				ui.drawHandBoundaries(frame, self.data.skeleton["hand"]["left"], leftShift, (200, 70, 30))
+				#ui.drawHandBoundaries(frame, self.data.skeleton["hand"]["left"], leftShift, (200, 70, 30))
 			elif self.data.hand == LiveDataset.RIGHT_HAND:
 				currentDepth = rightPixel
 				# Display a rectangle around the current hand
-				ui.drawHandBoundaries(frame, self.data.skeleton["hand"]["right"], rightShift, (200, 70, 30))
-			else:
+				#ui.drawHandBoundaries(frame, self.data.skeleton["hand"]["right"], rightShift, (200, 70, 30))
+			#else:
 				# Display a rectangle around both hands
-				ui.drawHandBoundaries(frame, self.data.skeleton["hand"]["left"], leftShift, (200, 70, 30))
-				ui.drawHandBoundaries(frame, self.data.skeleton["hand"]["right"], rightShift, (200, 70, 30))
+				#ui.drawHandBoundaries(frame, self.data.skeleton["hand"]["left"], leftShift, (200, 70, 30))
+				#ui.drawHandBoundaries(frame, self.data.skeleton["hand"]["right"], rightShift, (200, 70, 30))
 			
 			
 			# Test the data against the neural network
@@ -130,10 +130,17 @@ class LiveGui(QtWidgets.QWidget):
 			self.resultLabel.setText(result)
 			
 			# Highlight the finger tip
-			ui.drawPoint(frame, self.bpn.fingerTip[0], self.bpn.fingerTip[1], 5)
+			if result != "None":
+				ui.drawPoint(frame, self.bpn.fingerTip[0], self.bpn.fingerTip[1], 5)
+			
+				# Highlight the eye
+				ui.drawPoint(frame, self.bpn.eyePosition[0], self.bpn.eyePosition[1], 5)
+			
+				# Line of sight
+				ui.drawElbowLine(frame, self.bpn.eyePosition, self.bpn.fingerTip)
 			
 			
-		cv2.putText(frame, str(currentDepth), (5, 60), cv2.FONT_HERSHEY_SIMPLEX, 2, (50, 100, 255), 5)
+			#cv2.putText(frame, str(self.data.skeleton["head"][2]), (5, 60), cv2.FONT_HERSHEY_SIMPLEX, 2, (50, 100, 255), 5)
 		
 		# Update the frame
 		self.depthImage.setPixmap(ui.convertOpenCVFrameToQPixmap(frame))
@@ -154,7 +161,7 @@ class LiveGui(QtWidgets.QWidget):
 		comboBox.addItem("Left")
 		comboBox.addItem("Right")
 		comboBox.addItem("Both")
-		comboBox.setCurrentIndex(0)
+		comboBox.setCurrentIndex(1)
 		hlayout.addWidget(label)
 		hlayout.addWidget(comboBox)
 		globalLayout.addLayout(hlayout)

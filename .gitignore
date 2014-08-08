@@ -55,6 +55,8 @@ docs/_build/
 # Original dataset
 dataset/full/
 dataset/light/
+dataset/light-copy/
+dataset/light-old/
 
 # Tests
 src/test.py
