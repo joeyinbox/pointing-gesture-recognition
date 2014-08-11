@@ -54,6 +54,7 @@ docs/_build/
 
 # Original dataset
 dataset/full/
+dataset/full-old/
 dataset/light/
 dataset/light-copy/
 dataset/light-old/

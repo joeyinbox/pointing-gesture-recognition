@@ -102,8 +102,8 @@ class LiveGui(QtWidgets.QWidget):
 			#ui.drawElbowLine(frame, self.data.skeleton["elbow"]["right"], self.data.skeleton["hand"]["right"])
 			
 			# Get the pixel's depth from the coordinates of the hands
-			leftPixel = hand.getDepthFromMap(self.depth.map, self.data.skeleton["hand"]["left"])
-			rightPixel = hand.getDepthFromMap(self.depth.map, self.data.skeleton["hand"]["right"])
+			leftPixel = hand.getDepthFromMap(self.data.depth_map, self.data.skeleton["hand"]["left"])
+			rightPixel = hand.getDepthFromMap(self.data.depth_map, self.data.skeleton["hand"]["right"])
 			#print "Left hand depth: %d | Right hand depth: %d" % (leftPixel, rightPixel)
 			
 			

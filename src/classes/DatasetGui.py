@@ -119,9 +119,6 @@ class DatasetGui(QtWidgets.QWidget):
 		
 		
 		if len(self.user.users) > 0 and len(self.data.skeleton["head"]) > 0:
-			# Adjust the value of the user distance
-			self.userDistanceField.value.value = int(self.data.skeleton["head"][2])
-			
 			# Highlight the head
 			ui.drawPoint(frame, self.data.skeleton["head"][0], self.data.skeleton["head"][1], 5)
     		
@@ -130,9 +127,9 @@ class DatasetGui(QtWidgets.QWidget):
 			ui.drawElbowLine(frame, self.data.skeleton["elbow"]["right"], self.data.skeleton["hand"]["right"])
 			
 			# Get the pixel's depth from the coordinates of the hands
-			leftPixel = hand.getDepthFromMap(self.depth.map, self.data.skeleton["hand"]["left"])
-			rightPixel = hand.getDepthFromMap(self.depth.map, self.data.skeleton["hand"]["right"])
-			print "Left hand depth: %d | Right hand depth: %d" % (leftPixel, rightPixel)
+			leftPixel = hand.getDepthFromMap(self.data.depth_map, self.data.skeleton["hand"]["left"])
+			rightPixel = hand.getDepthFromMap(self.data.depth_map, self.data.skeleton["hand"]["right"])
+			#print "Left hand depth: %d | Right hand depth: %d" % (leftPixel, rightPixel)
 			
 			# Get the shift of the boundaries around both hands
 			leftShift = hand.getHandBoundShift(leftPixel)
@@ -154,22 +151,16 @@ class DatasetGui(QtWidgets.QWidget):
 	
 	
 	def record(self, obj):
-		# Prompt the finger tip position only if needed
-		if self.data.hand["type"] == Dataset.NO_HAND:
-			# Directly save the dataset and update the label number
-			self.data.save()
-			self.updateDatasetNumberLabel()
-		else:
-			# Freeze the data
-			self.timerScreen.stop()
-			
-			# Translate the depth values to a frame and set it in the dialog window
-			frame = np.fromstring(self.depth.get_raw_depth_map_8(), np.uint8).reshape(480, 640)
-			frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2RGB)
-			self.dialogWindow.setFrame(frame)
+		# Freeze the data
+		self.timerScreen.stop()
 		
-			# Display the dialog window
-			self.dialogWindow.exec_()
+		# Translate the depth values to a frame and set it in the dialog window
+		frame = np.fromstring(self.depth.get_raw_depth_map_8(), np.uint8).reshape(480, 640)
+		frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2RGB)
+		self.dialogWindow.setFrame(frame)
+	
+		# Prompt the finger tip and eye positions
+		self.dialogWindow.exec_()
 	
 	def recordCountdown(self):
 		# Decrease the countdown and check if it needs to continue
@@ -192,87 +183,123 @@ class DatasetGui(QtWidgets.QWidget):
 	
 	# Create the acquisition interface form
 	def create_acquision_form(self):
-		globalLayout = QtWidgets.QHBoxLayout()
-		vlayout = QtWidgets.QVBoxLayout()
-	
-		groupbox = QtWidgets.QGroupBox()
-		groupbox.setTitle("Pointing hand")
-		groupbox_layout = QtWidgets.QVBoxLayout()
-		buttonGroup = QtWidgets.QButtonGroup(groupbox_layout)
-		self.leftHandRadio = self.add_radio_button(buttonGroup, groupbox_layout, "Left hand", self.data.toggleLeftHand, True)
-		self.rightHandRadio = self.add_radio_button(buttonGroup, groupbox_layout, "Right hand", self.data.toggleRightHand)
-		self.noHandRadio = self.add_radio_button(buttonGroup, groupbox_layout, "No hand", self.data.toggleNoHand)
-		groupbox.setLayout(groupbox_layout)
-		vlayout.addWidget(groupbox)
-	
-		groupbox = QtWidgets.QGroupBox()
-		groupbox.setTitle("Hand")
-		groupbox_layout = QtWidgets.QVBoxLayout()
-		self.handHeightField = self.add_text_field(groupbox_layout, "Height", 185, self.data.setHandHeight)
-		self.handWidthField = self.add_text_field(groupbox_layout, "Width", 85, self.data.setHandWidth)
-		self.handThicknessField = self.add_text_field(groupbox_layout, "Thickness", 70, self.data.setHandThickness)
-		groupbox.setLayout(groupbox_layout)
-		vlayout.addWidget(groupbox)
-	
-		globalLayout.addLayout(vlayout)
-		vlayout = QtWidgets.QVBoxLayout()
-	
-		groupbox = QtWidgets.QGroupBox()
-		groupbox.setTitle("User")
-		groupbox_layout = QtWidgets.QVBoxLayout()
-		self.userDistanceField = self.add_text_field(groupbox_layout, "Distance", 0, self.data.setUserDistance)
-		self.userHeightField = self.add_text_field(groupbox_layout, "Height", 1840, self.data.setUserHeight)
-		self.userAngleField = self.add_text_field(groupbox_layout, "Angle", 90, self.data.setUserAngle)
-		groupbox.setLayout(groupbox_layout)
-		vlayout.addWidget(groupbox)
-	
+		globalLayout = QtWidgets.QVBoxLayout()
+		hlayout = QtWidgets.QHBoxLayout()
+		
 		groupbox = QtWidgets.QGroupBox()
 		groupbox.setTitle("Target")
 		groupbox_layout = QtWidgets.QVBoxLayout()
+		self.targetAngleField = self.add_text_field(groupbox_layout, "Angle", 0, self.data.setTargetAngle)
 		self.targetDistanceField = self.add_text_field(groupbox_layout, "Distance", 0, self.data.setTargetDistance)
 		self.targetHeightField = self.add_text_field(groupbox_layout, "Height", 0, self.data.setTargetHeight)
-		self.targetAngleField = self.add_text_field(groupbox_layout, "Angle", 0, self.data.setTargetAngle)
 		groupbox.setLayout(groupbox_layout)
-		vlayout.addWidget(groupbox)
-	
-		globalLayout.addLayout(vlayout)
-		vlayout = QtWidgets.QVBoxLayout()
+		hlayout.addWidget(groupbox)
+		
+		groupbox = QtWidgets.QGroupBox()
+		groupbox.setTitle("Finger tip")
+		groupbox_layout = QtWidgets.QVBoxLayout()
+		self.fingerTipAngleField = self.add_text_field(groupbox_layout, "Angle", 0, self.data.setFingerTipAngle)
+		self.fingerTipDistanceField = self.add_text_field(groupbox_layout, "Distance", 0, self.data.setFingerTipDistance)
+		self.fingerTipHeightField = self.add_text_field(groupbox_layout, "Height", 0, self.data.setFingerTipHeight)
+		groupbox.setLayout(groupbox_layout)
+		hlayout.addWidget(groupbox)
+		
+		groupbox = QtWidgets.QGroupBox()
+		groupbox.setTitle("Eye")
+		groupbox_layout = QtWidgets.QVBoxLayout()
+		self.eyeAngleField = self.add_text_field(groupbox_layout, "Angle", 0, self.data.setEyeAngle)
+		self.eyeDistanceField = self.add_text_field(groupbox_layout, "Distance", 0, self.data.setEyeDistance)
+		self.eyeHeightField = self.add_text_field(groupbox_layout, "Height", 0, self.data.setEyeHeight)
+		groupbox.setLayout(groupbox_layout)
+		hlayout.addWidget(groupbox)
+		
+		globalLayout.addLayout(hlayout)
+		hlayout = QtWidgets.QHBoxLayout()
+		
+		
+		
+		
+		groupbox = QtWidgets.QGroupBox()
+		groupbox.setTitle("Pointing")
+		groupbox_layout = QtWidgets.QVBoxLayout()
+		
+		item_layout = QtWidgets.QHBoxLayout()
+		label = QtWidgets.QLabel("Hand")
+		label.setFixedWidth(100)
+		comboBox = QtWidgets.QComboBox()
+		comboBox.currentIndexChanged.connect(self.data.toggleHand)
+		comboBox.setFixedWidth(285)
+		comboBox.addItem("Left")
+		comboBox.addItem("Right")
+		comboBox.setCurrentIndex(0)
+		item_layout.addWidget(label)
+		item_layout.addWidget(comboBox)
+		groupbox_layout.addLayout(item_layout)
+		
+		item_layout = QtWidgets.QHBoxLayout()
+		label = QtWidgets.QLabel("Orientation")
+		label.setFixedWidth(100)
+		comboBox = QtWidgets.QComboBox()
+		comboBox.currentIndexChanged.connect(self.data.toggleOrientation)
+		comboBox.setFixedWidth(285)
+		comboBox.addItem("Back Right")
+		comboBox.addItem("Right")
+		comboBox.addItem("Front Right")
+		comboBox.addItem("Front")
+		comboBox.addItem("Front Left")
+		comboBox.addItem("Left")
+		comboBox.addItem("Back Left")
+		comboBox.setCurrentIndex(0)
+		item_layout.addWidget(label)
+		item_layout.addWidget(comboBox)
+		groupbox_layout.addLayout(item_layout)
+		
+		item_layout = QtWidgets.QHBoxLayout()
+		label = QtWidgets.QLabel("Direction")
+		label.setFixedWidth(100)
+		comboBox = QtWidgets.QComboBox()
+		comboBox.currentIndexChanged.connect(self.data.toggleDirection)
+		comboBox.setFixedWidth(285)
+		comboBox.addItem("Up")
+		comboBox.addItem("Lateral")
+		comboBox.addItem("Down")
+		comboBox.setCurrentIndex(0)
+		item_layout.addWidget(label)
+		item_layout.addWidget(comboBox)
+		groupbox_layout.addLayout(item_layout)
+		
+		groupbox.setLayout(groupbox_layout)
+		hlayout.addWidget(groupbox)
+		
+		
+		
 	
 		groupbox = QtWidgets.QGroupBox()
 		groupbox.setTitle("Camera")
 		groupbox_layout = QtWidgets.QVBoxLayout()
 		self.cameraHeightField = self.add_text_field(groupbox_layout, "Height", 1500, self.data.setCameraHeight)
 		groupbox.setLayout(groupbox_layout)
-		vlayout.addWidget(groupbox)
-	
-		groupbox = QtWidgets.QGroupBox()
-		groupbox.setTitle("Arm")
-		groupbox_layout = QtWidgets.QVBoxLayout()
-		self.userArmLengthField = self.add_text_field(groupbox_layout, "Length", 630, self.data.setUserArmLength)
-		groupbox.setLayout(groupbox_layout)
-		vlayout.addWidget(groupbox)
+		hlayout.addWidget(groupbox)
+		
+		
 		
 		vlayout2 = QtWidgets.QVBoxLayout()
 		
-		self.numberLabel.setFixedWidth(405)
+		self.numberLabel.setFixedWidth(420)
 		self.numberLabel.setAlignment(QtCore.Qt.AlignCenter)
 		vlayout2.addWidget(self.numberLabel)
 		
-		buttonGroup = QtWidgets.QButtonGroup(vlayout2)
-		self.trainingRadio = self.add_radio_button(buttonGroup, vlayout2, "Training", self.data.toggleTraining, True)
-		self.positiveTestingRadio = self.add_radio_button(buttonGroup, vlayout2, "Positive testing", self.data.togglePositiveTesting)
-		self.negativeTestingRadio = self.add_radio_button(buttonGroup, vlayout2, "Negative testing", self.data.toggleNegativeTesting)
 		
-		hLayout = QtWidgets.QHBoxLayout()
-		
+		item_layout = QtWidgets.QHBoxLayout()
 		self.countdownButton = QtWidgets.QPushButton("Save in %ds"%(self.countdownRemaining), clicked=self.countdownTimer.start)
 		self.saveButton = QtWidgets.QPushButton('Save', clicked=self.record)
-		hLayout.addWidget(self.countdownButton)
-		hLayout.addWidget(self.saveButton)
+		item_layout.addWidget(self.countdownButton)
+		item_layout.addWidget(self.saveButton)
+		vlayout2.addLayout(item_layout)
 		
-		vlayout2.addLayout(hLayout)
-		vlayout.addLayout(vlayout2)
-		globalLayout.addLayout(vlayout)
+		hlayout.addLayout(vlayout2)
+		globalLayout.addLayout(hlayout)
+		
 		self.layout.addLayout(globalLayout)
 
 
@@ -303,20 +330,3 @@ class DatasetGui(QtWidgets.QWidget):
 
 
 
-
-	# Add a radio button to the layout
-	def add_radio_button(self, group, parent_layout, title, function, selected=False):
-		radioButton = QtWidgets.QRadioButton(title)
-		parent_layout.addWidget(radioButton)
-		group.addButton(radioButton)
-	
-		obj = FormItem(selected)
-		action = functools.partial(function, obj)
-		# connect signals to gui elements
-		obj.value.changed.connect(action)
-		radioButton.toggled.connect(obj.value.set_value)
-	
-		if selected == True:
-			radioButton.toggle()
-	
-		return obj

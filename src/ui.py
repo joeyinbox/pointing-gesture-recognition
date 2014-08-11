@@ -4,8 +4,8 @@ from PyQt5 import QtGui
 
 
 # Highlight the head
-def drawPoint(frame, x, y, width):
-    cv2.circle(frame, (int(x),int(y)), width, (0,0,255), -1)
+def drawPoint(frame, x, y, width, color=(0,0,255)):
+    cv2.circle(frame, (int(x),int(y)), width, color, -1)
 
 # Display lines from elbows to the respective hands
 def drawElbowLine(frame, elbow, hand):
