@@ -127,17 +127,17 @@ class LiveGui(QtWidgets.QWidget):
 			
 			# Test the data against the neural network
 			result = self.bpn.test(self.data)
-			self.resultLabel.setText(result)
+			self.resultLabel.setText(str(result[0]))
 			
 			# Highlight the finger tip
-			if result != "None":
-				ui.drawPoint(frame, self.bpn.fingerTip[0], self.bpn.fingerTip[1], 5)
+			if result[0] != False:
+				ui.drawPoint(frame, self.bpn.fingerTip[result[1]][0], self.bpn.fingerTip[result[1]][1], 5)
 			
 				# Highlight the eye
-				ui.drawPoint(frame, self.bpn.eyePosition[0], self.bpn.eyePosition[1], 5)
+				ui.drawPoint(frame, self.bpn.eyePosition[result[1]][0], self.bpn.eyePosition[result[1]][1], 5)
 			
 				# Line of sight
-				ui.drawElbowLine(frame, self.bpn.eyePosition, self.bpn.fingerTip)
+				ui.drawElbowLine(frame, self.bpn.eyePosition[result[1]], self.bpn.fingerTip[result[1]])
 			
 			
 			#cv2.putText(frame, str(self.data.skeleton["head"][2]), (5, 60), cv2.FONT_HERSHEY_SIMPLEX, 2, (50, 100, 255), 5)
@@ -161,7 +161,7 @@ class LiveGui(QtWidgets.QWidget):
 		comboBox.addItem("Left")
 		comboBox.addItem("Right")
 		comboBox.addItem("Both")
-		comboBox.setCurrentIndex(1)
+		comboBox.setCurrentIndex(2)
 		hlayout.addWidget(label)
 		hlayout.addWidget(comboBox)
 		globalLayout.addLayout(hlayout)

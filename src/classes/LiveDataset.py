@@ -32,4 +32,4 @@ class LiveDataset:
 		
 	def toggleHand(self, value):
 		self.hand = value
-		print "hand toggled"
+		print "hand toggled to {0}".format(value)

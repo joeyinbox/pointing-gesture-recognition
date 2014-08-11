@@ -523,12 +523,11 @@ class testBPN():
 				bad += 1
 			else:
 				good += 1
-			#print result
 		print
 		print "{0} corrects and {1} bad --> {2:0.2f}%".format(good, bad, (good/float(good+bad)*100))
 		print
 		
-		
+		bpn.unload()
 		data = bpn.loadNegative("validating", negativeValidating, [])
 		
 		print "negative"
@@ -540,7 +539,6 @@ class testBPN():
 				bad2 += 1
 			else:
 				good2 += 1
-			#print result
 		print
 		print "{0} corrects and {1} bad --> {2:0.2f}%".format(good2, bad2, (good2/float(good2+bad2)*100))
 		print "Final score = {0:0.2f}%".format(((good+good2)/float(good+bad+good2+bad2))*100)

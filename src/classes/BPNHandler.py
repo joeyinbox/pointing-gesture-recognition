@@ -40,8 +40,8 @@ class BPNHandler():
 	tar = 0
 	
 	# The current fingertip (if any)
-	fingerTip = [0,0]
-	eyePosition = [0,0]
+	fingerTip = [[0,0], [0,0]]
+	eyePosition = [[0,0], [0,0]]
 	
 	count = 0
 	
@@ -121,6 +121,14 @@ class BPNHandler():
 		
 		if type=="validating":
 			return self.validatingInput
+	
+	def unload(self):
+		self.trainingInput = []
+		self.testingInput = []
+		self.validatingInput = []
+		
+		self.trainingTarget = []
+		self.testingTarget = []
 	
 	def loadNewDataRestrainedMixedFeatures(self):
 		self.trainingInput = np.array([
@@ -739,7 +747,7 @@ class BPNHandler():
 	
 	def sift(self, input):
 		data = np.copy(self.currentExtracted).astype(np.uint8)
-		gray = cv2.cvtColor(data, cv2.COLOR_GRAself.cropRightBGR)
+		gray = cv2.cvtColor(data, cv2.COLOR_GRAY2BGR)
 
 		sift = cv2.SIFT()
 		kp = sift.detect(gray, None)
@@ -983,7 +991,7 @@ class BPNHandler():
 			h2,v2,d2 = map(int, data["skeleton"]["elbow"]["right"])
 		
 		# Then, get the corresponding features
-		return self.getFeatures(h,v,d, h2,v2,d2, depthMap, data["skeleton"]["head"])
+		return self.getFeatures(h,v,d, h2,v2,d2, depthMap, data["skeleton"]["head"], 0)
 	
 	def getFeaturesLight(self, data):
 		# Retrieve the depth map and convert it to a numpy array of floats
@@ -1002,31 +1010,32 @@ class BPNHandler():
 			h2,v2,d2 = map(int, data["skeleton"]["elbow"]["right"])
 		
 		# Then, get the corresponding features
-		return self.getFeatures(h,v,d, h2,v2,d2, depthMap, data["skeleton"]["head"])
+		return self.getFeatures(h,v,d, h2,v2,d2, depthMap, data["skeleton"]["head"], 0)
 	
 	
 	def getFeaturesLive(self, data):
+		result = []
+		
 		# Retrieve the position of the pointing hand
-		if data.hand==LiveDataset.LEFT_HAND:
+		if data.hand==LiveDataset.LEFT_HAND or data.hand==LiveDataset.BOTH_HAND:
 			h,v,d = map(int, data.skeleton["hand"]["left"])
 			h2,v2,d2 = map(int, data.skeleton["elbow"]["left"])
-		elif data.hand==LiveDataset.RIGHT_HAND:
+			result.append(self.getFeatures(h,v,d, h2,v2,d2, data.depth_map, data.skeleton["head"], 0))
+		if data.hand==LiveDataset.RIGHT_HAND or data.hand==LiveDataset.BOTH_HAND:
 			h,v,d = map(int, data.skeleton["hand"]["right"])
 			h2,v2,d2 = map(int, data.skeleton["elbow"]["right"])
-		else:
-			# Take arbitrarily the right hand
-			h,v,d = map(int, data.skeleton["hand"]["right"])
-			h2,v2,d2 = map(int, data.skeleton["elbow"]["right"])
+			result.append(self.getFeatures(h,v,d, h2,v2,d2, data.depth_map, data.skeleton["head"], len(result)))
 		
-		# Then, get the corresponding features
-		return self.getFeatures(h,v,d, h2,v2,d2, data.depth_map, data.skeleton["head"])
+		# Then, return the corresponding features
+		return result
 	
-	def getFeatures(self, h,v,d, h2,v2,d2, depthMap, head):
+	def getFeatures(self, h,v,d, h2,v2,d2, depthMap, head, handId=0):
 		# Determine the bounding box around the pointing hand regarding to the depth of the hand
 		if d != 0:
 			shift = int((1000.0/d)*90)
 		else:
 			shift = 1
+		
 	
 		# Determine the coordinates of the bounding box to extract
 		self.cropTop = self.keepRange(int(v-shift), 480)
@@ -1080,10 +1089,10 @@ class BPNHandler():
 		self.tarExtracted()
 		
 		# Retrieve the finger tip position
-		self.fingerTip = self.getFingerTip()
+		self.fingerTip[handId] = self.getFingerTip()
 		
 		# Retrieve eyes position
-		self.eyePosition = self.getEyePosition(depthMap, head, self.getElbowHandAlignment(d, v, h, v2, h2))
+		self.eyePosition[handId] = self.getEyePosition(depthMap, head, self.getElbowHandAlignment(d, v, h, v2, h2))
 		
 		
 		
@@ -1119,6 +1128,7 @@ class BPNHandler():
 		# |          Feature 1 to 6            |
 		# |   Percent of data in sub-regions   |
 		# \------------------------------------/
+		
 		
 		
 		
@@ -1241,7 +1251,7 @@ class BPNHandler():
 		# Based on the alignment of the hand and the elbow, we can extrapolate their relative position
 		
 		# First, let's make sure the chosen line is accessible
-		if len(extracted)<line:
+		if len(extracted)<=line:
 			return [0,0]
 		else:
 			
@@ -1630,13 +1640,13 @@ class BPNHandler():
 		# Loop to change the number of hidden layers
 		for hidden in ran:
 			
-			rate = np.arange(0.05, 1, 0.05)
+			rate = np.arange(trainingRate, 1, 0.05)
 			for trainingRate in rate:
 				
-				mom = np.arange(0.1, 1.0, 0.1)
+				mom = np.arange(momentum, 1.0, 0.1)
 				for momentum in mom:
 					
-					for repeat in range(20):
+					for repeat in range(5):
 						
 					
 						print("{0} hidden layers with a training rate of {1} and a momentum of {2}".format(hidden, trainingRate, momentum))
@@ -1652,9 +1662,10 @@ class BPNHandler():
 			        	
 						# Create a new networl instance
 						bpn = BackPropagationNetwork((len(self.trainingInput[0]), hidden, len(self.trainingTarget[0])), lFuncs)
+						#bpn.setWeights(self.plop())
 			        	
 						# Set our goals
-						lnMax = 50000
+						lnMax = 100000
 						lnErr = 0.002
 						errMax = 1e100
 			        	
@@ -1664,10 +1675,13 @@ class BPNHandler():
 						bestWeights = []
 						initialWeights = []
 						bestIteration = 0
+						
+						# Get the initial weights
+						initialWeights = bpn.getWeights()
 			        	
 						for i in range(lnMax+1):
 							err = bpn.trainEpoch(lvTrainingInput, lvTrainingTarget, trainingRate, momentum)
-							initialWeights = bpn.getWeights()
+							
 				    	
 							# Get the result for the current weights against the testing dataset
 							self.bpnTesting.setWeights(bpn.getWeights())
@@ -1740,22 +1754,155 @@ class BPNHandler():
 			
 		self.displayResults(None, None)
 			
-			
+	def plop(self):
+		return [np.array([[  9.16821230e-01,  -6.09576216e-01,  -1.01610164e+00,
+         -1.51784111e+00,  -1.03165647e+00,   3.09431812e+00,
+          3.29916603e-01],
+       [ -2.39959737e+00,   6.66689154e+00,  -1.40112041e+01,
+         -4.94692255e+00,   1.67765344e+01,  -4.03798774e+00,
+          4.85366771e-01],
+       [ -1.79843389e+01,   1.61073826e+01,  -1.39310457e+00,
+         -8.23318613e-01,   6.29806806e+00,   8.90932646e-01,
+         -7.64471673e-01],
+       [ -4.27226287e+00,   1.05656723e+01,   1.91868571e-01,
+          2.01113768e+00,   7.50118407e+00,  -8.57193689e+00,
+         -1.68975570e+00],
+       [ -1.26609208e+01,   6.56579039e+00,   4.98841849e+00,
+         -7.38533483e+00,   4.68893528e+00,   7.14487376e+00,
+         -7.81596851e-01],
+       [ -2.09587543e+00,   3.53046782e+00,   7.24953766e-01,
+          1.60725544e+00,  -5.21213127e-01,   1.75860711e+00,
+         -1.25917416e+00],
+       [ -3.71097031e+00,   1.57689848e+00,  -7.91779106e+00,
+          2.96248199e+00,  -5.20826865e+00,   1.00174349e+01,
+          5.95553315e-01],
+       [ -1.09989408e+01,   1.14357594e+01,  -1.19795018e+01,
+         -3.52447123e+00,   1.83580100e+01,   8.23328167e+00,
+         -2.88599315e+00],
+       [  3.24150393e+00,  -1.67076373e+00,  -5.23394148e-01,
+          1.48872304e+00,  -2.14499523e+00,   7.94470259e-02,
+          2.03507547e-02],
+       [  1.37084027e+01,  -1.00823959e+01,  -1.21557372e+00,
+         -8.57511850e+00,   1.14829166e+01,  -9.51655249e+00,
+          1.03813428e+00],
+       [ -2.05007701e+00,   4.02821786e+00,   2.91320740e+00,
+         -3.05913423e+00,   2.19337640e+00,  -3.27204303e+00,
+         -3.96622726e-01],
+       [ -4.03963711e+00,   2.57362296e+00,   4.95888470e-01,
+          7.58479716e+00,  -7.42082964e+00,   9.29325500e-01,
+          5.86784654e-02],
+       [  5.19535651e+00,  -2.64170315e+00,  -2.99358811e+00,
+          2.77118678e+00,  -6.04094685e-01,  -2.39602486e+00,
+          1.06101090e-01],
+       [  1.43032510e+01,  -4.68743971e+00,   1.73519271e+01,
+         -1.10351329e+01,   1.69389470e+00,  -1.71693380e+01,
+         -8.79501985e-02],
+       [ -7.46117914e+00,  -2.20949995e+00,   6.55407880e-01,
+         -3.50445521e+00,   8.27837113e+00,   4.75417288e+00,
+         -5.47019174e-02],
+       [  2.14755741e+00,  -2.70174365e+00,  -5.69114821e+00,
+          7.07550836e+00,   2.55297072e-01,  -1.28539189e+00,
+          8.62357160e-03],
+       [  6.13106255e+00,  -5.52938753e+00,  -9.79891509e+00,
+          1.37804405e+01,  -9.95459237e+00,   1.36852580e+00,
+          1.17058426e+00],
+       [  1.16412278e+01,   9.18191393e+00,  -1.12225469e+01,
+         -2.64158986e+00,  -3.10200219e+00,   2.87867230e+00,
+         -1.64938860e+00],
+       [  1.81259420e+00,  -6.08184833e-02,  -1.80376344e+00,
+          2.66409397e+00,  -2.46160290e+00,   9.33769138e-02,
+         -1.23846702e-02],
+       [  9.86031936e+00,   3.02173558e+00,   3.79471026e+00,
+         -1.53667810e+01,  -1.12912053e+00,  -3.91857226e+00,
+          1.10306601e+00],
+       [  4.14994356e-01,   8.19667459e-01,   3.72679181e-02,
+          1.22492224e+00,  -2.42784227e-02,   2.48574411e-01,
+         -6.21261380e-01],
+       [  1.81153128e+00,   5.58821271e+00,   1.42183212e+01,
+         -8.66532389e+00,   3.86394026e+00,  -1.12785589e+01,
+         -1.35027862e+00],
+       [ -4.64344338e+00,   7.66362266e+00,  -3.55543000e+00,
+         -1.39737750e+01,   1.95604815e+01,   1.88781501e+00,
+         -1.64240506e+00],
+       [ -1.57694579e+01,   1.94772819e+01,   1.49725940e+00,
+         -9.43357238e+00,   1.16466476e+00,   7.90997152e+00,
+         -1.36104988e+00],
+       [ -2.17707878e+00,   1.44321392e+01,  -5.88540348e+00,
+         -1.20863482e+01,  -9.13825273e+00,   1.45640780e+01,
+          2.71044364e-01],
+       [ -9.20018534e-01,   1.72144405e+00,   1.19439537e+00,
+          2.60830027e-01,   3.23054802e-01,   1.29242991e+00,
+         -1.13027653e+00],
+       [  3.33401597e+00,  -7.01578988e+00,   7.45504544e+00,
+         -9.09882208e+00,   3.65247844e+00,   6.05013513e-01,
+          1.33314857e-01],
+       [  2.86938072e+00,   8.53444074e+00,  -9.63086280e+00,
+          5.79346207e-01,   8.20538434e+00,  -7.49274142e+00,
+         -7.89204596e-01],
+       [  1.97739154e+00,  -4.03445249e-01,  -6.35377685e-01,
+          1.26658197e+00,  -6.30132375e-01,  -3.34869640e-01,
+         -7.91575590e-02],
+       [ -4.74769548e+00,   3.96213805e+00,  -8.95075120e-01,
+          1.03771094e+00,  -1.81085591e+00,   3.10701485e+00,
+         -1.67196558e-01],
+       [  6.18735972e+00,  -1.12255841e-01,  -9.62124162e+00,
+          1.45796743e+01,  -8.22737889e+00,  -5.99632945e+00,
+          9.05860170e-01],
+       [ -4.31835175e+00,   2.98721578e+00,  -5.29163347e-01,
+         -2.14395212e+00,   3.51452038e+00,   3.00355745e-01,
+          2.98581548e-02],
+       [  7.10490193e-01,   4.24108933e-01,   4.73739559e-01,
+          6.31643677e-01,   1.26243973e-01,   4.70535089e-01,
+         -7.40464038e-01]]), np.array([[ -1.67927842,   8.54622088,  -8.60213501, -12.7698285 ,
+         -3.88520377,  -1.35345178,  -4.6900627 , -12.43362509,
+         -1.58137407,   8.58145055,  -0.07281086,   6.45928137,
+         -4.85478598,  -5.78269512,   2.31172322,  -2.97214419,
+         -5.20012074,  -7.17320907,   0.69042782,  -9.90930085,
+         -0.63718768,   0.07330444,   1.00506786,   4.87253469,
+        -12.86149419,  -0.91018503,  -0.58714418, -11.59409374,
+         -0.9860967 ,  -4.68410659,  10.48109116,  -3.36544174,
+         -0.94537841,  -2.37626128],
+       [ -2.12422663,  -3.91394287,   2.06279104,  15.67226016,
+         -6.53729211,  -1.7858478 ,  -2.77051089,  15.69926335,
+         -0.41823031,   3.01888271,  -1.04221638,   2.87470304,
+         -4.48003322,  -3.57885167,  -1.94869633,  -6.23338304,
+          7.75789471,   9.73022964,   0.13442946,   9.1115365 ,
+         -0.02106519,  -1.84771421,  -8.33884056,  -3.59856162,
+         10.41348346,  -1.1600764 ,   2.8075752 ,   1.82440163,
+         -0.43899892,  -4.27936439,  -3.91986283,  -2.47265234,
+         -0.13561933,  -7.14658744],
+       [ -2.67170061, -11.75058   ,  -9.66436098, -10.0053802 ,
+         -4.41232795,   0.13491398,   5.9169031 ,  -4.93161911,
+         -4.11298038,  -9.61743966,  -5.59228127,  -6.35747186,
+          1.1909878 ,  13.60933403, -10.86369512,  -1.70019057,
+         -7.55699333,  -7.39710427,  -4.36492929,  -1.25306765,
+         -1.22757873, -11.29683283,  -8.10709968, -14.52878668,
+          4.77431531,  -0.09825825,  -8.91048539,  11.47592262,
+         -2.0339816 ,  -1.3518466 ,   0.0363097 ,  -5.99218419,
+         -1.31229601,  16.13970211],
+       [ -0.52367206, -10.29956823,  10.59356434,  11.45296512,
+          2.12998559,   0.24799918,  -7.699861  ,  -3.1232179 ,
+          1.74727399,  -9.05077786,   3.39689337,  -5.60730628,
+          2.51992884, -11.09607305,  -4.03861771,   3.49999554,
+         -7.23339797,  14.2605844 ,   0.05095487,   1.75518205,
+         -0.86472109,  10.24324172,   7.96291082,  10.80464515,
+         -5.8189822 ,  -0.19050438, -12.50662113,  -5.01116324,
+         -0.03661645,   4.00265385,  -5.80763631,   0.45384937,
+         -0.12153206, -14.37323255]])]
 		
 	def test(self, data, validating=False):
 		# First, retrieve the features from the input
 		if not validating:
-			lvInput = np.array([self.getFeaturesLive(data)])
+			lvInput = np.array(self.getFeaturesLive(data))
 		else:
 			lvInput = np.array([self.getFeaturesLight(data)])
 		
 		# Then, run the network
 		lvOutput = self.bpnValidating.run(lvInput)
 		
+		result = [False,0]
 		for i in range(lvInput.shape[0]):
 			# If a gesture is recognised:
 			if lvOutput[i][np.argmax(lvOutput[i])] > 0.5:
-				return str(np.argmax(lvOutput[i]))
-			else:
-				return "None"
-		return "Unknown"
+				result = [True, i]
+		return result
