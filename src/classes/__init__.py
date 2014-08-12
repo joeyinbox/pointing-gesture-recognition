@@ -13,3 +13,5 @@ from classes.LightDatasetGui import LightDatasetGui
 from classes.FormItem import FormItem
 from classes.SensorWidget import SensorWidget
 from classes.Settings import Settings
+
+from classes.Validator import Validator
