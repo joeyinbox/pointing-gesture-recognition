@@ -63,7 +63,7 @@ class Settings:
 		elif direction == Settings.LATERAL:
 			direction = "lateral/"
 		elif direction == Settings.DOWN:
-			direction = "down"
+			direction = "down/"
 		else:
 			raise "Invalid direction id", direction
 		

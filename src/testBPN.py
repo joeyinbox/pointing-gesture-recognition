@@ -3,8 +3,6 @@ from classes.BPNHandler import *
 import numpy as np
 import sys
 import cv2
-from os import listdir
-from os.path import isfile, join
 import utils
 
 class testBPN():
@@ -153,9 +151,6 @@ class testBPN():
 		
 
 
-	def getFileList(self, path):
-		return [path+f for f in listdir(path) if isfile(join(path,f)) and f!=".DS_Store"]
-	
 	def count(self, array):
 		total = 0
 		for i in range(len(array)):
@@ -169,33 +164,33 @@ class testBPN():
 		folder = self.settings.getPositiveLightFolder()
 		
 		return np.array([
-			self.getFileList("{0}{1}/back-right/up/".format(folder, type)),
-			self.getFileList("{0}{1}/back-right/lateral/".format(folder, type)),
-			self.getFileList("{0}{1}/back-right/down/".format(folder, type)),
+			utils.getFileList("{0}{1}/back-right/up/".format(folder, type)),
+			utils.getFileList("{0}{1}/back-right/lateral/".format(folder, type)),
+			utils.getFileList("{0}{1}/back-right/down/".format(folder, type)),
 			
-			self.getFileList("{0}{1}/right/up/".format(folder, type)),
-			self.getFileList("{0}{1}/right/lateral/".format(folder, type)),
-			self.getFileList("{0}{1}/right/down/".format(folder, type)),
+			utils.getFileList("{0}{1}/right/up/".format(folder, type)),
+			utils.getFileList("{0}{1}/right/lateral/".format(folder, type)),
+			utils.getFileList("{0}{1}/right/down/".format(folder, type)),
 			
-			self.getFileList("{0}{1}/front-right/up/".format(folder, type)),
-			self.getFileList("{0}{1}/front-right/lateral/".format(folder, type)),
-			self.getFileList("{0}{1}/front-right/down/".format(folder, type)),
+			utils.getFileList("{0}{1}/front-right/up/".format(folder, type)),
+			utils.getFileList("{0}{1}/front-right/lateral/".format(folder, type)),
+			utils.getFileList("{0}{1}/front-right/down/".format(folder, type)),
 			
-			self.getFileList("{0}{1}/front/up/".format(folder, type)),
-			self.getFileList("{0}{1}/front/lateral/".format(folder, type)),
-			self.getFileList("{0}{1}/front/down/".format(folder, type)),
+			utils.getFileList("{0}{1}/front/up/".format(folder, type)),
+			utils.getFileList("{0}{1}/front/lateral/".format(folder, type)),
+			utils.getFileList("{0}{1}/front/down/".format(folder, type)),
 			
-			self.getFileList("{0}{1}/front-left/up/".format(folder, type)),
-			self.getFileList("{0}{1}/front-left/lateral/".format(folder, type)),
-			self.getFileList("{0}{1}/front-left/down/".format(folder, type)),
+			utils.getFileList("{0}{1}/front-left/up/".format(folder, type)),
+			utils.getFileList("{0}{1}/front-left/lateral/".format(folder, type)),
+			utils.getFileList("{0}{1}/front-left/down/".format(folder, type)),
 			
-			self.getFileList("{0}{1}/left/up/".format(folder, type)),
-			self.getFileList("{0}{1}/left/lateral/".format(folder, type)),
-			self.getFileList("{0}{1}/left/down/".format(folder, type)),
+			utils.getFileList("{0}{1}/left/up/".format(folder, type)),
+			utils.getFileList("{0}{1}/left/lateral/".format(folder, type)),
+			utils.getFileList("{0}{1}/left/down/".format(folder, type)),
 			
-			self.getFileList("{0}{1}/back-left/up/".format(folder, type)),
-			self.getFileList("{0}{1}/back-left/lateral/".format(folder, type)),
-			self.getFileList("{0}{1}/back-left/down/".format(folder, type))
+			utils.getFileList("{0}{1}/back-left/up/".format(folder, type)),
+			utils.getFileList("{0}{1}/back-left/lateral/".format(folder, type)),
+			utils.getFileList("{0}{1}/back-left/down/".format(folder, type))
 		])
 	
 	
@@ -204,33 +199,33 @@ class testBPN():
 		
 		folder = self.settings.getPositiveLightFolder()
 		
-		backRight = self.getFileList("{0}{1}/back-right/up/".format(folder, type))
-		backRight.extend(self.getFileList("{0}{1}/back-right/lateral/".format(folder, type)))
-		backRight.extend(self.getFileList("{0}{1}/back-right/down/".format(folder, type)))
+		backRight = utils.getFileList("{0}{1}/back-right/up/".format(folder, type))
+		backRight.extend(utils.getFileList("{0}{1}/back-right/lateral/".format(folder, type)))
+		backRight.extend(utils.getFileList("{0}{1}/back-right/down/".format(folder, type)))
 		
-		right = self.getFileList("{0}{1}/right/up/".format(folder, type))
-		right.extend(self.getFileList("{0}{1}/right/lateral/".format(folder, type)))
-		right.extend(self.getFileList("{0}{1}/right/down/".format(folder, type)))
+		right = utils.getFileList("{0}{1}/right/up/".format(folder, type))
+		right.extend(utils.getFileList("{0}{1}/right/lateral/".format(folder, type)))
+		right.extend(utils.getFileList("{0}{1}/right/down/".format(folder, type)))
 		
-		frontRight = self.getFileList("{0}{1}/front-right/up/".format(folder, type))
-		frontRight.extend(self.getFileList("{0}{1}/front-right/lateral/".format(folder, type)))
-		frontRight.extend(self.getFileList("{0}{1}/front-right/down/".format(folder, type)))
+		frontRight = utils.getFileList("{0}{1}/front-right/up/".format(folder, type))
+		frontRight.extend(utils.getFileList("{0}{1}/front-right/lateral/".format(folder, type)))
+		frontRight.extend(utils.getFileList("{0}{1}/front-right/down/".format(folder, type)))
 		
-		front = self.getFileList("{0}{1}/front/up/".format(folder, type))
-		front.extend(self.getFileList("{0}{1}/front/lateral/".format(folder, type)))
-		front.extend(self.getFileList("{0}{1}/front/down/".format(folder, type)))
+		front = utils.getFileList("{0}{1}/front/up/".format(folder, type))
+		front.extend(utils.getFileList("{0}{1}/front/lateral/".format(folder, type)))
+		front.extend(utils.getFileList("{0}{1}/front/down/".format(folder, type)))
 		
-		frontLeft = self.getFileList("{0}{1}/front-left/up/".format(folder, type))
-		frontLeft.extend(self.getFileList("{0}{1}/front-left/lateral/".format(folder, type)))
-		frontLeft.extend(self.getFileList("{0}{1}/front-left/down/".format(folder, type)))
+		frontLeft = utils.getFileList("{0}{1}/front-left/up/".format(folder, type))
+		frontLeft.extend(utils.getFileList("{0}{1}/front-left/lateral/".format(folder, type)))
+		frontLeft.extend(utils.getFileList("{0}{1}/front-left/down/".format(folder, type)))
 		
-		left = self.getFileList("{0}{1}/left/up/".format(folder, type))
-		left.extend(self.getFileList("{0}{1}/left/lateral/".format(folder, type)))
-		left.extend(self.getFileList("{0}{1}/left/down/".format(folder, type)))
+		left = utils.getFileList("{0}{1}/left/up/".format(folder, type))
+		left.extend(utils.getFileList("{0}{1}/left/lateral/".format(folder, type)))
+		left.extend(utils.getFileList("{0}{1}/left/down/".format(folder, type)))
 		
-		backLeft = self.getFileList("{0}{1}/back-left/up/".format(folder, type))
-		backLeft.extend(self.getFileList("{0}{1}/back-left/lateral/".format(folder, type)))
-		backLeft.extend(self.getFileList("{0}{1}/back-left/down/".format(folder, type)))
+		backLeft = utils.getFileList("{0}{1}/back-left/up/".format(folder, type))
+		backLeft.extend(utils.getFileList("{0}{1}/back-left/lateral/".format(folder, type)))
+		backLeft.extend(utils.getFileList("{0}{1}/back-left/down/".format(folder, type)))
 		
 		
 		return np.array([
@@ -248,21 +243,21 @@ class testBPN():
 		
 		folder = self.settings.getPositiveLightFolder()
 		
-		right = self.getFileList("{0}{1}/right/up/".format(folder, type))
-		right.extend(self.getFileList("{0}{1}/right/lateral/".format(folder, type)))
-		right.extend(self.getFileList("{0}{1}/right/down/".format(folder, type)))
+		right = utils.getFileList("{0}{1}/right/up/".format(folder, type))
+		right.extend(utils.getFileList("{0}{1}/right/lateral/".format(folder, type)))
+		right.extend(utils.getFileList("{0}{1}/right/down/".format(folder, type)))
 		
-		frontRight = self.getFileList("{0}{1}/front-right/up/".format(folder, type))
-		frontRight.extend(self.getFileList("{0}{1}/front-right/lateral/".format(folder, type)))
-		frontRight.extend(self.getFileList("{0}{1}/front-right/down/".format(folder, type)))
+		frontRight = utils.getFileList("{0}{1}/front-right/up/".format(folder, type))
+		frontRight.extend(utils.getFileList("{0}{1}/front-right/lateral/".format(folder, type)))
+		frontRight.extend(utils.getFileList("{0}{1}/front-right/down/".format(folder, type)))
 		
-		frontLeft = self.getFileList("{0}{1}/front-left/up/".format(folder, type))
-		frontLeft.extend(self.getFileList("{0}{1}/front-left/lateral/".format(folder, type)))
-		frontLeft.extend(self.getFileList("{0}{1}/front-left/down/".format(folder, type)))
+		frontLeft = utils.getFileList("{0}{1}/front-left/up/".format(folder, type))
+		frontLeft.extend(utils.getFileList("{0}{1}/front-left/lateral/".format(folder, type)))
+		frontLeft.extend(utils.getFileList("{0}{1}/front-left/down/".format(folder, type)))
 		
-		left = self.getFileList("{0}{1}/left/up/".format(folder, type))
-		left.extend(self.getFileList("{0}{1}/left/lateral/".format(folder, type)))
-		left.extend(self.getFileList("{0}{1}/left/down/".format(folder, type)))
+		left = utils.getFileList("{0}{1}/left/up/".format(folder, type))
+		left.extend(utils.getFileList("{0}{1}/left/lateral/".format(folder, type)))
+		left.extend(utils.getFileList("{0}{1}/left/down/".format(folder, type)))
 		
 		
 		return np.array([
@@ -278,54 +273,54 @@ class testBPN():
 		
 		folder = self.settings.getNegativeLightFolder()
 		
-		output = self.getFileList("{0}{1}/back-right/closed/".format(folder, type))
-		output.extend(self.getFileList("{0}{1}/back-right/opened/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/back-right/four/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/back-right/three/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/back-right/peace/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/back-right/rock/".format(folder, type)))
+		output = utils.getFileList("{0}{1}/back-right/closed/".format(folder, type))
+		output.extend(utils.getFileList("{0}{1}/back-right/opened/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/back-right/four/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/back-right/three/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/back-right/peace/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/back-right/rock/".format(folder, type)))
 		
-		output.extend(self.getFileList("{0}{1}/right/closed/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/right/opened/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/right/four/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/right/three/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/right/peace/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/right/rock/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/right/closed/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/right/opened/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/right/four/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/right/three/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/right/peace/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/right/rock/".format(folder, type)))
 		
-		output.extend(self.getFileList("{0}{1}/front-right/closed/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/front-right/opened/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/front-right/four/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/front-right/three/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/front-right/peace/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/front-right/rock/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/front-right/closed/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/front-right/opened/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/front-right/four/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/front-right/three/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/front-right/peace/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/front-right/rock/".format(folder, type)))
 		
-		output.extend(self.getFileList("{0}{1}/front/closed/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/front/opened/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/front/four/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/front/three/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/front/peace/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/front/rock/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/front/closed/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/front/opened/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/front/four/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/front/three/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/front/peace/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/front/rock/".format(folder, type)))
 		
-		output.extend(self.getFileList("{0}{1}/front-left/closed/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/front-left/opened/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/front-left/four/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/front-left/three/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/front-left/peace/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/front-left/rock/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/front-left/closed/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/front-left/opened/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/front-left/four/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/front-left/three/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/front-left/peace/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/front-left/rock/".format(folder, type)))
 		
-		output.extend(self.getFileList("{0}{1}/left/closed/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/left/opened/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/left/four/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/left/three/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/left/peace/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/left/rock/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/left/closed/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/left/opened/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/left/four/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/left/three/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/left/peace/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/left/rock/".format(folder, type)))
 		
-		output.extend(self.getFileList("{0}{1}/back-left/closed/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/back-left/opened/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/back-left/four/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/back-left/three/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/back-left/peace/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/back-left/rock/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/back-left/closed/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/back-left/opened/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/back-left/four/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/back-left/three/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/back-left/peace/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/back-left/rock/".format(folder, type)))
 		
 		return np.array(output)
 	
@@ -333,33 +328,33 @@ class testBPN():
 		
 		folder = self.settings.getNegativeLightFolder()
 		
-		output = self.getFileList("{0}{1}/right/closed/".format(folder, type))
-		output.extend(self.getFileList("{0}{1}/right/opened/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/right/four/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/right/three/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/right/peace/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/right/rock/".format(folder, type)))
+		output = utils.getFileList("{0}{1}/right/closed/".format(folder, type))
+		output.extend(utils.getFileList("{0}{1}/right/opened/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/right/four/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/right/three/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/right/peace/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/right/rock/".format(folder, type)))
 		
-		output.extend(self.getFileList("{0}{1}/front-right/closed/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/front-right/opened/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/front-right/four/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/front-right/three/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/front-right/peace/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/front-right/rock/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/front-right/closed/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/front-right/opened/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/front-right/four/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/front-right/three/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/front-right/peace/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/front-right/rock/".format(folder, type)))
 		
-		output.extend(self.getFileList("{0}{1}/front-left/closed/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/front-left/opened/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/front-left/four/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/front-left/three/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/front-left/peace/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/front-left/rock/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/front-left/closed/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/front-left/opened/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/front-left/four/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/front-left/three/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/front-left/peace/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/front-left/rock/".format(folder, type)))
 		
-		output.extend(self.getFileList("{0}{1}/left/closed/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/left/opened/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/left/four/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/left/three/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/left/peace/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/left/rock/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/left/closed/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/left/opened/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/left/four/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/left/three/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/left/peace/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/left/rock/".format(folder, type)))
 		
 		return np.array(output)
 	
@@ -367,25 +362,25 @@ class testBPN():
 		
 		folder = self.settings.getNegativeLightFolder()
 		
-		output = self.getFileList("{0}{1}/right/closed/".format(folder, type))
-		output.extend(self.getFileList("{0}{1}/right/opened/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/right/four/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/right/three/".format(folder, type)))
+		output = utils.getFileList("{0}{1}/right/closed/".format(folder, type))
+		output.extend(utils.getFileList("{0}{1}/right/opened/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/right/four/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/right/three/".format(folder, type)))
 		
-		output.extend(self.getFileList("{0}{1}/front-right/closed/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/front-right/opened/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/front-right/four/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/front-right/three/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/front-right/closed/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/front-right/opened/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/front-right/four/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/front-right/three/".format(folder, type)))
 		
-		output.extend(self.getFileList("{0}{1}/front-left/closed/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/front-left/opened/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/front-left/four/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/front-left/three/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/front-left/closed/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/front-left/opened/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/front-left/four/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/front-left/three/".format(folder, type)))
 		
-		output.extend(self.getFileList("{0}{1}/left/closed/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/left/opened/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/left/four/".format(folder, type)))
-		output.extend(self.getFileList("{0}{1}/left/three/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/left/closed/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/left/opened/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/left/four/".format(folder, type)))
+		output.extend(utils.getFileList("{0}{1}/left/three/".format(folder, type)))
 		
 		return np.array(output)
 		
@@ -454,16 +449,36 @@ class testBPN():
 	
 	
 	def test(self):
-		print self.count(self.getPositiveFull())
-		print len(self.getNegativeFull())
 		
-		print
-		print self.count(self.getPositiveFull("testing"))
-		print len(self.getNegativeFull("testing"))
+		folder = self.settings.getCompleteDatasetFolder(self.settings.LEFT, self.settings.LATERAL)
 		
+		
+		positive = np.array([
+			utils.getFileList(folder)
+		])
+		
+		
+		
+		bpn = BPNHandler(True, 6, 33, 4)
+		
+		data = bpn.loadPositive("validating", positive, [])
+		
+		print "positive"
+		good = 0
+		bad = 0
+		for d in data:
+			result = bpn.test(d, True, False)
+			if result == "None":
+				bad += 1
+			else:
+				good += 1
 		print
-		print self.count(self.getPositiveFull("validating"))
-		print len(self.getNegativeFull("validating"))
+		print "{0} corrects and {1} bad --> {2:0.2f}%".format(good, bad, (good/float(good+bad)*100))
+		print
+		
+		print bpn.fingerTip
+		print bpn.eyePosition
+		
 		
 		
 		
@@ -471,7 +486,7 @@ class testBPN():
 		
 	
 	
-	def full(self):
+	def complete(self):
 		positiveTraining = self.getPositiveFull("training")
 		negativeTraining = self.getNegativeFull("training")
 		positiveTesting = self.getPositiveFull("testing")
@@ -482,7 +497,7 @@ class testBPN():
 		self.run(positiveTraining, negativeTraining, positiveTesting, negativeTesting, positiveTarget, True)
 		
 	
-	def testFull(self):
+	def testComplete(self):
 		bpn = BPNHandler()
 		bpn.loadNewDataFeatures()
 		bpn.run()
@@ -566,4 +581,4 @@ class testBPN():
 
 
 test = testBPN()
-test.restrained()
+test.test()

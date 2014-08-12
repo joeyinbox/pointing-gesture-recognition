@@ -68,8 +68,7 @@ class BPNHandler():
 	def thresholdExtracted(self, x, start, end):
 	    return np.NaN if x<start or x>end or x==0 else x
 	
-	def loadPositive(self, type, positive, target):
-		#print
+	def loadPositive(self, type, positive, target, light=True):
 		print "Loading positive {0} data".format(type)
 		
 		for i in range(len(positive)):
@@ -79,10 +78,16 @@ class BPNHandler():
 				data = utils.loadJsonFromFile(str(j))
 				
 				if type=="training":
-					self.trainingInput.append(self.getFeaturesLight(data))
+					if light:
+						self.trainingInput.append(self.getFeaturesLight(data))
+					else:
+						self.trainingInput.append(self.getFeaturesFull(data))
 					self.trainingTarget.append(target[i])
 				elif type=="testing":
-					self.testingInput.append(self.getFeaturesLight(data))
+					if light:
+						self.testingInput.append(self.getFeaturesLight(data))
+					else:
+						self.testingInput.append(self.getFeaturesFull(data))
 					self.testingTarget.append(target[i])
 				elif type=="validating":
 					self.validatingInput.append(data)
@@ -94,8 +99,7 @@ class BPNHandler():
 		if type=="validating":
 			return self.validatingInput
 	
-	def loadNegative(self, type, negative, targetLength):
-		#print
+	def loadNegative(self, type, negative, targetLength, light=True):
 		print "Loading negative {0} data".format(type)
 		
 		# Create the negative target thanks to the lenth of the positive one
@@ -107,10 +111,16 @@ class BPNHandler():
 			data = utils.loadJsonFromFile(str(i))
 			
 			if type=="training":
-				self.trainingInput.append(self.getFeaturesLight(data))
+				if light:
+					self.trainingInput.append(self.getFeaturesLight(data))
+				else:
+					self.trainingInput.append(self.getFeaturesFull(data))
 				self.trainingTarget.append(negativeTarget)
 			elif type=="testing":
-				self.testingInput.append(self.getFeaturesLight(data))
+				if light:
+					self.testingInput.append(self.getFeaturesLight(data))
+				else:
+					self.testingInput.append(self.getFeaturesFull(data))
 				self.testingTarget.append(negativeTarget)
 			elif type=="validating":
 				self.validatingInput.append(data)
@@ -990,6 +1000,9 @@ class BPNHandler():
 			h,v,d = map(int, data["skeleton"]["hand"]["right"])
 			h2,v2,d2 = map(int, data["skeleton"]["elbow"]["right"])
 		
+		print "Finger tip manual position: {0}".format(data["fingerTip"]["position"])
+		print "Eye manual position: {0}".format(data["eye"]["position"])
+		
 		# Then, get the corresponding features
 		return self.getFeatures(h,v,d, h2,v2,d2, depthMap, data["skeleton"]["head"], 0)
 	
@@ -1275,8 +1288,8 @@ class BPNHandler():
 				
 				# Return the coordinates
 				
-				v = cropTop+emptyTop+line
-				h = cropLeft+emptyLeft+h
+				v = int(cropTop+emptyTop+line)
+				h = int(cropLeft+emptyLeft+h)
 				
 				return [h, v]
 		
@@ -1890,12 +1903,14 @@ class BPNHandler():
          -0.03661645,   4.00265385,  -5.80763631,   0.45384937,
          -0.12153206, -14.37323255]])]
 		
-	def test(self, data, validating=False):
+	def test(self, data, validating=False, light=True):
 		# First, retrieve the features from the input
 		if not validating:
 			lvInput = np.array(self.getFeaturesLive(data))
-		else:
+		elif light:
 			lvInput = np.array([self.getFeaturesLight(data)])
+		else:
+			lvInput = np.array([self.getFeaturesFull(data)])
 		
 		# Then, run the network
 		lvOutput = self.bpnValidating.run(lvInput)

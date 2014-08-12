@@ -2,6 +2,9 @@
 import base64, cv2, json, os, re
 import numpy as np
 
+from os import listdir
+from os.path import isfile, join
+
 
 # Write array values to a file
 def writeToFile(data, filename):
@@ -60,3 +63,7 @@ def getFileNumberInFolder(folder):
 				total += 1
 	
 	return total
+
+# Return all files from a folder
+def getFileList(path):
+	return [path+f for f in listdir(path) if isfile(join(path,f)) and f!=".DS_Store"]
