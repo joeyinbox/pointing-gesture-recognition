@@ -444,17 +444,36 @@ class testBPN():
 			[0,0,0,1]
 		])
 	
-	# New dataset
-	# ID:	complete3
-	
-	
 	def test(self):
 		
-		folder = self.settings.getCompleteDatasetFolder(self.settings.LEFT, self.settings.LATERAL)
-		
-		
 		positive = np.array([
-			utils.getFileList(folder)
+			utils.getFileList(self.settings.getCompleteDatasetFolder(self.settings.BACK_LEFT, self.settings.UP)),
+			utils.getFileList(self.settings.getCompleteDatasetFolder(self.settings.BACK_LEFT, self.settings.LATERAL)),
+			utils.getFileList(self.settings.getCompleteDatasetFolder(self.settings.BACK_LEFT, self.settings.DOWN)),
+			
+			utils.getFileList(self.settings.getCompleteDatasetFolder(self.settings.LEFT, self.settings.UP)),
+			utils.getFileList(self.settings.getCompleteDatasetFolder(self.settings.LEFT, self.settings.LATERAL)),
+			utils.getFileList(self.settings.getCompleteDatasetFolder(self.settings.LEFT, self.settings.DOWN)),
+			
+			utils.getFileList(self.settings.getCompleteDatasetFolder(self.settings.FRONT_LEFT, self.settings.UP)),
+			utils.getFileList(self.settings.getCompleteDatasetFolder(self.settings.FRONT_LEFT, self.settings.LATERAL)),
+			utils.getFileList(self.settings.getCompleteDatasetFolder(self.settings.FRONT_LEFT, self.settings.DOWN)),
+			
+			utils.getFileList(self.settings.getCompleteDatasetFolder(self.settings.FRONT, self.settings.UP)),
+			utils.getFileList(self.settings.getCompleteDatasetFolder(self.settings.FRONT, self.settings.LATERAL)),
+			utils.getFileList(self.settings.getCompleteDatasetFolder(self.settings.FRONT, self.settings.DOWN)),
+			
+			utils.getFileList(self.settings.getCompleteDatasetFolder(self.settings.FRONT_RIGHT, self.settings.UP)),
+			utils.getFileList(self.settings.getCompleteDatasetFolder(self.settings.FRONT_RIGHT, self.settings.LATERAL)),
+			utils.getFileList(self.settings.getCompleteDatasetFolder(self.settings.FRONT_RIGHT, self.settings.DOWN)),
+			
+			utils.getFileList(self.settings.getCompleteDatasetFolder(self.settings.RIGHT, self.settings.UP)),
+			utils.getFileList(self.settings.getCompleteDatasetFolder(self.settings.RIGHT, self.settings.LATERAL)),
+			utils.getFileList(self.settings.getCompleteDatasetFolder(self.settings.RIGHT, self.settings.DOWN)),
+			
+			utils.getFileList(self.settings.getCompleteDatasetFolder(self.settings.BACK_RIGHT, self.settings.UP)),
+			utils.getFileList(self.settings.getCompleteDatasetFolder(self.settings.BACK_RIGHT, self.settings.LATERAL)),
+			utils.getFileList(self.settings.getCompleteDatasetFolder(self.settings.BACK_RIGHT, self.settings.DOWN))
 		])
 		
 		
@@ -468,16 +487,22 @@ class testBPN():
 		bad = 0
 		for d in data:
 			result = bpn.test(d, True, False)
-			if result == "None":
+			if result[0] == False:
 				bad += 1
+				print "bad"
 			else:
 				good += 1
+				print "good"
+				
+			print bpn.fingerTip
+			print bpn.eyePosition
+			print 
+			
 		print
 		print "{0} corrects and {1} bad --> {2:0.2f}%".format(good, bad, (good/float(good+bad)*100))
 		print
 		
-		print bpn.fingerTip
-		print bpn.eyePosition
+		
 		
 		
 		
@@ -534,7 +559,7 @@ class testBPN():
 		bad = 0
 		for d in data:
 			result = bpn.test(d, True)
-			if result == "None":
+			if result[0] == False:
 				bad += 1
 			else:
 				good += 1
@@ -550,7 +575,7 @@ class testBPN():
 		bad2 = 0
 		for d in data:
 			result = bpn.test(d, True)
-			if result != "None":
+			if result[0] == True:
 				bad2 += 1
 			else:
 				good2 += 1
@@ -581,4 +606,4 @@ class testBPN():
 
 
 test = testBPN()
-test.test()
+test.validateRestrained()

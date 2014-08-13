@@ -30,8 +30,7 @@ class Validator:
 		
 		return [x,y,z]
 	
-	
-	def findIntersectionDistance(self, eye, fingerTip, target, radius):
+	def findIntersection(self, eye, fingerTip, target, radius):
 		
 		# Retrieve coordinates
 		x1, y1, z1 = map(float, eye)
@@ -76,28 +75,46 @@ class Validator:
 			point2.append(round(y1 + t2*(y2-y1)))
 			point2.append(round(z1 + t2*(z2-z1)))
 			
-			# Now, let's find the distance to the center of the target
-			xd = x3-((point1[0]+point2[0])/2)
-			yd = y3-((point1[1]+point2[1])/2)
-			zd = z3-((point1[2]+point2[2])/2)
-			distance = math.sqrt(xd*xd + yd*yd + zd*zd)
+			# Calculate the center point of the line from point1 to point2 to get the closest coordinates to the center of the target
+			xd = (point1[0]+point2[0])/2
+			yd = (point1[1]+point2[1])/2
+			zd = (point1[2]+point2[2])/2
 			
-			return distance
+			return [xd, yd, zd]
 			
 		elif dis == 0:
 			# The pointed direction is tangent to the sphere
 			# The intersection point can be calculated by substituting t in the parametric line equations
-			t1 = -b/(2*a)
+			t1 = [-b/(2*a)]
 			
 			point = []
 			point.append(round(x1 + t1*(x2-x1)))
 			point.append(round(y1 + t1*(y2-y1)))
 			point.append(round(z1 + t1*(z2-z1)))
 			
-			# The distance is the radius
-			return r
-		
+			# The closest point is this only intersection
+			return point
+			
 		elif dis < 0:
 			return None
+	
+	
+	
+	
+	def findIntersectionDistance(self, eye, fingerTip, target, radius):
+		# Retrieve target coordinates
+		x3, y3, z3 = map(float, target)
 		
+		# Find eventual intersections
+		intersection = self.findIntersection(eye, fingerTip, target, radius)
 		
+		if intersection != None:
+			# Let's find the distance to the center of the target
+			xd = x3-intersection[0]
+			yd = y3-intersection[1]
+			zd = z3-intersection[2]
+			distance = math.sqrt(xd*xd + yd*yd + zd*zd)
+			
+			return distance
+		else:
+			return None
