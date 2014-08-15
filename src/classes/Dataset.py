@@ -1,65 +1,89 @@
 #! /usr/bin/python
 import json, utils
+import numpy as np
 from copy import deepcopy
 from classes.Settings import *
+from classes.Utils import Utils
 
 
 class Dataset:
+	TYPE_POSITIVE = 0
+	TYPE_NEGATIVE = 1
+	TYPE_ACCURACY = 2
+	
 	LEFT_HAND = 0
 	RIGHT_HAND = 1
+	NO_HAND = 2
+	
+	DISTANCE_550 = 0
+	DISTANCE_750 = 4
+	DISTANCE_1000 = 1
+	DISTANCE_1250 = 5
+	DISTANCE_1500 = 2
+	DISTANCE_1750 = 6
+	DISTANCE_2000 = 3
 	
 	
-	def __init__(self):
+	def __init__(self, camera_height=None, hand=None, skeleton=None, depth_map=None, image=None, type=None, distance=None, target=None):
 		self.settings = Settings()
+		self.utils = Utils()
 		
-		self.camera_height = 1500
-		self.target = {
-			"distance": 0,
-			"angle": 0,
-			"height": 0
-		}
-		self.fingerTip = {
-			"distance": 0,
-			"angle": 0,
-			"height": 0,
-			"position" : [0,0]
-		}
-		self.eye = {
-			"distance": 0,
-			"angle": 0,
-			"height": 0,
-			"position" : [0,0]
-		}
-		self.hand = Dataset.LEFT_HAND
-		self.orientation = self.settings.BACK_RIGHT
-		self.direction = self.settings.UP
-		self.skeleton = {
-			"head": [],
-			"shoulder": {
-				"left": [],
-				"right": [],
-				"center": []
-			},
-			"elbow": {
-				"left": [],
-				"right": []
-			},
-			"hand": {
-				"left": [],
-				"right": []
+		
+		if camera_height is None:
+			camera_height = 1500
+		self.camera_height = camera_height
+		
+		if hand is None:
+			hand = self.settings.LEFT_HAND
+		self.hand = hand
+		
+		if skeleton is None:
+			skeleton = {
+				"head": [],
+				"shoulder": {
+					"left": [],
+					"right": [],
+					"center": []
+				},
+				"elbow": {
+					"left": [],
+					"right": []
+				},
+				"hand": {
+					"left": [],
+					"right": []
+				}
 			}
-		}
-		self.depth_map = []
-		self.image = ""
-	
+		self.skeleton = skeleton
+		
+		if depth_map is None:
+			depth_map = []
+		self.depth_map = np.array(depth_map)
+		
+		if image is None:
+			image = ""
+		self.image = image
+		
+		if type is None:
+			type = Dataset.TYPE_POSITIVE
+		self.type = type
+		
+		if distance is None:
+			distance = Dataset.DISTANCE_550
+		self.distance = distance
+		
+		if target is None:
+			target = []
+		self.target = target
 	
 	def to_JSON(self):
 		# Update the depth map and the image to prepare them
 		self.depth_map = self.depth_map.tolist()
-		self.image = utils.getBase64(self.image)
+		self.image = self.utils.getBase64(self.image)
 		
 		obj = deepcopy(self)
 		del obj.settings
+		del obj.utils
 		
 		return json.dumps(obj, default=lambda o: o.__dict__, separators=(',', ':'))
 	
@@ -68,76 +92,47 @@ class Dataset:
 		print "Saving dataset informations..."
 		
 		# Save the dataset to the right folder
-		filename = self.settings.getCompleteDatasetFolder(self.orientation, self.direction)
+		if self.type == Dataset.TYPE_POSITIVE:
+			filename = self.settings.getPositiveFolder()
+		elif self.type == Dataset.TYPE_NEGATIVE:
+			filename = self.settings.getNegativeFolder()
+		elif self.type == Dataset.TYPE_ACCURACY:
+			filename = self.settings.getAccuracyFolder()
+		else:
+			filename = ""
 		
 		# Retrieve the number of files saved so far
 		# Be careful that due to the sample file, the counter does not need to be incremented. Otherwise, the files would replace each others
-		filename += str(utils.getFileNumberInFolder(self.settings.getDatasetFolder())).zfill(3)+".json"
-		utils.dumpJsonToFile(self.to_JSON(), filename)
+		filename += str(self.utils.getFileNumberInFolder(filename)).zfill(3)+".json"
+		self.utils.dumpJsonToFile(self.to_JSON(), filename)
+	
+	
+	
+	
+	def toggleType(self, value):
+		self.type = value
+		print "type toggled to {0}".format(value)
 		
-		# Re-initialise finger-tip and eye positions
-		self.fingerTip["position"] = [0,0]
-		self.eye["position"] = [0,0]
-	
-	def validateValue(self, obj):
-		if obj.value.value == "":
-			return 0
-		else:
-			return int(obj.value.value)
-	
+	def toggleDistance(self, value):
+		self.distance = value
+		print "distance toggled"
 	
 	def toggleHand(self, value):
 		self.hand = value
-		print "hand toggled to {0}".format(value)
+		print "hand toggled"
 	
-	def toggleOrientation(self, value):
-		self.orientation = value
-		print "orientation toggled to {0}".format(value)
-	
-	def toggleDirection(self, value):
-		self.direction = value
-		print "direction toggled to {0}".format(value)
-	
-	
-	
-	def setTargetHeight(self, obj, value):
-		self.target["height"] = self.validateValue(obj)
-		
-	def setTargetDistance(self, obj, value):
-		self.target["distance"] = self.validateValue(obj)
-	
-	def setTargetAngle(self, obj, value):
-		self.target["angle"] = self.validateValue(obj)
-	
-	
-	
-	def setEyeHeight(self, obj, value):
-		self.eye["height"] = self.validateValue(obj)
-		
-	def setEyeDistance(self, obj, value):
-		self.eye["distance"] = self.validateValue(obj)
-	
-	def setEyeAngle(self, obj, value):
-		self.eye["angle"] = self.validateValue(obj)
-	
-	def setEyePosition(self, value):
-		self.eye["position"] = value
-	
-	
-	
-	def setFingerTipHeight(self, obj, value):
-		self.fingerTip["height"] = self.validateValue(obj)
-		
-	def setFingerTipDistance(self, obj, value):
-		self.fingerTip["distance"] = self.validateValue(obj)
-	
-	def setFingerTipAngle(self, obj, value):
-		self.fingerTip["angle"] = self.validateValue(obj)
-	
-	def setFingerTipPosition(self, value):
-		self.fingerTip["position"] = value
-	
-	
-	
-	def setCameraHeight(self, obj, value):
-		self.camera_height = self.validateValue(obj)
+	def getWishedDistance(self):
+		if self.distance == Dataset.DISTANCE_550:
+			return 550
+		elif self.distance == Dataset.DISTANCE_750:
+			return 750
+		elif self.distance == Dataset.DISTANCE_1000:
+			return 1000
+		elif self.distance == Dataset.DISTANCE_1250:
+			return 1250
+		elif self.distance == Dataset.DISTANCE_1500:
+			return 1500
+		elif self.distance == Dataset.DISTANCE_1750:
+			return 1750
+		elif self.distance == Dataset.DISTANCE_2000:
+			return 2000

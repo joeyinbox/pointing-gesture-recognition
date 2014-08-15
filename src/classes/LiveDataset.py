@@ -1,14 +1,9 @@
 #! /usr/bin/python
 
 class LiveDataset:
-	LEFT_HAND = 0
-	RIGHT_HAND = 1
-	BOTH_HAND = 2
-	
-	
 	def __init__(self):
 		print "Live dataset"
-		self.hand = []
+		self.hand = 0
 		self.skeleton = {
 			"head": [],
 			"shoulder": {

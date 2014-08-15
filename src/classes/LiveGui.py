@@ -3,15 +3,20 @@ from PyQt5 import QtCore, QtWidgets, QtGui, QtMultimedia
 from openni import *
 import numpy as np
 from copy import deepcopy
-import cv2, ctypes, functools, hand, skeleton, ui
+import cv2, ctypes, functools, skeleton, ui
 
 from classes.BPNHandler import *
+from classes.FeatureExtractor import *
 from classes.LiveDataset import *
 from classes.SensorWidget import *
 from classes.Settings import *
 
 
 class LiveGui(QtWidgets.QWidget):
+	
+	featureExtractor = FeatureExtractor()
+	bpn = BPNHandler(True)
+	
 	def __init__(self):
 		super(LiveGui, self).__init__()
 		self.setWindowTitle("Pointing Gesture Recognition - Live")
@@ -40,9 +45,6 @@ class LiveGui(QtWidgets.QWidget):
 		self.context.start_generating_all()
 		print "Starting to detect users.."
 		
-		
-		# Create the neural network
-		self.bpn = BPNHandler(True, features=6, hiddenLayers=33, output=4)
 		
 		# Create a new dataset item
 		self.data = LiveDataset()
@@ -102,20 +104,20 @@ class LiveGui(QtWidgets.QWidget):
 			#ui.drawElbowLine(frame, self.data.skeleton["elbow"]["right"], self.data.skeleton["hand"]["right"])
 			
 			# Get the pixel's depth from the coordinates of the hands
-			leftPixel = hand.getDepthFromMap(self.data.depth_map, self.data.skeleton["hand"]["left"])
-			rightPixel = hand.getDepthFromMap(self.data.depth_map, self.data.skeleton["hand"]["right"])
+			leftPixel = self.utils.getDepthFromMap(self.data.depth_map, self.data.skeleton["hand"]["left"])
+			rightPixel = self.utils.getDepthFromMap(self.data.depth_map, self.data.skeleton["hand"]["right"])
 			#print "Left hand depth: %d | Right hand depth: %d" % (leftPixel, rightPixel)
 			
 			
 			# Get the shift of the boundaries around both hands
-			leftShift = hand.getHandBoundShift(leftPixel)
-			rightShift = hand.getHandBoundShift(rightPixel)
+			leftShift = self.utils.getHandBoundShift(leftPixel)
+			rightShift = self.utils.getHandBoundShift(rightPixel)
 			
-			if self.data.hand == LiveDataset.LEFT_HAND:
+			if self.data.hand == self.settings.LEFT_HAND:
 				currentDepth = leftPixel
 				# Display a rectangle around the current hand
 				#ui.drawHandBoundaries(frame, self.data.skeleton["hand"]["left"], leftShift, (200, 70, 30))
-			elif self.data.hand == LiveDataset.RIGHT_HAND:
+			elif self.data.hand == self.settings.RIGHT_HAND:
 				currentDepth = rightPixel
 				# Display a rectangle around the current hand
 				#ui.drawHandBoundaries(frame, self.data.skeleton["hand"]["right"], rightShift, (200, 70, 30))
@@ -125,22 +127,23 @@ class LiveGui(QtWidgets.QWidget):
 				#ui.drawHandBoundaries(frame, self.data.skeleton["hand"]["right"], rightShift, (200, 70, 30))
 			
 			
-			# Test the data against the neural network
-			result = self.bpn.test(self.data)
-			self.resultLabel.setText(str(result[0]))
+			# Test the data against the neural network if possible
+			if self.data.hand != self.settings.NO_HAND:
+				result = self.bpn.check(self.featureExtractor.getFeatures(self.data))
+				self.resultLabel.setText(str(result[0]))
+				
+				# Highlight the finger tip
+				if result[0] != False:
+					ui.drawPoint(frame, self.featureExtractor.fingerTip[result[1]][0], self.featureExtractor.fingerTip[result[1]][1], 5)
+				
+					# Highlight the eye
+					ui.drawPoint(frame, self.featureExtractor.eyePosition[result[1]][0], self.featureExtractor.eyePosition[result[1]][1], 5)
+				
+					# Line of sight
+					ui.drawElbowLine(frame, self.featureExtractor.eyePosition[result[1]], self.featureExtractor.fingerTip[result[1]])
 			
-			# Highlight the finger tip
-			if result[0] != False:
-				ui.drawPoint(frame, self.bpn.fingerTip[result[1]][0], self.bpn.fingerTip[result[1]][1], 5)
-			
-				# Highlight the eye
-				ui.drawPoint(frame, self.bpn.eyePosition[result[1]][0], self.bpn.eyePosition[result[1]][1], 5)
-			
-				# Line of sight
-				ui.drawElbowLine(frame, self.bpn.eyePosition[result[1]], self.bpn.fingerTip[result[1]])
-			
-			
-			#cv2.putText(frame, str(self.data.skeleton["head"][2]), (5, 60), cv2.FONT_HERSHEY_SIMPLEX, 2, (50, 100, 255), 5)
+					# Indicate orientation
+					cv2.putText(frame, self.featureExtractor.orientation[result[1]], (5, 60), cv2.FONT_HERSHEY_SIMPLEX, 2, (50, 100, 255), 5)
 		
 		# Update the frame
 		self.depthImage.setPixmap(ui.convertOpenCVFrameToQPixmap(frame))
@@ -160,8 +163,9 @@ class LiveGui(QtWidgets.QWidget):
 		comboBox.setFixedWidth(200)
 		comboBox.addItem("Left")
 		comboBox.addItem("Right")
+		comboBox.addItem("None")
 		comboBox.addItem("Both")
-		comboBox.setCurrentIndex(2)
+		comboBox.setCurrentIndex(3)
 		hlayout.addWidget(label)
 		hlayout.addWidget(comboBox)
 		globalLayout.addLayout(hlayout)

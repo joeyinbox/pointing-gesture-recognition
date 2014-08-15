@@ -3,6 +3,11 @@ import os, sys
 
 
 class Settings:
+	LEFT_HAND = 0
+	RIGHT_HAND = 1
+	NO_HAND = 2
+	BOTH_HAND = 3
+	
 	BACK_RIGHT = 0
 	RIGHT = 1
 	FRONT_RIGHT = 2
@@ -25,58 +30,25 @@ class Settings:
 		
 		self._resource_folder = "res/"
 		
-		self._dataset_folder = "dataset/full/"
-		
-		self._light_dataset_folder = "dataset/light/"
-		self._positive_light_folder = self._light_dataset_folder + "positive/"
-		self._negative_light_folder = self._light_dataset_folder + "negative/"
+		self._dataset_folder = "dataset/"
+		self._positive_folder = self._dataset_folder + "positive/"
+		self._negative_folder = self._dataset_folder + "negative/"
+		self._accuracy_folder = self._dataset_folder + "accuracy/"
 	
 	
 	def getResourceFolder(self):
 		return os.path.join(self.application_path, self._resource_folder)
 	
+	
+	
 	def getDatasetFolder(self):
 		return os.path.join(self.application_path, self._dataset_folder)
 	
+	def getPositiveFolder(self):
+		return os.path.join(self.application_path, self._positive_folder)
 	
-	def getCompleteDatasetFolder(self, orientation, direction):
-		if orientation == Settings.BACK_RIGHT:
-			orientation = "back-right/"
-		elif orientation == Settings.RIGHT:
-			orientation = "right/"
-		elif orientation == Settings.FRONT_RIGHT:
-			orientation = "front-right/"
-		elif orientation == Settings.FRONT:
-			orientation = "front/"
-		elif orientation == Settings.FRONT_LEFT:
-			orientation = "front-left/"
-		elif orientation == Settings.LEFT:
-			orientation = "left/"
-		elif orientation == Settings.BACK_LEFT:
-			orientation = "back-left/"
-		else:
-			raise "Invalid orientation id", orientation
-		
-		
-		if direction == Settings.UP:
-			direction = "up/"
-		elif direction == Settings.LATERAL:
-			direction = "lateral/"
-		elif direction == Settings.DOWN:
-			direction = "down/"
-		else:
-			raise "Invalid direction id", direction
-		
-		
-		return self.getDatasetFolder()+orientation+direction
+	def getNegativeFolder(self):
+		return os.path.join(self.application_path, self._negative_folder)
 	
-	
-	
-	def getLightDatasetFolder(self):
-		return os.path.join(self.application_path, self._light_dataset_folder)
-	
-	def getPositiveLightFolder(self):
-		return os.path.join(self.application_path, self._positive_light_folder)
-	
-	def getNegativeLightFolder(self):
-		return os.path.join(self.application_path, self._negative_light_folder)
+	def getAccuracyFolder(self):
+		return os.path.join(self.application_path, self._accuracy_folder)

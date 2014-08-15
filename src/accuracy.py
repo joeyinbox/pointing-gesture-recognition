@@ -2,9 +2,13 @@
 import numpy as np
 import sys
 
+from classes.BPNHandler import *
+from classes.DatasetManager import *
+from classes.FeatureExtractor import *
 from classes.Settings import *
+from classes.Utils import *
 from classes.Validator import *
-import utils
+from classes.Utils import *
 
 from mpl_toolkits.mplot3d import Axes3D, proj3d
 import matplotlib.pyplot as plt
@@ -14,100 +18,72 @@ from itertools import product, combinations
 
 
 class Accuracy:
-	validator = Validator()
+	bpn = BPNHandler(True)
+	datasetManager = DatasetManager()
+	featureExtractor = FeatureExtractor()
 	settings = Settings()
+	utils = Utils()
+	validator = Validator()
 
 	expectedRadius = 2000
 	
 	
-	def getFullDatasetFiles(self):
-		return np.array([
-			utils.getFileList(self.settings.getCompleteDatasetFolder(self.settings.BACK_LEFT, self.settings.UP)),
-			utils.getFileList(self.settings.getCompleteDatasetFolder(self.settings.BACK_LEFT, self.settings.LATERAL)),
-			utils.getFileList(self.settings.getCompleteDatasetFolder(self.settings.BACK_LEFT, self.settings.DOWN)),
-			
-			utils.getFileList(self.settings.getCompleteDatasetFolder(self.settings.LEFT, self.settings.UP)),
-			utils.getFileList(self.settings.getCompleteDatasetFolder(self.settings.LEFT, self.settings.LATERAL)),
-			utils.getFileList(self.settings.getCompleteDatasetFolder(self.settings.LEFT, self.settings.DOWN)),
-			
-			utils.getFileList(self.settings.getCompleteDatasetFolder(self.settings.FRONT_LEFT, self.settings.UP)),
-			utils.getFileList(self.settings.getCompleteDatasetFolder(self.settings.FRONT_LEFT, self.settings.LATERAL)),
-			utils.getFileList(self.settings.getCompleteDatasetFolder(self.settings.FRONT_LEFT, self.settings.DOWN)),
-			
-			utils.getFileList(self.settings.getCompleteDatasetFolder(self.settings.FRONT, self.settings.UP)),
-			utils.getFileList(self.settings.getCompleteDatasetFolder(self.settings.FRONT, self.settings.LATERAL)),
-			utils.getFileList(self.settings.getCompleteDatasetFolder(self.settings.FRONT, self.settings.DOWN)),
-			
-			utils.getFileList(self.settings.getCompleteDatasetFolder(self.settings.FRONT_RIGHT, self.settings.UP)),
-			utils.getFileList(self.settings.getCompleteDatasetFolder(self.settings.FRONT_RIGHT, self.settings.LATERAL)),
-			utils.getFileList(self.settings.getCompleteDatasetFolder(self.settings.FRONT_RIGHT, self.settings.DOWN)),
-			
-			utils.getFileList(self.settings.getCompleteDatasetFolder(self.settings.RIGHT, self.settings.UP)),
-			utils.getFileList(self.settings.getCompleteDatasetFolder(self.settings.RIGHT, self.settings.LATERAL)),
-			utils.getFileList(self.settings.getCompleteDatasetFolder(self.settings.RIGHT, self.settings.DOWN)),
-			
-			utils.getFileList(self.settings.getCompleteDatasetFolder(self.settings.BACK_RIGHT, self.settings.UP)),
-			utils.getFileList(self.settings.getCompleteDatasetFolder(self.settings.BACK_RIGHT, self.settings.LATERAL)),
-			utils.getFileList(self.settings.getCompleteDatasetFolder(self.settings.BACK_RIGHT, self.settings.DOWN))
-		])
 
-	def loadFullDataset(self):
-		dataset = self.getFullDatasetFiles()
-		data = []
-		
-		for i in dataset:
-			for j in i:
-				name = j.split("/")
-				print("Loading {0}/{1}/{2}".format(name[-3], name[-2], name[-1]))
-				data.append(utils.loadJsonFromFile(str(j)))
-		return data
+	def getDatasetFiles(self):
+		return np.array([
+			self.utils.getFileList(self.settings.getAccuracyFolder())
+		])
 	
 	
-	
-	def pointedDirection(self):
-		dataset = self.loadFullDataset()
+	def measuredPointedDirection(self):
+		dataset = self.datasetManager.loadDataset(self.getDatasetFiles())
+		output = []
 		
 		for data in dataset:
-			fingerTipCoordinates = self.validator.retrieveCoordinates(data["fingerTip"]["height"], data["fingerTip"]["angle"], data["fingerTip"]["distance"])
-			print data["fingerTip"]
-			print fingerTipCoordinates
-			
-			eyeCoordinates = self.validator.retrieveCoordinates(data["eye"]["height"], data["eye"]["angle"], data["eye"]["distance"])
-			print data["eye"]
-			print eyeCoordinates
-			
-			targetCoordinates = self.validator.retrieveCoordinates(data["target"]["height"], data["target"]["angle"], data["target"]["distance"])
-			print data["target"]
-			print targetCoordinates
+			fingerTipCoordinates = data.fingerTip
+			eyeCoordinates = data.eye
+			targetCoordinates = data.target
 			
 			distance = self.validator.findIntersectionDistance(fingerTipCoordinates, eyeCoordinates, targetCoordinates, self.expectedRadius)
 			if distance == None:
 				print "Missed..."
 			else:
 				print "The pointed direction intersects the target at a distance of {0:0.1f} mm.".format(distance)
-	
-			print 
-			print
-			print
-	
-	
-	
-	def draw(self):
-		class Arrow3D(FancyArrowPatch):
-		    def __init__(self, xs, ys, zs, *args, **kwargs):
-		        FancyArrowPatch.__init__(self, (0,0), (0,0), *args, **kwargs)
-		        self._verts3d = xs, ys, zs
-
-		    def draw(self, renderer):
-		        xs3d, ys3d, zs3d = self._verts3d
-		        xs, ys, zs = proj3d.proj_transform(xs3d, ys3d, zs3d, renderer.M)
-		        self.set_positions((xs[0],ys[0]),(xs[1],ys[1]))
-		        FancyArrowPatch.draw(self, renderer)
+				output.append(distance)
 		
+		print "Average distance of {0:0.1f} mm.".format(np.average(output))
+	
+	
+	def processedPointedDirection(self):
+		dataset = self.datasetManager.loadDataset(self.getDatasetFiles())
+		output = []
 		
+		for data in dataset:
+			features = self.featureExtractor.getFeatures(data)
+			
+			depthMap = data.depth_map
+			targetCoordinates = data.target
+			
+			fingerTipCoordinates = self.featureExtractor.fingerTip[0]
+			fingerTipCoordinates.append(self.utils.getDepthFromMap(depthMap, fingerTipCoordinates))
+			
+			eyeCoordinates = self.featureExtractor.eyePosition[0]
+			eyeCoordinates.append(self.utils.getDepthFromMap(depthMap, eyeCoordinates))
+			
+			
+			distance = self.validator.findIntersectionDistance(fingerTipCoordinates, eyeCoordinates, targetCoordinates, self.expectedRadius)
+			if distance == None:
+				print "Missed..."
+			else:
+				print "The pointed direction intersects the target at a distance of {0:0.1f} mm.".format(distance)
+				output.append(distance)
+		
+		print "Average distance of {0:0.1f} mm.".format(np.average(output))
+	
+	
+	def drawTrajectories(self):
 		# Load the dataset
-		dataset = self.loadFullDataset()
-		
+		dataset = self.datasetManager.loadDataset(self.getDatasetFiles())
 		
 		
 		# Create the scene
@@ -121,36 +97,49 @@ class Accuracy:
 		
 		
 		for data in dataset:
-			# Measured data
-			fingerTipCoordinates = self.validator.retrieveCoordinates(data["fingerTip"]["height"], data["fingerTip"]["angle"], data["fingerTip"]["distance"])
-			eyeCoordinates = self.validator.retrieveCoordinates(data["eye"]["height"], data["eye"]["angle"], data["eye"]["distance"])
-			targetCoordinates = self.validator.retrieveCoordinates(data["target"]["height"], data["target"]["angle"], data["target"]["distance"])
+			
+			result = self.featureExtractor.getFeatures(data)
+			
+			
+			# Processed data
+			fingerTipCoordinates = self.featureExtractor.fingerTip[0]
+			eyeCoordinates = self.featureExtractor.eyePosition[0]
+			targetCoordinates = data.target
+			depthMap = data.depth_map
+			
+			fingerTipCoordinates.append(self.utils.getDepthFromMap(depthMap, fingerTipCoordinates))
+			eyeCoordinates.append(self.utils.getDepthFromMap(depthMap, eyeCoordinates))
+			
+			print fingerTipCoordinates
+			print eyeCoordinates
+			print targetCoordinates
+			print
 			
 			closest = self.validator.findIntersection(fingerTipCoordinates, eyeCoordinates, targetCoordinates, self.expectedRadius)
 			
 			if closest != None:
 				
-				# Draw points
-				ax.scatter(fingerTipCoordinates[0],fingerTipCoordinates[1],fingerTipCoordinates[2], color="b", s=100)
-				ax.scatter(eyeCoordinates[0],eyeCoordinates[1],eyeCoordinates[2], color="g", s=100)
-				ax.scatter(targetCoordinates[0],targetCoordinates[1],targetCoordinates[2], color="r", s=100)
 				
-				# Draw closest point
-				ax.scatter(closest[0],closest[1],closest[2], color="c", s=50)
+				x = [fingerTipCoordinates[0]-targetCoordinates[0], closest[0]-targetCoordinates[0]]
+				y = [fingerTipCoordinates[1]-targetCoordinates[1], closest[1]-targetCoordinates[1]]
+				z = [fingerTipCoordinates[2]-targetCoordinates[2], closest[2]-targetCoordinates[2]]
+				
+				# Draw the impact point
+				#ax.scatter(closest[0]-targetCoordinates[0], closest[1]-targetCoordinates[1], closest[2]-targetCoordinates[2], color="r", marker="^", s=100)
+				ax.plot(x, y, z)
 		
-				# Draw an arrow
-				a = Arrow3D([eyeCoordinates[0],closest[0]],[eyeCoordinates[1],closest[1]],[eyeCoordinates[2],closest[2]], mutation_scale=20, lw=1, arrowstyle="-|>", color="k")
-				ax.add_artist(a)
-		
+		# Draw the target point
+		ax.scatter(0, 0, 0, c="#000000", marker="o", s=2000)
 		
 		plt.show()
 		
 		sys.exit(1)
 
 
+
 if __name__ == "__main__":
 	accuracy = Accuracy()
-	accuracy.pointedDirection()
+	accuracy.drawTrajectories()
 
 
 

@@ -14,12 +14,26 @@ Automatic Recognition of Pointing Gestures in Python using a depth sensor.
 - Open a terminal and execute the `main.py` file.
 - Stand up and point!
 
-## Record new dataset items ##
-- Open a terminal and execute the `main.py` file with either `light` or `full` arguments.
-- Fill the form and shoot!
-
 ## Configuration ##
 - Auto-calibration needs to be enabled in the OpenNI file `FeatureExtraction.ini` by uncommenting and setting to 1 the line `UseAutoCalibration=1` under the **[LBS]** section.
+
+## Advanced ##
+
+### Record new dataset items ###
+- Open a terminal and execute the `capture.py` file.
+- Fill the GUI form and shoot!
+
+### Train the network ###
+- Open a terminal and execute the `training.py` file.
+- You can choose what kind of data you will input alongside the network's parameters.
+
+### Validate the network ###
+- Open a terminal and execute the `validating.py` file.
+- Same choice than the training part herein.
+
+### Check accuracy ###
+- Open a terminal and execute the `accuracy.py` file.
+- More options coming.
 
 ## About ##
 This experimentation is part of my Software Engineering Master's dissertation for [Oxford Brookes University](http://brookes.ac.uk) and is meant to be used on their [RoboThespian](https://www.engineeredarts.co.uk) unit.

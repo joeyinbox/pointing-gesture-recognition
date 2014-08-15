@@ -53,11 +53,10 @@ coverage.xml
 docs/_build/
 
 # Original dataset
-dataset/full/
-dataset/full-old/
-dataset/light/
-dataset/light-copy/
-dataset/light-old/
+dataset/old/
+dataset/accuracy/
+dataset/positive/
+dataset/negative/
 
 # Tests
 src/test.py
