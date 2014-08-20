@@ -21,19 +21,27 @@ class Validating():
 	
 	
 	def complete(self):
-		positiveValidating = self.getPositiveComplete("validating")
-		negativeValidating = self.getNegativeComplete("validating")
+		positiveValidating = self.datasetManager.getPositiveCompleteMixed("validating")
+		negativeValidating = self.datasetManager.getMainNegative("validating")
 		
 		# run the network
 		self.run(positiveValidating, negativeValidating)
 	
 	
 	def restrained(self):
-		positiveValidating = self.datasetManager.getPositiveRestrainedMixed("validating")
-		negativeValidating = self.datasetManager.getNegativeMainRestrained("validating")
+		positiveValidating = self.datasetManager.getPositiveRestrainedMixed("testing")
+		negativeValidating = self.datasetManager.getNegativeMainRestrained("testing")
 		
 		# run the network
 		self.run(positiveValidating, negativeValidating)
+	
+	def accuracy(self):
+		positiveValidating = self.datasetManager.getAccuracyRestrained()
+		
+		# run the network
+		self.run(positiveValidating, [])
+		
+		
 		
 	
 	
@@ -47,6 +55,7 @@ class Validating():
 		positiveInput = []
 		for data in positive:
 			positiveInput.extend(self.featureExtractor.getFeatures(data))
+
 		
 		negativeInput = []
 		for data in negative:

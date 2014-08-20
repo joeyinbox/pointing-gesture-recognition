@@ -31,7 +31,7 @@ class Settings:
 		self._resource_folder = "res/"
 		
 		self._dataset_folder = "dataset/"
-		self._positive_folder = self._dataset_folder + "positive/"
+		self._positive_folder = self._dataset_folder + "positive-reorganised/"
 		self._negative_folder = self._dataset_folder + "negative/"
 		self._accuracy_folder = self._dataset_folder + "accuracy/"
 	

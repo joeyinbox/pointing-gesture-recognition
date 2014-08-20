@@ -56,6 +56,7 @@ docs/_build/
 dataset/old/
 dataset/accuracy/
 dataset/positive/
+dataset/positive-reorganised/
 dataset/negative/
 
 # Tests

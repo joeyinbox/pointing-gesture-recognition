@@ -58,7 +58,7 @@ class Utils:
 	
 	# Return the python code to initialise a numpy array
 	def getPythonInitCode(self, data, name):
-		print "{0} = np.array([".format(name)
+		print "if {0}:\n\treturn np.array([".format(name)
 		
 		for i in range(len(data)):
 			text = "	["
@@ -88,7 +88,7 @@ class Utils:
 	
 	
 	# At 1m, the hand is surrounded with a shift of 90 pixels around its center of gravity
-	def getHandBoundShift(depth):
+	def getHandBoundShift(self, depth):
 		if depth == 0:
 			return 90
 		else:

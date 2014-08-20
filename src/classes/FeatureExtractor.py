@@ -331,7 +331,19 @@ class FeatureExtractor():
 		output.append(self.countWithinArea(self.currentBinary, total, w/2, h/3, w, 2*(h/3))) 	# middle right
 		output.append(self.countWithinArea(self.currentBinary, total, w/2, 2*(h/3), w, h)) 		# lower right
 		
-		return output
+		return self.normalizeInput(output)
+	
+	def getUpperPercent(self):
+		h,w = self.currentBinary.shape
+		total = np.sum(self.currentBinary)
+		
+		output = []
+	
+		output.append(self.countWithinArea(self.currentBinary, total, 0, 0, w/3, h/3)) 			# left
+		output.append(self.countWithinArea(self.currentBinary, total, w/3, 0, 2*(w/3), h/3)) 	# middle
+		output.append(self.countWithinArea(self.currentBinary, total, 2*(w/3), 0, w, h/3)) 		# right
+		
+		return self.normalizeInput(output, 0, 30)
 	
 	
 	def getElbowHandAlignment(self, depth, hand_v, hand_h, elbow_v, elbow_h, handId):
@@ -371,29 +383,31 @@ class FeatureExtractor():
 		
 	
 	
-	def getTipHandDepthDiff(self, depthMap):
+	def getTipHandDepthDiff(self, depthMap, fingerTip, handId):
+		if fingerTip[1]<0 or fingerTip[1]>=480 or fingerTip[0]<0 or fingerTip[0]>=640 or len(self.currentBinary)==0:
+			return 0.0
+		
 		# Retrieve fingertip depth
-		fingerTipDepth = depthMap[self.fingerTip[1]][self.fingerTip[0]]
+		fingerTipDepth = depthMap[fingerTip[1]][fingerTip[0]]
 		
 		# Retrieve non-empty values of the last row to get the coordinates of the middle value
 		index = np.nonzero(self.currentBinary[-1] == 1)
-		h = index[0][0]+int((index[0][-1]-index[0][0])/2)
+		h = self.findNearestValue(self.currentBinary[-1], index[0][0]+int((index[0][-1]-index[0][0])/2))
 		
 		# Retrieve lower part depth
 		lowerDepth = self.currentExtracted[-1][h]+self.tar
 		
 		# Check difference
-		threshold = 50
+		threshold = 100
 		
 		if fingerTipDepth+threshold < lowerDepth:
-			print "front"
-			return 1	# Front
+			print "{0} front {1}".format(self.count, self.orientation[handId])
 		elif fingerTipDepth > lowerDepth+threshold:
-			print "back"
-			return -1	# Back
+			print "{0} back {1}".format(self.count, self.orientation[handId])
 		else:
-			print "lateral"
-			return 0	# Lateral
+			print "{0} lateral {1}".format(self.count, self.orientation[handId])
+		
+		return self.normalizeInput([fingerTipDepth/lowerDepth], 0.9, 1.1)[0]
 	
 	def getTopHandSizeDiff(self):
 		# Get the height of the hand
@@ -408,9 +422,11 @@ class FeatureExtractor():
 		lower = np.sum(self.currentBinary[upperIndex:upperIndex+1, :])
 		upper = np.sum(self.currentBinary[lowerIndex:lowerIndex+1, :], dtype=np.int32)
 		
+		print "lower= {0}\t upper= {1} \t divised={2}".format(lower, upper, lower/float(upper))
+		
 		return lower/float(upper)
 		
-		print "lower= {0}\t upper= {1} \t divised={2}".format(lower, upper, lower/float(upper))
+		
 		
 	
 	
@@ -497,11 +513,15 @@ class FeatureExtractor():
 		self.rotate([v,h], [v2,h2])
 		self.tarExtracted()
 		
+		# Calculate the elbow/hand alignment
+		alignment = self.getElbowHandAlignment(d, v, h, v2, h2, handId)
+		
+		# Retrieve eyes position
+		self.eyePosition[handId] = self.getEyePosition(depthMap, head, alignment)
+		
 		# Retrieve the finger tip position
 		self.fingerTip[handId] = self.getFingerTip()
 		
-		# Retrieve eyes position
-		self.eyePosition[handId] = self.getEyePosition(depthMap, head, self.getElbowHandAlignment(d, v, h, v2, h2, handId))
 		
 		
 		
@@ -512,12 +532,7 @@ class FeatureExtractor():
 		# \-------------------------------/
 		
 		
-		#input.append(self.getTipHandDepthDiff(depthMap))
-		
-		
-		
-		#input.extend(self.normalizeInput([self.getTopHandSizeDiff()], old_min=0, old_max=1))
-		
+		#input.append(self.getTipHandDepthDiff(depthMap, self.fingerTip[handId], handId))
 		
 		
 		
@@ -542,8 +557,12 @@ class FeatureExtractor():
 		
 		
 		# Hold the percentage of actual data within sub-areas
-		input.extend(self.normalizeInput(self.diviseInSix()))
+		input.extend(self.diviseInSix())
+		#input.extend(self.getUpperPercent())
 		
+		
+		
+		self.count += 1
 		
 		return input
 	
@@ -573,7 +592,8 @@ class FeatureExtractor():
 			v = len(self.currentBinary)
 		elif self.rotationAngle == 1:
 			v = h
-			h = len(self.currentBinary)
+			h = len(self.currentBinary)-1
+		
 		
 		# Revert empty columns/rows and initial crop
 		return [self.cropLeft+h+self.emptyLeft, self.cropTop+v+self.emptyTop]

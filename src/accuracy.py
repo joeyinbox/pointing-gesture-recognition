@@ -15,6 +15,11 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import FancyArrowPatch
 from itertools import product, combinations
 
+from matplotlib.colors import ColorConverter
+
+
+
+
 
 
 class Accuracy:
@@ -29,14 +34,10 @@ class Accuracy:
 	
 	
 
-	def getDatasetFiles(self):
-		return np.array([
-			self.utils.getFileList(self.settings.getAccuracyFolder())
-		])
 	
 	
 	def measuredPointedDirection(self):
-		dataset = self.datasetManager.loadDataset(self.getDatasetFiles())
+		dataset = self.datasetManager.loadDataset(self.datasetManager.getAccuracyComplete())
 		output = []
 		
 		for data in dataset:
@@ -55,7 +56,7 @@ class Accuracy:
 	
 	
 	def processedPointedDirection(self):
-		dataset = self.datasetManager.loadDataset(self.getDatasetFiles())
+		dataset = self.datasetManager.loadDataset(self.datasetManager.getAccuracyComplete())
 		output = []
 		
 		for data in dataset:
@@ -81,9 +82,9 @@ class Accuracy:
 		print "Average distance of {0:0.1f} mm.".format(np.average(output))
 	
 	
-	def drawTrajectories(self):
+	def drawUnifiedTrajectories(self):
 		# Load the dataset
-		dataset = self.datasetManager.loadDataset(self.getDatasetFiles())
+		dataset = self.datasetManager.loadDataset(self.datasetManager.getAccuracyComplete())
 		
 		
 		# Create the scene
@@ -110,11 +111,6 @@ class Accuracy:
 			fingerTipCoordinates.append(self.utils.getDepthFromMap(depthMap, fingerTipCoordinates))
 			eyeCoordinates.append(self.utils.getDepthFromMap(depthMap, eyeCoordinates))
 			
-			print fingerTipCoordinates
-			print eyeCoordinates
-			print targetCoordinates
-			print
-			
 			closest = self.validator.findIntersection(fingerTipCoordinates, eyeCoordinates, targetCoordinates, self.expectedRadius)
 			
 			if closest != None:
@@ -125,21 +121,140 @@ class Accuracy:
 				z = [fingerTipCoordinates[2]-targetCoordinates[2], closest[2]-targetCoordinates[2]]
 				
 				# Draw the impact point
-				#ax.scatter(closest[0]-targetCoordinates[0], closest[1]-targetCoordinates[1], closest[2]-targetCoordinates[2], color="r", marker="^", s=100)
 				ax.plot(x, y, z)
 		
 		# Draw the target point
 		ax.scatter(0, 0, 0, c="#000000", marker="o", s=2000)
 		
 		plt.show()
+	
+	
+	def drawImpacts(self):
+		# Load the dataset
+		dataset = self.datasetManager.loadDataset(self.datasetManager.getAccuracyComplete())
 		
-		sys.exit(1)
+		
+		# Create the scene
+		fig = plt.figure()
+		ax = fig.gca(projection='3d')
+		ax.set_aspect("equal")
+		
+		ax.set_xlabel('X (horizontal in mm)')
+		ax.set_ylabel('Y (vertical in mm)')
+		ax.set_zlabel('Z (depth in mm)')
+		
+		
+		colorConverter = ColorConverter()
+		
+		
+		for data in dataset:
+			
+			result = self.featureExtractor.getFeatures(data)
+			
+			
+			# Processed data
+			fingerTipCoordinates = self.featureExtractor.fingerTip[0]
+			eyeCoordinates = self.featureExtractor.eyePosition[0]
+			targetCoordinates = data.target
+			depthMap = data.depth_map
+			
+			fingerTipCoordinates.append(self.utils.getDepthFromMap(depthMap, fingerTipCoordinates))
+			eyeCoordinates.append(self.utils.getDepthFromMap(depthMap, eyeCoordinates))
+			
+			closest = self.validator.findIntersection(fingerTipCoordinates, eyeCoordinates, targetCoordinates, self.expectedRadius)
+			
+			
+			if closest != None:
+				x = closest[0]-targetCoordinates[0]
+				y = closest[1]-targetCoordinates[1]
+				z = closest[2]-targetCoordinates[2]
+				
+				distance = self.validator.findIntersectionDistance(fingerTipCoordinates, eyeCoordinates, targetCoordinates, self.expectedRadius)
+				
+				red = 1-(distance/200)
+				if red < 0:
+					red = 0
+				elif red > 1:
+					red = 1
+				
+				blue = 0+(distance/200)
+				if blue < 0:
+					blue = 0
+				elif blue > 1:
+					blue = 1
+				
+				cc = colorConverter.to_rgba((red,0,blue), 0.4)
+				
+				# Draw the impact point
+				ax.scatter(x, y, z, color=cc, marker="o", s=50)
+		
+		# Draw the target point
+		ax.scatter(0, 0, 0, c="#000000", marker="o", color="#000000", s=100)
+		
+		plt.show()
+	
+	
+	
+	def drawImpacts2D(self, x=True, y=True, z=False):
+		# Load the dataset
+		dataset = self.datasetManager.loadDataset(self.datasetManager.getAccuracyComplete())
+		
+		plt.axis("equal")
+		colorConverter = ColorConverter()
+		
+		for data in dataset:
+			
+			result = self.featureExtractor.getFeatures(data)
+			
+			
+			# Processed data
+			fingerTipCoordinates = self.featureExtractor.fingerTip[0]
+			eyeCoordinates = self.featureExtractor.eyePosition[0]
+			targetCoordinates = data.target
+			depthMap = data.depth_map
+			
+			fingerTipCoordinates.append(self.utils.getDepthFromMap(depthMap, fingerTipCoordinates))
+			eyeCoordinates.append(self.utils.getDepthFromMap(depthMap, eyeCoordinates))
+			
+			closest = self.validator.findIntersection(fingerTipCoordinates, eyeCoordinates, targetCoordinates, self.expectedRadius)
+			
+			
+			if closest != None:
+				x = closest[0]-targetCoordinates[0]
+				y = closest[1]-targetCoordinates[1]
+				z = closest[2]-targetCoordinates[2]
+				
+				distance = self.validator.findIntersectionDistance(fingerTipCoordinates, eyeCoordinates, targetCoordinates, self.expectedRadius)
+				
+				red = 1-(distance/200)
+				if red < 0:
+					red = 0
+				elif red > 1:
+					red = 1
+				
+				blue = 0+(distance/200)
+				if blue < 0:
+					blue = 0
+				elif blue > 1:
+					blue = 1
+				
+				cc = colorConverter.to_rgba((red,0,blue), 0.4)
+				
+				if not x:
+					plt.scatter(y, z, color=cc, marker="o", s=50)
+				elif not y:
+					plt.scatter(x, z, color=cc, marker="o", s=50)
+				else:
+					plt.scatter(x, y, color=cc, marker="o", s=50)
+		
+		plt.show()
+
 
 
 
 if __name__ == "__main__":
 	accuracy = Accuracy()
-	accuracy.drawTrajectories()
+	accuracy.drawImpacts2D()
 
 
 

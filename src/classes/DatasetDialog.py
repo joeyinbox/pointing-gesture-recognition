@@ -4,10 +4,13 @@ from PyQt5 import QtCore, QtWidgets
 from copy import deepcopy
 
 from classes.SensorWidget import *
+from classes.Utils import *
 
 
 # Display a dialog window to prompt the target position
 class DatasetDialog(QtWidgets.QDialog):
+	
+	utils = Utils()
 	
 	def __init__(self, parent=None):
 		super(DatasetDialog, self).__init__(parent)

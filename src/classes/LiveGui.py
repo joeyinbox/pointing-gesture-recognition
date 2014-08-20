@@ -10,10 +10,12 @@ from classes.FeatureExtractor import *
 from classes.LiveDataset import *
 from classes.SensorWidget import *
 from classes.Settings import *
+from classes.Utils import *
 
 
 class LiveGui(QtWidgets.QWidget):
 	
+	utils = Utils()
 	featureExtractor = FeatureExtractor()
 	bpn = BPNHandler(True)
 	

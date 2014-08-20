@@ -41,25 +41,35 @@ class Training():
 	
 	
 	def complete(self):
-		positiveTraining = self.getPositiveComplete("training")
-		negativeTraining = self.getNegativeComplete("training")
-		positiveTesting = self.getPositiveComplete("testing")
-		negativeTesting = self.getNegativeComplete("testing")
-		positiveTarget = self.getCompleteTarget()
+		positiveTraining = self.datasetManager.getPositiveCompleteMixed("training")
+		negativeTraining = self.datasetManager.getMainNegative("training")
+		positiveTesting = self.datasetManager.getPositiveCompleteMixed("testing")
+		negativeTesting = self.datasetManager.getMainNegative("testing")
+		positiveTarget = self.datasetManager.getCompleteMixedTarget()
 		
 		# run the network
-		self.run(positiveTraining, negativeTraining, positiveTesting, negativeTesting, positiveTarget)
+		self.run(positiveTraining, negativeTraining, positiveTesting, negativeTesting, positiveTarget, True)
 	
 	
 	def restrained(self):
-		positiveTraining = self.datasetManager.getPositiveRestrainedMixed("training")
+		positiveTraining = self.datasetManager.getPositiveRestrained("training")
 		negativeTraining = self.datasetManager.getNegativeMainRestrained("training")
-		positiveTesting = self.datasetManager.getPositiveRestrainedMixed("testing")
+		positiveTesting = self.datasetManager.getPositiveRestrained("testing")
 		negativeTesting = self.datasetManager.getNegativeMainRestrained("testing")
-		positiveTarget = self.datasetManager.getRestrainedMixedTarget()
+		positiveTarget = self.datasetManager.getRestrainedTarget()
 		
 		# run the network
-		self.run(positiveTraining, negativeTraining, positiveTesting, negativeTesting, positiveTarget)
+		self.run(positiveTraining, negativeTraining, positiveTesting, negativeTesting, positiveTarget, True)
+		
+	
+	def recentValues(self):
+		trainingInput = self.datasetManager.getRecentValuesRestrained(trainingInput=True)
+		trainingTarget = self.datasetManager.getRecentValuesRestrained(trainingTarget=True)
+		testingInput = self.datasetManager.getRecentValuesRestrained(testingInput=True)
+		testingTarget = self.datasetManager.getRecentValuesRestrained(testingTarget=True)
+		
+		# run the network
+		self.bpn.run(trainingInput, trainingTarget, testingInput, testingTarget, trainingRate=0.05, momentum=0.1, optimal=True)
 		
 	
 	
@@ -100,27 +110,7 @@ class Training():
 		else:
 			# Run the network
 			self.bpn.run(trainingInput, trainingTarget, testingInput, testingTarget, trainingRate=0.05, momentum=0.1, optimal=False)
-		
-		
-		
-		
-			
-		
-		
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-
 
 
 test = Training()
-test.restrained()
+test.recentValues()

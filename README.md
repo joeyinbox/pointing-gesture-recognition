@@ -14,6 +14,19 @@ Automatic Recognition of Pointing Gestures in Python using a depth sensor.
 - Open a terminal and execute the `main.py` file.
 - Stand up and point!
 
+![Live GUI](http://joeyclouvel.com/brookes/live-gui.png)
+
+## Performances and Accuracy ##
+The average pointed direction is **6.5 cm** off the target.
+
+![Impacts heatmap](http://joeyclouvel.com/brookes/impacts-heatmap.png)
+
+The current neural network features the following success percentages:
+- **98.50 %** on training
+- **88.10 %** on testing
+- **90.77 %** on validation
+- **70.83 %** on random data
+
 ## Configuration ##
 - Auto-calibration needs to be enabled in the OpenNI file `FeatureExtraction.ini` by uncommenting and setting to 1 the line `UseAutoCalibration=1` under the **[LBS]** section.
 
@@ -33,7 +46,8 @@ Automatic Recognition of Pointing Gestures in Python using a depth sensor.
 
 ### Check accuracy ###
 - Open a terminal and execute the `accuracy.py` file.
-- More options coming.
+- Get the average pointed direction accuracy.
+- Get a graphic of all trajectories or all impacts relative to the target thanks to [matplotlib](http://matplotlib.org) as illustrated in the performance section.
 
 ## About ##
 This experimentation is part of my Software Engineering Master's dissertation for [Oxford Brookes University](http://brookes.ac.uk) and is meant to be used on their [RoboThespian](https://www.engineeredarts.co.uk) unit.
