@@ -10,6 +10,7 @@ class Dataset:
 	TYPE_POSITIVE = 0
 	TYPE_NEGATIVE = 1
 	TYPE_ACCURACY = 2
+	TYPE_HEATMAP = 3
 	
 	LEFT_HAND = 0
 	RIGHT_HAND = 1
@@ -99,7 +100,7 @@ class Dataset:
 		elif self.type == Dataset.TYPE_ACCURACY:
 			filename = self.settings.getAccuracyFolder()
 		else:
-			filename = ""
+			raise ValueError("Invalid type of dataset to save", self.type)
 		
 		# Retrieve the number of files saved so far
 		# Be careful that due to the sample file, the counter does not need to be incremented. Otherwise, the files would replace each others

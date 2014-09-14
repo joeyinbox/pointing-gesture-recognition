@@ -4,8 +4,11 @@ from openni import *
 import numpy as np
 import cv2, ctypes, functools, skeleton, ui
 
+import accuracy
+from classes.BPNHandler import *
 from classes.DatasetDialog import *
 from classes.Dataset import *
+from classes.FeatureExtractor import *
 from classes.SensorWidget import *
 from classes.Settings import *
 from classes.Utils import *
@@ -14,6 +17,9 @@ from classes.Utils import *
 class DatasetGui(QtWidgets.QWidget):
 	
 	utils = Utils()
+	featureExtractor = FeatureExtractor()
+	bpn = BPNHandler(True)
+	accuracy = accuracy.Accuracy()
 	
 	
 	def __init__(self):
@@ -67,6 +73,13 @@ class DatasetGui(QtWidgets.QWidget):
 		self.countdownTimer.setSingleShot(True)
 		self.countdownTimer.timeout.connect(self.recordCountdown)
 		
+		# Create a timer to eventually record data for a heat map
+		self.heatmapRunning = False
+		self.heatmapTimer = QtCore.QTimer()
+		self.heatmapTimer.setInterval(10)
+		self.heatmapTimer.setSingleShot(True)
+		self.heatmapTimer.timeout.connect(self.recordHeatmap)
+		
 		
 		# Create the global layout
 		self.layout = QtWidgets.QVBoxLayout(self)
@@ -83,7 +96,7 @@ class DatasetGui(QtWidgets.QWidget):
 		self.updateDatasetNumberLabel()
 		
 		# Create the acquisition form elements
-		self.create_acquision_form()
+		self.createAcquisitionForm()
 		
 		
 		# Register a dialog window to prompt the target position
@@ -189,6 +202,13 @@ class DatasetGui(QtWidgets.QWidget):
 		# If the user collects data to check accuracy, prompts additional informations
 		if self.data.type == Dataset.TYPE_ACCURACY:
 			self.saveForTarget()
+		# If the user collects data for a heat map, let's do it
+		elif self.data.type == Dataset.TYPE_HEATMAP:
+			# The same button will be used to stop recording
+			if not self.heatmapRunning:
+				self.startRecordHeatmap()
+			else:
+				self.stopRecordHeatmap()
 		else:
 			# Directly save the dataset and update the label number
 			self.data.save()
@@ -213,6 +233,49 @@ class DatasetGui(QtWidgets.QWidget):
 		self.countdownButton.setText("Save in %ds"%(self.countdownRemaining))
 	
 	
+	def recordHeatmap(self):
+		if self.data.hand == self.settings.NO_HAND:
+			print "Unable to record as no hand is selected"
+			return False
+		
+		if len(self.user.users) > 0 and len(self.data.skeleton["head"]) > 0:
+			# Input the data into the feature extractor
+			result = self.bpn.check(self.featureExtractor.getFeatures(self.data))
+			
+			# Add the depth of the finger tip
+			point = self.featureExtractor.fingerTip[result[1]]
+			point.append(self.utils.getDepthFromMap(self.data.depth_map, point))
+			
+			# Verify that informations are correct
+			if point[0]!=0 and point[1]!=0 and point[2]!=0:
+				# Add the result of the neural network
+				point.append(result[0])
+				
+				self.heatmap.append(point)
+				self.countdownSound.play()
+			
+		# Loop timer
+		self.heatmapTimer.start()
+	
+	def startRecordHeatmap(self):
+		self.saveButton.setText("Stop recording")
+		self.heatmapRunning = True
+		self.heatmapTimer.start()
+		
+	
+	def stopRecordHeatmap(self):
+		self.heatmapTimer.stop()
+		self.heatmapRunning = False
+		self.countdownEndedSound.play()
+		
+		self.saveButton.setText("Record")
+		
+		self.accuracy.showHeatmap(self.heatmap, "front")
+		self.heatmap = []
+		
+		
+	
+	
 	def startRecordWhenReady(self):
 		self.recordIfReady = True
 	
@@ -231,9 +294,22 @@ class DatasetGui(QtWidgets.QWidget):
 	
 	def toggleType(self, value):
 		self.data.toggleType(value)
-		self.updateDatasetNumberLabel()
+		
+		if value == self.data.TYPE_HEATMAP:
+			self.saveButton.setText("Record")
+			self.countdownButton.setText("Record in %ds"%(self.countdownRemaining))
+			self.readyButton.setEnabled(False)
+			
+			# Create an array to hold all points
+			self.heatmap = []
+		else:
+			self.updateDatasetNumberLabel()
+			if hasattr(self, 'saveButton'):
+				self.saveButton.setText("Save")
+				self.countdownButton.setText("Save in %ds"%(self.countdownRemaining))
+				self.readyButton.setEnabled(True)
 	
-	def create_acquision_form(self):
+	def createAcquisitionForm(self):
 		globalLayout = QtWidgets.QHBoxLayout()
 		vlayout = QtWidgets.QVBoxLayout()
 		
@@ -279,6 +355,7 @@ class DatasetGui(QtWidgets.QWidget):
 		comboBox.addItem("Positive")
 		comboBox.addItem("Negative")
 		comboBox.addItem("Accuracy")
+		comboBox.addItem("Heat map")
 		comboBox.setCurrentIndex(0)
 		hlayout.addWidget(label)
 		hlayout.addWidget(comboBox)
