@@ -1,3 +1,6 @@
+from accuracy import Accuracy
+
+
 from classes.BackPropagationNetwork import BackPropagationNetwork
 from classes.BPNHandler import BPNHandler
 
@@ -13,6 +16,9 @@ from classes.LiveGui import LiveGui
 
 from classes.SensorWidget import SensorWidget
 from classes.Settings import Settings
+
+from classes.Testing import Testing
+from classes.UnitTesting import UnitTesting
 
 from classes.Utils import Utils
 

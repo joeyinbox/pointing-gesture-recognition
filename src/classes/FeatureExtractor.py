@@ -1,16 +1,13 @@
 #! /usr/bin/python -W ignore::FutureWarning
-from classes.BackPropagationNetwork import *
 from classes.Dataset import *
-from classes.LightDataset import *
 from classes.LiveDataset import *
 from classes.Settings import *
-from classes.Utils import *
+from classes.Testing import *
 import numpy as np
 import sys, math
 import scipy.stats, scipy.ndimage
 import cv2
 from copy import deepcopy
-import time
 import signal
 import heapq
 
@@ -19,6 +16,9 @@ class FeatureExtractor():
 	
 	# Load settings
 	settings = Settings()
+	
+	# Compatibility with testing mode
+	testing = Testing()
 	
 	# Hold all input feature data
 	trainingInput, testingInput, validatingInput = [], [], []
@@ -44,8 +44,6 @@ class FeatureExtractor():
 	eyePosition = [[0,0], [0,0]]
 	orientation = ["", ""]
 	
-	
-	count = 0
 	
 	bpnValidating = None
 	
@@ -88,6 +86,9 @@ class FeatureExtractor():
 		
 		# Remove this value to all elements of the matrice
 		self.currentExtracted = self.currentExtracted-np.array([self.tar])
+		
+		# For testing purpose
+		self.testing.timerMarker("Tar the values of the extracted hand")
 	
 	
 	def getEuclidianDistance(self, a, b):
@@ -119,8 +120,12 @@ class FeatureExtractor():
 		# Re-initialise empty holders
 		self.emptyTop, self.emptyLeft, self.emptyBottom, self.emptyRight = 0, 0, 0, 0
 		
+		# Verify the content of the matrices
+		if self.currentExtracted.size==0 or self.currentBinary.size==0:
+			return False
 		
-		# Remove all zeros columns and rows from both matrices
+		
+		# Count along columns and rows from both matrices to detect empty ones
 		column = self.currentBinary.sum(axis=0).astype(int)
 		row = self.currentBinary.sum(axis=1).astype(int)
 
@@ -156,6 +161,9 @@ class FeatureExtractor():
 			self.emptyBottom += 1
 			i -= 1
 		
+		# For testing purpose
+		self.testing.timerMarker("Remove all zeros columns and rows from both matrices")
+		
 	
 	
 	
@@ -183,7 +191,9 @@ class FeatureExtractor():
 		
 		
 		# Check if the elbow is on top/bottom extrems to determine the rotation degree
-		if v>h:
+		if hand[0]==elbow[0] and hand[1]==elbow[1]:
+			self.rotationAngle = 0
+		elif v>h:
 			if not up:
 				self.rotationAngle = 0
 			else:
@@ -198,6 +208,9 @@ class FeatureExtractor():
 		# Apply rotation
 		self.currentBinary = np.rot90(self.currentBinary, self.rotationAngle)
 		self.currentExtracted = np.rot90(self.currentExtracted, self.rotationAngle)
+		
+		# For testing purpose
+		self.testing.timerMarker("Matrice rotation")
 	
 	
 	def getHistogram(self):
@@ -306,13 +319,16 @@ class FeatureExtractor():
 		if value < 0:
 			return 0
 		elif value > max:
-			return max
+			if max > 0:
+				return max
+			else:
+				return 0
 		else: 
 			return value
 
-	def countWithinArea(self, data, total, h1, v1, h2,v2):
+	def countWithinArea(self, data, total, h1, v1, h2, v2):
 		# Return the percentage of actual data within a restricted area
-		if self.currentW != 0 and self.currentH != 0:
+		if self.currentW>0 and self.currentH>0 and total>0 and data.size>0 and data.shape[0]>=h2 and data.shape[1]>=v2:
 			return np.sum(data[v1:v2, h1:h2], dtype=np.int32)/float(total)*100
 		else:
 			return 0
@@ -351,7 +367,10 @@ class FeatureExtractor():
 		# Uses the disposition of the hand and the elbow
 		
 		# At 1m, a variation of 60 pixels indicates a position change
-		threshold = (60/float(depth))*1000
+		if depth>0:
+			threshold = (60/float(depth))*1000
+		else:
+			threshold = 60
 		
 		# Right, Left or Front?
 		if hand_h > elbow_h+threshold:
@@ -377,6 +396,8 @@ class FeatureExtractor():
 			self.orientation[handId] += "lateral"
 		
 		
+		# For testing purpose
+		self.testing.timerMarker("Get elbow / hand alignment")
 		
 		return [h,v]
 		
@@ -401,11 +422,11 @@ class FeatureExtractor():
 		threshold = 100
 		
 		if fingerTipDepth+threshold < lowerDepth:
-			print "{0} front {1}".format(self.count, self.orientation[handId])
+			print "front {1}".format(self.orientation[handId])
 		elif fingerTipDepth > lowerDepth+threshold:
-			print "{0} back {1}".format(self.count, self.orientation[handId])
+			print "back {1}".format(self.orientation[handId])
 		else:
-			print "{0} lateral {1}".format(self.count, self.orientation[handId])
+			print "lateral {1}".format(self.orientation[handId])
 		
 		return self.normalizeInput([fingerTipDepth/lowerDepth], 0.9, 1.1)[0]
 	
@@ -432,11 +453,14 @@ class FeatureExtractor():
 	
 	def normalizeInput(self, input, old_min=0, old_max=100):
 		# Normalize the data in a range from -1 to 1
-		old_range = old_max - old_min
+		old_range = old_max-old_min
 		new_min = -1
-		new_range = 1 - new_min
+		new_range = 1-new_min
+		
+		if old_range==0:
+			raise ValueError("Invalid range")
 	
-		return [float((n - old_min) / float(old_range) * new_range + new_min) for n in input]
+		return [float((n-old_min) / float(old_range) * new_range + new_min) for n in input]
 	
 	def getFeatures(self, data):
 		result = []
@@ -455,18 +479,28 @@ class FeatureExtractor():
 		return result
 	
 	def processFeatures(self, h,v,d, h2,v2,d2, depthMap, head, handId=0):
+		# Assert the validaity of the values
+		if depthMap.size==0 or len(depthMap.shape)<=1:
+			return [-1.0,-1.0,-1.0,-1.0,-1.0,-1.0]
+		
+		
 		# Determine the bounding box around the pointing hand regarding to the depth of the hand
 		if d != 0:
 			shift = int((1000.0/d)*90)
 		else:
 			shift = 1
 		
+		# For testing purpose
+		self.testing.startTimer()
 	
 		# Determine the coordinates of the bounding box to extract
 		self.cropTop = self.keepRange(int(v-shift), 480)
 		self.cropLeft = self.keepRange(int(h-shift), 640)
 		self.cropBottom = self.keepRange(int(v+shift)+1, 480)
 		self.cropRight = self.keepRange(int(h+shift)+1, 640)
+		
+		# For testing purpose
+		self.testing.timerMarker("Determine the coordinates of the bounding box to extract")
 	
 		# Extract the informations within the bounding box
 		startV = shift-v+self.cropTop
@@ -480,6 +514,9 @@ class FeatureExtractor():
 		self.currentExtracted[startV:endV, startH:endH] = depthMap[self.cropTop:self.cropBottom, self.cropLeft:self.cropRight]
 		self.currentBinary = np.copy(self.currentExtracted)
 		
+		# For testing purpose
+		self.testing.timerMarker("Extract the informations within the bounding box")
+		
 	
 		# Extract the hand from the background with a threshold
 		start = d-100
@@ -488,6 +525,9 @@ class FeatureExtractor():
 		self.currentBinary = self.thresholdBinary(self.currentBinary, start, end)
 		self.currentExtracted = self.thresholdExtracted(self.currentExtracted, start, end)
 		
+		# For testing purpose
+		self.testing.timerMarker("Extract the hand from the background with a threshold")
+		
 		
 		# Remove all zeros columns and rows from both matrices
 		self.removeEmptyColumnsRows()
@@ -495,18 +535,6 @@ class FeatureExtractor():
 		
 		# Initialize the input features
 		input = []
-		
-		
-		
-		
-		# /--------------------------------\
-		# |          Feature 1-2           |
-		# |     Hand / Elbow alignment     |
-		# \--------------------------------/
-		
-		
-		#input.extend(self.getElbowHandAlignment(d, v, h, v2, h2))
-		
 		
 		
 		# Rotate the hand to form a vertical line between the hand and the elbow
@@ -519,29 +547,14 @@ class FeatureExtractor():
 		# Retrieve eyes position
 		self.eyePosition[handId] = self.getEyePosition(depthMap, head, alignment)
 		
+		# For testing purpose
+		self.testing.timerMarker("Get eye position")
+		
 		# Retrieve the finger tip position
 		self.fingerTip[handId] = self.getFingerTip()
 		
-		
-		
-		
-		
-		# /-------------------------------\
-		# |           Feature 3           |
-		# |   Finger tip / lower depth    |
-		# \-------------------------------/
-		
-		
-		#input.append(self.getTipHandDepthDiff(depthMap, self.fingerTip[handId], handId))
-		
-		
-		
-		
-		# /----------------------------------------\
-		# | Depth map of the hand is now extracted |
-		# |        Starting getting features       |
-		# \----------------------------------------/
-		
+		# For testing purpose
+		self.testing.timerMarker("Get fingertip")
 		
 		
 		# Hold the ratio
@@ -558,11 +571,10 @@ class FeatureExtractor():
 		
 		# Hold the percentage of actual data within sub-areas
 		input.extend(self.diviseInSix())
-		#input.extend(self.getUpperPercent())
 		
-		
-		
-		self.count += 1
+		# For testing purpose
+		self.testing.timerMarker("Process hand histogram")
+		self.testing.stopTimer()
 		
 		return input
 	
@@ -575,6 +587,9 @@ class FeatureExtractor():
 		# Retrieve non-empty values of the first row
 		index = np.nonzero(self.currentBinary[0] == 1)
 		output = []
+		
+		if len(index)<1 or len(index[0])<1:
+			return [0,0]
 		
 		# Finger tip coordinates (once rotated!)
 		v = 0
@@ -601,6 +616,10 @@ class FeatureExtractor():
 		
 		
 	def getEyePosition(self, depthMap, head, elbowHand):
+		# Assert the validaity of the values
+		if depthMap.size==0 or len(depthMap.shape)<=1:
+			return [0,0]
+			
 		# First extract a sub-area based on the depth
 		h,v,d = map(int, head)
 		
