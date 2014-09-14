@@ -1,41 +1,25 @@
 {
-	"depth_map": [
-		[0,0],
-		[0,0]
-	],
+	"camera_height": 1500,
+	"depth_map": [],
+	"distance": 0,
+	"hand": 0,
 	"image": "",
-	"camera_height": 0,
-	"user": {
-		"distance": 0,
-		"angle": 0,
-		"height": 0,
-		"arm_length": 0
-	},
-	"hand": {
-		"width": 0,
-		"thickness": 0,
-		"height": 0
-	},
-	"finger_tip": [0,0,0],
 	"skeleton": {
 		"shoulder": {
-			"right": [0,0,0],
-			"center": [0,0,0],
-			"left": [0,0,0]
+			"right": [x,y,z],
+			"center": [x,y,z],
+			"left": [x,y,z]
 		},
 		"elbow": {
-			"right": [0,0,0],
-			"left": [0,0,0]
+			"right": [x,y,z],
+			"left": [x,y,z]
 		},
-		"head": [0,0,0],
+		"head": [x,y,z],
 		"hand": {
-			"right": [0,0,0],
-			"left": [0,0,0]
+			"right": [x,y,z],
+			"left": [x,y,z]
 		}
 	},
-	"target": {
-		"distance": 0,
-		"angle": 0,
-		"height": 0
-	}
+	"target": [x,y,z],
+	"type": 0
 }

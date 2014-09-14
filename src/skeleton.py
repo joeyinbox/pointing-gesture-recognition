@@ -13,27 +13,27 @@ def init(user):
 	skel_cap = user.skeleton_cap
 
 	# Register the callbacks
-	user.register_user_cb(new_user, lost_user)
-	skel_cap.register_c_start_cb(calibration_start)
-	skel_cap.register_c_complete_cb(calibration_complete)
+	user.register_user_cb(newUser, lostUser)
+	skel_cap.register_c_start_cb(calibrationStart)
+	skel_cap.register_c_complete_cb(calibrationComplete)
 
 	# Set the profile
 	skel_cap.set_profile(SKEL_PROFILE_ALL)
 	
 
 # Callback used when a new user is detected
-def new_user(src, id):
+def newUser(src, id):
     print "1/3 User {} detected." .format(id)
     skel_cap.request_calibration(id, True)
 
 
 # Callback used to calibrate a new user skeleton
-def calibration_start(src, id):
+def calibrationStart(src, id):
     print "2/3 Calibration started for user {}." .format(id)
 
 
 # Callback used to start tracking a user
-def calibration_complete(src, id, status):
+def calibrationComplete(src, id, status):
     if status == CALIBRATION_STATUS_OK:
         print "3/3 User {} successfully calibrated! Starting to track." .format(id)
         skel_cap.start_tracking(id)
@@ -46,7 +46,7 @@ def clear(users):
 
 
 # Callback called when a user is lost
-def lost_user(src, id):
+def lostUser(src, id):
     print "User {} lost.." .format(id)
 
 

@@ -69,7 +69,7 @@ class Training():
 		testingTarget = self.datasetManager.getRecentValuesRestrained(testingTarget=True)
 		
 		# run the network
-		self.bpn.run(trainingInput, trainingTarget, testingInput, testingTarget, trainingRate=0.05, momentum=0.1, optimal=True)
+		self.bpn.run(trainingInput, trainingTarget, testingInput, testingTarget, learningRate=0.05, momentum=0.1, optimal=True)
 		
 	
 	
@@ -109,7 +109,7 @@ class Training():
 			
 		else:
 			# Run the network
-			self.bpn.run(trainingInput, trainingTarget, testingInput, testingTarget, trainingRate=0.05, momentum=0.1, optimal=False)
+			self.bpn.run(trainingInput, trainingTarget, testingInput, testingTarget, learningRate=0.05, momentum=0.1, optimal=False)
 
 
 test = Training()

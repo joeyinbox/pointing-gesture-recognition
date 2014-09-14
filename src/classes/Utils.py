@@ -76,6 +76,9 @@ class Utils:
 	
 	# Return the depth value of a point from the depth map
 	def getDepthFromMap(self, depthMap, position):
+		if len(depthMap.shape)<=1 or len(position)!=2:
+			return 0
+			
 		y = int(position[0])
 		x = int(position[1])
 	

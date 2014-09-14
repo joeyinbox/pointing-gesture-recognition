@@ -67,7 +67,7 @@ class LiveGui(QtWidgets.QWidget):
 		self.resultLabel.setText("No")
 		
 		# Create the acquisition form elements
-		self.create_acquision_form()
+		self.createAcquisitionForm()
 		
 		
 		# Create and launch a timer to update the images
@@ -154,7 +154,7 @@ class LiveGui(QtWidgets.QWidget):
 		
 	
 	# Create the acquisition interface form
-	def create_acquision_form(self):
+	def createAcquisitionForm(self):
 		globalLayout = QtWidgets.QHBoxLayout()
 		
 		hlayout = QtWidgets.QHBoxLayout()

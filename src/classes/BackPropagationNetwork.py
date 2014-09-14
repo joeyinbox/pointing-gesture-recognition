@@ -94,7 +94,7 @@ class BackPropagationNetwork:
 		return self._layerOutput[-1].T
 	
 	# Trains the network for one epoch
-	def trainEpoch(self, input, target, trainingRate=0.2, momentum=0.5):
+	def trainEpoch(self, input, target, learningRate=0.2, momentum=0.5):
 		
 		delta = []
 		lnCases = input.shape[0]
@@ -127,7 +127,7 @@ class BackPropagationNetwork:
 								 layerOutput[None, :, :].transpose(2, 0, 1)*delta[delta_index][None, :, :].transpose(2, 1, 0)\
 								 , axis=0)
 			
-			weightDelta = trainingRate*currentWeightDelta + momentum*self._previousWeightDelta[index]
+			weightDelta = learningRate*currentWeightDelta + momentum*self._previousWeightDelta[index]
 			
 			self.weights[index] -= weightDelta
 			self._previousWeightDelta[index] = weightDelta

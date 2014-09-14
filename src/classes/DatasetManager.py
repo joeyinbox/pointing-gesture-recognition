@@ -2,7 +2,6 @@
 from classes.Dataset import *
 from classes.Settings import *
 from classes.Utils import *
-from classes.FeatureExtractor import *
 
 import numpy as np
 import sys
@@ -47,7 +46,7 @@ class DatasetManager():
 	# Return all positive files from a specified type separately (training, testing or validating)
 	def getPositiveComplete(self, type="training"):
 		if type!="training" and type!="testing" and type!="validating":
-			raise "Invalid type of dataset wanted", type
+			raise ValueError("Invalid type of dataset wanted", type)
 		
 		folder = self.settings.getPositiveFolder()
 		
@@ -86,7 +85,7 @@ class DatasetManager():
 	# Return all positive files from a specified type by orientation (training, testing or validating)
 	def getPositiveCompleteMixed(self, type="training"):
 		if type!="training" and type!="testing" and type!="validating":
-			raise "Invalid type of dataset wanted", type
+			raise ValueError("Invalid type of dataset wanted", type)
 		
 		folder = self.settings.getPositiveFolder()
 		
@@ -134,7 +133,7 @@ class DatasetManager():
 	# Return main positive files from a specified type separately (training, testing or validating)
 	def getPositiveRestrained(self, type="training"):
 		if type!="training" and type!="testing" and type!="validating":
-			raise "Invalid type of dataset wanted", type
+			raise ValueError("Invalid type of dataset wanted", type)
 		
 		folder = self.settings.getPositiveFolder()
 		
@@ -161,7 +160,7 @@ class DatasetManager():
 	# Return main positive files from a specified type by orientation (training, testing or validating)
 	def getPositiveRestrainedMixed(self, type="training"):
 		if type!="training" and type!="testing" and type!="validating":
-			raise "Invalid type of dataset wanted", type
+			raise ValueError("Invalid type of dataset wanted", type)
 		
 		folder = self.settings.getPositiveFolder()
 		
@@ -194,7 +193,7 @@ class DatasetManager():
 	# Return all negative files from a specified type separately (training, testing or validating)
 	def getNegativeComplete(self, type="training"):
 		if type!="training" and type!="testing" and type!="validating":
-			raise "Invalid type of dataset wanted", type
+			raise ValueError("Invalid type of dataset wanted", type)
 		
 		folder = self.settings.getNegativeFolder()
 		
@@ -254,7 +253,7 @@ class DatasetManager():
 	# Return main negative files from a specified type separately (training, testing or validating)
 	def getMainNegative(self, type="training"):
 		if type!="training" and type!="testing" and type!="validating":
-			raise "Invalid type of dataset wanted", type
+			raise ValueError("Invalid type of dataset wanted", type)
 		
 		folder = self.settings.getNegativeFolder()
 		
@@ -293,7 +292,7 @@ class DatasetManager():
 	# Return all main negative files from a specified type by orientation (training, testing or validating)
 	def getNegativeRestrained(self, type="training"):
 		if type!="training" and type!="testing" and type!="validating":
-			raise "Invalid type of dataset wanted", type
+			raise ValueError("Invalid type of dataset wanted", type)
 		
 		folder = self.settings.getNegativeFolder()
 		
@@ -332,7 +331,7 @@ class DatasetManager():
 	# Return only main negative files from a specified type by orientation (training, testing or validating)
 	def getNegativeMainRestrained(self, type="training"):
 		if type!="training" and type!="testing" and type!="validating":
-			raise "Invalid type of dataset wanted", type
+			raise ValueError("Invalid type of dataset wanted", type)
 		
 		folder = self.settings.getNegativeFolder()
 		
