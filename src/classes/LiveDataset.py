@@ -2,8 +2,7 @@
 
 class LiveDataset:
 	def __init__(self):
-		print "Live dataset"
-		self.hand = 0
+		self.hand = 3
 		self.skeleton = {
 			"head": [],
 			"shoulder": {

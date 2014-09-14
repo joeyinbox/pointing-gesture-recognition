@@ -13,6 +13,7 @@ from classes.FeatureExtractor import FeatureExtractor
 
 from classes.LiveDataset import LiveDataset
 from classes.LiveGui import LiveGui
+from classes.Live import Live
 
 from classes.SensorWidget import SensorWidget
 from classes.Settings import Settings
