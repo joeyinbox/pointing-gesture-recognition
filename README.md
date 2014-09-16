@@ -11,7 +11,7 @@ Automatic Recognition of Pointing Gestures in Python using a depth sensor.
 - Depth sensor (e.g. Kinect, Asus Xtion Live)
 
 ## Getting started ##
-- Open a terminal and execute the `main.py` file.
+- Open a terminal and execute the `main.py` file (CLI-only version: `live.py`).
 - Stand up and point!
 
 ![Live GUI](http://joeyclouvel.com/brookes/live-gui.png)
