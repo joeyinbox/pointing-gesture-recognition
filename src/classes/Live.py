@@ -10,6 +10,7 @@ from classes.FeatureExtractor import *
 from classes.LiveDataset import *
 from classes.Settings import *
 from classes.Utils import *
+from classes.Testing import *
 
 
 class Live():
@@ -17,6 +18,7 @@ class Live():
 	utils = Utils()
 	featureExtractor = FeatureExtractor()
 	bpn = BPNHandler(True)
+	testing = Testing()
 	
 	def __init__(self):
 		# Retrieve all settings
