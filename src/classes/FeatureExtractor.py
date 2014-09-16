@@ -328,7 +328,7 @@ class FeatureExtractor():
 
 	def countWithinArea(self, data, total, h1, v1, h2, v2):
 		# Return the percentage of actual data within a restricted area
-		if self.currentW>0 and self.currentH>0 and total>0 and data.size>0 and data.shape[0]>=h2 and data.shape[1]>=v2:
+		if self.currentW>0 and self.currentH>0 and total>0 and data.size>0 and data.shape[0]>=v2 and data.shape[1]>=h2:
 			return np.sum(data[v1:v2, h1:h2], dtype=np.int32)/float(total)*100
 		else:
 			return 0

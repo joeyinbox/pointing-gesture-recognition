@@ -24,7 +24,7 @@ The average pointed direction is **6.5 cm** off the target.
 The current neural network features the following success percentages:
 - **98.50 %** on training
 - **88.10 %** on testing
-- **90.77 %** on validation
+- **88.10 %** on validation
 - **70.83 %** on random data
 
 ## Configuration ##

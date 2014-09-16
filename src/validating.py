@@ -29,8 +29,8 @@ class Validating():
 	
 	
 	def restrained(self):
-		positiveValidating = self.datasetManager.getPositiveRestrainedMixed("testing")
-		negativeValidating = self.datasetManager.getNegativeMainRestrained("testing")
+		positiveValidating = self.datasetManager.getPositiveRestrainedMixed("validating")
+		negativeValidating = self.datasetManager.getNegativeMainRestrained("validating")
 		
 		# run the network
 		self.run(positiveValidating, negativeValidating)
