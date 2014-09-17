@@ -18,9 +18,9 @@ from classes.Live import Live
 from classes.SensorWidget import SensorWidget
 from classes.Settings import Settings
 
+from classes.Trigonometry import Trigonometry
+
 from classes.Testing import Testing
 from classes.UnitTesting import UnitTesting
 
 from classes.Utils import Utils
-
-from classes.Validator import Validator

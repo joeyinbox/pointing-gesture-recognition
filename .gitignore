@@ -53,10 +53,8 @@ coverage.xml
 docs/_build/
 
 # Original dataset
-dataset/old/
 dataset/accuracy/
 dataset/positive/
-dataset/positive-reorganised/
 dataset/negative/
 
 # Tests

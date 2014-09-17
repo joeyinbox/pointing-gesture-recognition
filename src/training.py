@@ -112,5 +112,8 @@ class Training():
 			self.bpn.run(trainingInput, trainingTarget, testingInput, testingTarget, learningRate=0.05, momentum=0.1, optimal=False)
 
 
-test = Training()
-test.recentValues()
+
+
+ if __name__ == __main__:
+	 app = Training()
+	 app.recentValues()

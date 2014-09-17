@@ -106,6 +106,6 @@ class Validating():
 
 
 
-
-test = Validating()
-test.restrained()
+if __name__ == "__main__":
+	app = Validating()
+	app.restrained()

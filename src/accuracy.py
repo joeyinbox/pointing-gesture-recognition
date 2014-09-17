@@ -6,8 +6,9 @@ from classes.BPNHandler import *
 from classes.DatasetManager import *
 from classes.FeatureExtractor import *
 from classes.Settings import *
+from classes.Trigonometry import *
 from classes.Utils import *
-from classes.Validator import *
+
 
 from mpl_toolkits.mplot3d import Axes3D, proj3d
 import matplotlib.pyplot as plt
@@ -26,8 +27,9 @@ class Accuracy:
 	datasetManager = DatasetManager()
 	featureExtractor = FeatureExtractor()
 	settings = Settings()
+	trigonometry = Trigonometry()
 	utils = Utils()
-	validator = Validator()
+	
 
 	expectedRadius = 2000
 	
@@ -44,7 +46,7 @@ class Accuracy:
 			eyeCoordinates = data.eye
 			targetCoordinates = data.target
 			
-			distance = self.validator.findIntersectionDistance(fingerTipCoordinates, eyeCoordinates, targetCoordinates, self.expectedRadius)
+			distance = self.trigonometry.findIntersectionDistance(fingerTipCoordinates, eyeCoordinates, targetCoordinates, self.expectedRadius)
 			if distance == None:
 				print "Missed..."
 			else:
@@ -71,7 +73,7 @@ class Accuracy:
 			eyeCoordinates.append(self.utils.getDepthFromMap(depthMap, eyeCoordinates))
 			
 			
-			distance = self.validator.findIntersectionDistance(fingerTipCoordinates, eyeCoordinates, targetCoordinates, self.expectedRadius)
+			distance = self.trigonometry.findIntersectionDistance(fingerTipCoordinates, eyeCoordinates, targetCoordinates, self.expectedRadius)
 			if distance == None:
 				print "Missed..."
 			else:
@@ -110,7 +112,7 @@ class Accuracy:
 			fingerTipCoordinates.append(self.utils.getDepthFromMap(depthMap, fingerTipCoordinates))
 			eyeCoordinates.append(self.utils.getDepthFromMap(depthMap, eyeCoordinates))
 			
-			closest = self.validator.findIntersection(fingerTipCoordinates, eyeCoordinates, targetCoordinates, self.expectedRadius)
+			closest = self.trigonometry.findIntersection(fingerTipCoordinates, eyeCoordinates, targetCoordinates, self.expectedRadius)
 			
 			if closest != None:
 				
@@ -160,7 +162,7 @@ class Accuracy:
 			fingerTipCoordinates.append(self.utils.getDepthFromMap(depthMap, fingerTipCoordinates))
 			eyeCoordinates.append(self.utils.getDepthFromMap(depthMap, eyeCoordinates))
 			
-			closest = self.validator.findIntersection(fingerTipCoordinates, eyeCoordinates, targetCoordinates, self.expectedRadius)
+			closest = self.trigonometry.findIntersection(fingerTipCoordinates, eyeCoordinates, targetCoordinates, self.expectedRadius)
 			
 			
 			if closest != None:
@@ -168,7 +170,7 @@ class Accuracy:
 				y = closest[1]-targetCoordinates[1]
 				z = closest[2]-targetCoordinates[2]
 				
-				distance = self.validator.findIntersectionDistance(fingerTipCoordinates, eyeCoordinates, targetCoordinates, self.expectedRadius)
+				distance = self.trigonometry.findIntersectionDistance(fingerTipCoordinates, eyeCoordinates, targetCoordinates, self.expectedRadius)
 				
 				red = 1-(distance/200)
 				if red < 0:
@@ -215,7 +217,7 @@ class Accuracy:
 			fingerTipCoordinates.append(self.utils.getDepthFromMap(depthMap, fingerTipCoordinates))
 			eyeCoordinates.append(self.utils.getDepthFromMap(depthMap, eyeCoordinates))
 			
-			closest = self.validator.findIntersection(fingerTipCoordinates, eyeCoordinates, targetCoordinates, self.expectedRadius)
+			closest = self.trigonometry.findIntersection(fingerTipCoordinates, eyeCoordinates, targetCoordinates, self.expectedRadius)
 			
 			
 			if closest != None:
@@ -223,7 +225,7 @@ class Accuracy:
 				y = closest[1]-targetCoordinates[1]
 				z = closest[2]-targetCoordinates[2]
 				
-				distance = self.validator.findIntersectionDistance(fingerTipCoordinates, eyeCoordinates, targetCoordinates, self.expectedRadius)
+				distance = self.trigonometry.findIntersectionDistance(fingerTipCoordinates, eyeCoordinates, targetCoordinates, self.expectedRadius)
 				
 				red = 1-(distance/200)
 				if red < 0:

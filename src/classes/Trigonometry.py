@@ -2,7 +2,7 @@
 import sys, math
 
 
-class Validator:
+class Trigonometry:
 		
 	def retrieveCoordinates(self, y, angle, distance):
 		# Retrieve X and Z coordinates thanks to the angle and the distance relative to the camera
@@ -95,7 +95,7 @@ class Validator:
 			# The closest point is this only intersection
 			return point
 			
-		elif dis < 0:
+		else:
 			return None
 	
 	
