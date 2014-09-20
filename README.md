@@ -17,7 +17,7 @@ Automatic Recognition of Pointing Gestures in Python using a depth sensor.
 ![Live GUI](http://joeyclouvel.com/brookes/live-gui.png)
 
 ## Performances and Accuracy ##
-The average pointed direction is **6.5 cm** off the target.
+The average pointed direction is **18.6 cm** off the target, representing an error angle of **5.3°**.
 
 ![Impacts heatmap](http://joeyclouvel.com/brookes/impacts-heatmap.png)
 

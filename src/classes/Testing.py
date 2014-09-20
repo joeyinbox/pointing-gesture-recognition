@@ -7,7 +7,7 @@ class Testing:
 	enabled = False
 	timer = 0
 	timerTotal = 0
-	sampleSize = 100
+	sampleSize = 1000
 	data = {"stop":{"total":0,"count":0}}
 	
 	def isEnabled(self):

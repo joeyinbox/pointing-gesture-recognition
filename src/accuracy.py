@@ -33,6 +33,16 @@ class Accuracy:
 
 	expectedRadius = 2000
 	
+	direction = [
+		"back-right",
+		"right",
+		"front-right",
+		"front",
+		"front-left",
+		"left",
+		"back-left"
+	]
+	
 	
 
 	
@@ -58,7 +68,10 @@ class Accuracy:
 	
 	def processedPointedDirection(self):
 		dataset = self.datasetManager.loadDataset(self.datasetManager.getAccuracyComplete())
-		output = []
+		outputDistance = []
+		outputAngle = []
+		outputAngleCamera = []
+		outputDistanceAt2m = []
 		
 		for data in dataset:
 			features = self.featureExtractor.getFeatures(data)
@@ -73,14 +86,92 @@ class Accuracy:
 			eyeCoordinates.append(self.utils.getDepthFromMap(depthMap, eyeCoordinates))
 			
 			
+			# Retrieve the distance between the actual target and the closest impact
 			distance = self.trigonometry.findIntersectionDistance(fingerTipCoordinates, eyeCoordinates, targetCoordinates, self.expectedRadius)
 			if distance == None:
 				print "Missed..."
 			else:
-				print "The pointed direction intersects the target at a distance of {0:0.1f} mm.".format(distance)
-				output.append(distance)
+				outputDistance.append(distance)
+				
+				# Retrieve the distance between the target and the fingertip:
+				targetDistance = float(data.distance)
+				
+				# Calculate the error angles
+				angle = math.degrees(math.asin(distance/targetDistance))
+				outputAngle.append(angle)
+				
+				angleCamera = math.degrees(math.asin(distance/targetCoordinates[2]))
+				outputAngleCamera.append(angleCamera)
+				
+				distanceAt2m = math.asin(distance/targetDistance)*2000
+				outputDistanceAt2m.append(distanceAt2m)
+				
+				print "--- Impact distance: {0:0.1f} mm\t Impact at 2m: {1:0.1f}\t Error angle (fingertip): {2:0.1f} deg\t Error angle (camera): {3:0.1f} deg".format(distance, distanceAt2m, angle, angleCamera)
+				
 		
-		print "Average distance of {0:0.1f} mm.".format(np.average(output))
+		print "---\n--- Average impact distance of {0:0.1f} mm.".format(np.average(outputDistance))
+		print "--- Average impact distance at 2 m of {0:0.1f} mm.".format(np.average(outputDistanceAt2m))
+		print "--- Average eror angle of {0:0.1f} deg at the fingertip.".format(np.average(outputAngle))
+		print "--- Average eror angle of {0:0.1f} deg at the camera.".format(np.average(outputAngleCamera))
+	
+	
+	def processedPointedDirectionByCategory(self):
+		datasets = self.datasetManager.getAccuracyComplete()
+		
+		# Load all categories separately
+		dataset = []
+		for data in datasets:
+			dataset.append(self.datasetManager.loadDataset([data]))
+		
+		
+		for category in range(len(dataset)):
+			outputDistance = []
+			outputAngle = []
+			outputAngleCamera = []
+			outputDistanceAt2m = []
+			
+			print "\n--- {0}".format(self.direction[category])
+		
+			for data in dataset[category]:
+				features = self.featureExtractor.getFeatures(data)
+				
+				depthMap = data.depth_map
+				targetCoordinates = data.target
+				
+				fingerTipCoordinates = self.featureExtractor.fingerTip[0]
+				fingerTipCoordinates.append(self.utils.getDepthFromMap(depthMap, fingerTipCoordinates))
+				
+				eyeCoordinates = self.featureExtractor.eyePosition[0]
+				eyeCoordinates.append(self.utils.getDepthFromMap(depthMap, eyeCoordinates))
+				
+				
+				# Retrieve the distance between the actual target and the closest impact
+				distance = self.trigonometry.findIntersectionDistance(fingerTipCoordinates, eyeCoordinates, targetCoordinates, self.expectedRadius)
+				if distance == None:
+					print "Missed..."
+				else:
+					outputDistance.append(distance)
+					
+					# Retrieve the distance between the target and the fingertip:
+					targetDistance = float(data.distance)
+					
+					# Calculate the error angles
+					angle = math.degrees(math.asin(distance/targetDistance))
+					outputAngle.append(angle)
+					
+					angleCamera = math.degrees(math.asin(distance/targetCoordinates[2]))
+					outputAngleCamera.append(angleCamera)
+					
+					distanceAt2m = math.asin(distance/targetDistance)*2000
+					outputDistanceAt2m.append(distanceAt2m)
+					
+					print "--- Impact distance: {0:0.1f} mm\t Impact at 2m: {1:0.1f}\t Error angle (fingertip): {2:0.1f} deg\t Error angle (camera): {3:0.1f} deg".format(distance, distanceAt2m, angle, angleCamera)
+					
+			
+			print "---\n--- Average impact distance of {0:0.1f} mm.".format(np.average(outputDistance))
+			print "--- Average impact distance at 2 m of {0:0.1f} mm.".format(np.average(outputDistanceAt2m))
+			print "--- Average eror angle of {0:0.1f} deg at the fingertip.".format(np.average(outputAngle))
+			print "--- Average eror angle of {0:0.1f} deg at the camera.".format(np.average(outputAngleCamera))
 	
 	
 	def drawUnifiedTrajectories(self):
@@ -382,6 +473,10 @@ class Accuracy:
 	
 if __name__ == "__main__":
 	accuracy = Accuracy()
+	
+	accuracy.processedPointedDirectionByCategory()
+	
+	sys.exit(1)
 			
 	right = [[189,447,3186,1],
 			[189,447,3186,1],

@@ -719,7 +719,6 @@ class FeatureExtractor():
 				
 				
 				# Return the coordinates
-				
 				v = int(cropTop+emptyTop+line)
 				h = int(cropLeft+emptyLeft+h)
 				

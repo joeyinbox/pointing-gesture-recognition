@@ -118,3 +118,10 @@ class Trigonometry:
 			return distance
 		else:
 			return None
+	
+	
+	def get3dDistance(self, origin, end):
+		x1, y1, z1 = map(float, origin)
+		x2, y2, z2 = map(float, end)
+		
+		return math.sqrt((x2-x1)**2+(y2-y1)**2+(z2-z1)**2)

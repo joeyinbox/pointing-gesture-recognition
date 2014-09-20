@@ -20,26 +20,20 @@ class Validating():
 	utils = Utils()
 	
 	
-	def complete(self):
-		positiveValidating = self.datasetManager.getPositiveCompleteMixed("validating")
-		negativeValidating = self.datasetManager.getMainNegative("validating")
+	def complete(self, type):
+		positiveValidating = self.datasetManager.getPositiveCompleteMixed(type)
+		negativeValidating = self.datasetManager.getMainNegative(type)
 		
 		# run the network
 		self.run(positiveValidating, negativeValidating)
 	
 	
-	def restrained(self):
-		positiveValidating = self.datasetManager.getPositiveRestrainedMixed("validating")
-		negativeValidating = self.datasetManager.getNegativeMainRestrained("validating")
+	def restrained(self, type):
+		positiveValidating = self.datasetManager.getPositiveRestrainedMixed(type)
+		negativeValidating = self.datasetManager.getNegativeMainRestrained(type)
 		
 		# run the network
 		self.run(positiveValidating, negativeValidating)
-	
-	def accuracy(self):
-		positiveValidating = self.datasetManager.getAccuracyRestrained()
-		
-		# run the network
-		self.run(positiveValidating, [])
 		
 		
 		
@@ -75,13 +69,17 @@ class Validating():
 				
 				goodPositive = 0
 				badPositive = 0
+				count = 0
 				for positive in positiveInput:
 					result = self.bpn.check([positive])
 					
 					if result[0] == False:
 						badPositive += 1
+						print("{0} is erroneous".format(count))
 					else:
 						goodPositive += 1
+					
+					count += 1
 				print
 				print "{0} corrects and {1} bad --> {2:0.2f}%".format(goodPositive, badPositive, (goodPositive/float(goodPositive+badPositive)*100))
 				print
@@ -90,13 +88,17 @@ class Validating():
 				print "Negative validation"
 				goodNegative = 0
 				badNegative = 0
+				count = 0
 				for negative in negativeInput:
 					result = self.bpn.check([negative])
 					
 					if result[0] == True:
 						badNegative += 1
+						print("{0} is erroneous".format(count))
 					else:
 						goodNegative += 1
+					
+					count += 1
 				print
 				print "{0} corrects and {1} bad --> {2:0.2f}%".format(goodNegative, badNegative, (goodNegative/float(goodNegative+badNegative)*100))
 				print "Final score = {0:0.2f}%".format(((goodPositive+goodNegative)/float(goodPositive+badPositive+goodNegative+badNegative))*100)
@@ -108,4 +110,13 @@ class Validating():
 
 if __name__ == "__main__":
 	app = Validating()
-	app.restrained()
+	#app.restrained("training")
+	#app.complete("training")
+	#print "\n----------\t"
+	#
+	app.restrained("testing")
+	#app.complete("testing")
+	#print "\n----------\t"
+	#
+	#app.restrained("validating")
+	#app.complete("validating")

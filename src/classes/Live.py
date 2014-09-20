@@ -61,7 +61,10 @@ class Live():
 		self.data = skeleton.track(self.user, self.depth, self.data)
 
 		# Get the whole depth map
+		self.testing.startTimer()
 		self.data.depth_map = np.asarray(self.depth.get_tuple_depth_map()).reshape(480, 640)
+		self.testing.timerMarker("Depth map acquisition and conversion")
+		self.testing.stopTimer()
 		
 		# Create dummy values
 		recognition = False

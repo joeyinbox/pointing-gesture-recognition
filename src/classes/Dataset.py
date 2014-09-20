@@ -116,7 +116,11 @@ class Dataset:
 		
 	def toggleDistance(self, value):
 		self.distance = value
-		print "distance toggled"
+		print "distance toggled to {0}".format(value)
+		
+	def setDistance(self, value):
+		self.distance = value
+		print "distance changed to {0}".format(value)
 	
 	def toggleHand(self, value):
 		self.hand = value
