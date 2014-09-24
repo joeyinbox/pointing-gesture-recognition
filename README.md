@@ -25,7 +25,6 @@ The current neural network features the following success percentages:
 - **98.50 %** on training
 - **88.10 %** on testing
 - **88.10 %** on validation
-- **70.83 %** on random data
 
 ## Configuration ##
 - Auto-calibration needs to be enabled in the OpenNI file `FeatureExtraction.ini` by uncommenting and setting to 1 the line `UseAutoCalibration=1` under the **[LBS]** section.
