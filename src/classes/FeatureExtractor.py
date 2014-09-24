@@ -12,6 +12,8 @@ import signal
 import heapq
 
 
+
+# Definition of the FeatureExtractor class
 class FeatureExtractor():
 	
 	# Load settings
@@ -44,21 +46,46 @@ class FeatureExtractor():
 	eyePosition = [[0,0], [0,0]]
 	orientation = ["", ""]
 	
-	
 	bpnValidating = None
 	
+	
+	# Constructor of the FeaturesExtractor class
+	# 
+	# @param	None
+	# @return	None
 	def __init__(self):
 		# Vectorize threshold functions to speed the process
 		self.thresholdBinary = np.vectorize(self.thresholdBinary)
 		self.thresholdExtracted = np.vectorize(self.thresholdExtracted)
 	
+	
+	# Apply a binary output after a threshold (This function is meant to be vectorialised)
+	# 
+	# @param	x					Value to process
+	# @param	start				Minimal value of the threshold
+	# @param	end					Maximal value of the threshold
+	# @return	integer				(0|1)
 	def thresholdBinary(self, x, start, end):
 	    return 0 if x<start or x>end or x==0 else 1
 	
+	
+	# Apply a threshold to transform unwanted values to NaN (This function is meant to be vectorialised)
+	# 
+	# @param	x					Value to process
+	# @param	start				Minimal value of the threshold
+	# @param	end					Maximal value of the threshold
+	# @return	numeric				(NaN|x)
 	def thresholdExtracted(self, x, start, end):
 	    return np.NaN if x<start or x>end or x==0 else x
 	
 	
+	# Find the nearest position of the value 1 in an array, starting ideally from its middle
+	# 
+	# @param	data				Array of values
+	# @param	index				Current index within the array
+	# @param	orientation			Orientation of next lookup (-1|1)
+	# @param	shift				Shift to push lookup on sides
+	# @return	integer|None		Index of the nearest 1 value; otherwise None
 	def findNearestValue(self, data, index, orientation=-1, shift=0):
 		# Returns the index of the nearest value around the index parameter
 		tmp = index+(orientation*shift)
@@ -76,6 +103,10 @@ class FeatureExtractor():
 			return self.findNearestValue(data, index, orientation, shift)
 	
 	
+	# Rebase the values of the extracted array based on its minimum value
+	# 
+	# @param	None
+	# @return	None
 	def tarExtracted(self):
 		# Determine the minimal non-zero value of the matrice
 		try:
@@ -91,31 +122,10 @@ class FeatureExtractor():
 		self.testing.timerMarker("Tar the values of the extracted hand")
 	
 	
-	def getEuclidianDistance(self, a, b):
-		return np.linalg.norm(a-b)
-
-	def getAvgEuclidianDistance(self):
-		# The reference point is taken at the center of the matrix
-		h, v = self.currentExtracted.shape
-		ref_h = h/2
-		ref_v = v/2
-		
-		# Then we determine all euclidian distances between relevant points and that reference point
-		distances = []
-		
-		# If the reference point is not a number, it will be considered as 0
-		if np.isnan(self.currentExtracted[ref_h, ref_v]):
-			reference = 0.0
-		else:
-			reference = self.currentExtracted[ref_h, ref_v]
-	
-		for i in range(h):
-			for j in range(v):
-				if not np.isnan(self.currentExtracted[i,j]) and (i!=ref_h or j!=ref_v):
-					distances.append(self.getEuclidianDistance(np.array([i, j, self.currentExtracted[i,j]]), np.array([ref_h, ref_v, reference])))
-		
-		return np.average(distances)
-	
+	# Remove all empty columns and rows of the extracted and binary arrays
+	# 
+	# @param	None
+	# @return	None
 	def removeEmptyColumnsRows(self):
 		# Re-initialise empty holders
 		self.emptyTop, self.emptyLeft, self.emptyBottom, self.emptyRight = 0, 0, 0, 0
@@ -165,8 +175,11 @@ class FeatureExtractor():
 		self.testing.timerMarker("Remove all zeros columns and rows from both matrices")
 		
 	
-	
-	
+	# Rotate the extracted and binary matrices to place the fingertip at their top
+	# 
+	# @param	hand				Coordinates of the hand
+	# @param	elbow				Coordinates of the elbow
+	# @return	None
 	def rotate(self, hand, elbow):
 		# The dataset can be oriented in 4 different ways that can be rotated back to form a vertical line between the hand and the elbow joints
 		
@@ -213,59 +226,10 @@ class FeatureExtractor():
 		self.testing.timerMarker("Matrice rotation")
 	
 	
-	def getHistogram(self):
-		hist, bin_edges = np.histogram(~np.isnan(self.currentExtracted), density=True)
-		return hist
-	
-	def sift(self, input):
-		data = np.copy(self.currentExtracted).astype(np.uint8)
-		gray = cv2.cvtColor(data, cv2.COLOR_GRAY2BGR)
-
-		sift = cv2.SIFT()
-		kp = sift.detect(gray, None)
-		
-		for i in range(len(kp)):
-			x = kp[i].pt[0]
-			y = kp[i].pt[1]
-			size = kp[i].size
-			dir_in_degrees = kp[i].angle
-			laplacian = kp[i].class_id
-			hessian = round(kp[i].response)
-			
-			input.append(laplacian)
-			input.append(hessian)
-			
-			print laplacian
-			print hessian
-			print dir_in_degrees
-			print size
-	
-	def surf(self, input):
-		data = np.copy(self.currentExtracted).astype(np.uint8)
-		gray = cv2.cvtColor(data, cv2.COLOR_GRAself.cropRightBGR)
-		
-		surfDetector = cv2.FeatureDetector_create("SURF")
-		surfDescriptorExtractor = cv2.DescriptorExtractor_create("SURF")
-		kp = surfDetector.detect(gray)
-		(kp, descriptors) = surfDescriptorExtractor.compute(gray, kp)
-		
-		for i in range(len(kp)):
-			x = kp[i].pt[0]
-			y = kp[i].pt[1]
-			size = kp[i].size
-			dir_in_degrees = kp[i].angle
-			laplacian = kp[i].class_id
-			hessian = round(kp[i].response)
-			
-			input.append(laplacian)
-			input.append(hessian)
-			
-			print laplacian
-			print hessian
-			print dir_in_degrees
-			print size
-	
-	
+	# Display the content of either the extracted or the binary array in ASCII
+	# 
+	# @param	b					Array to display (self.extracted|self.binary)
+	# @return	None
 	def display(self, b):
 		x,y = b.shape
 		for i in range(x):
@@ -279,42 +243,12 @@ class FeatureExtractor():
 			print text
 		print
 	
-	def displayHTML(self, b):
-		
-		old_min = float(np.min(b))
-		old_max = float(np.max(b))
-		
-		old_range = float(old_max - old_min)
-		new_min = 0
-		new_range = 1 - float(new_min)
-		
-		def f(n, old_min, old_range, new_range, new_min):
-		    return float((n - float(old_min)) / float(old_range) * float(new_range) + float(new_min))
-
-		f = np.vectorize(f)
-		b = f(b, old_min, old_range, new_range, new_min)
-		
-		
-		
-		x,y = b.shape
-		for i in range(x):
-			text = ""
-			for j in range(y):
-				if np.isnan(b[i,j]):
-					text += "ctx.fillStyle='rgba(0,0,0,0)'; ".format()
-					text += "ctx.fillRect({0},{1},2,2);\n".format(j*2,i*2)
-				else:
-					text += "ctx.fillStyle='rgba(0,0,0,{0:.2f})'; ".format(b[i,j])
-					text += "ctx.fillRect({0},{1},2,2);\n".format(j*2,i*2)
-			print text
-		print
-		
-		sys.exit(1)
-		
 	
-	
-	
-	
+	# Restrain a value between 0 and a maximum
+	# 
+	# @param	value				Value to process
+	# @param	max					Maximum limit
+	# @return	numeric				Value between the range 0 to max
 	def keepRange(self, value, max):
 		if value < 0:
 			return 0
@@ -325,7 +259,17 @@ class FeatureExtractor():
 				return 0
 		else: 
 			return value
-
+	
+	
+	# Get the sum of all numbers within a 2D array
+	# 
+	# @param	data				Array to process
+	# @param	total				Total number of data to get the percentage
+	# @param	h1					Horizontal coordinate to start
+	# @param	v1					Vertical coordinate to start
+	# @param	h2					Horizontal coordinate to finish
+	# @param	v2					Vertical coordinate to finish
+	# @return	float				Percentage of data
 	def countWithinArea(self, data, total, h1, v1, h2, v2):
 		# Return the percentage of actual data within a restricted area
 		if self.currentW>0 and self.currentH>0 and total>0 and data.size>0 and data.shape[0]>=v2 and data.shape[1]>=h2:
@@ -333,6 +277,11 @@ class FeatureExtractor():
 		else:
 			return 0
 	
+	
+	# Divise an array in 6 sub regions to get respective sub-percents
+	# 
+	# @param	None
+	# @return	array				Array of 6 sub-percents
 	def diviseInSix(self):
 		h,w = self.currentBinary.shape
 		total = np.sum(self.currentBinary)
@@ -349,19 +298,16 @@ class FeatureExtractor():
 		
 		return self.normalizeInput(output)
 	
-	def getUpperPercent(self):
-		h,w = self.currentBinary.shape
-		total = np.sum(self.currentBinary)
-		
-		output = []
 	
-		output.append(self.countWithinArea(self.currentBinary, total, 0, 0, w/3, h/3)) 			# left
-		output.append(self.countWithinArea(self.currentBinary, total, w/3, 0, 2*(w/3), h/3)) 	# middle
-		output.append(self.countWithinArea(self.currentBinary, total, 2*(w/3), 0, w, h/3)) 		# right
-		
-		return self.normalizeInput(output, 0, 30)
-	
-	
+	# Retrieve the alignement properties of the elbow and the pointing hand
+	# 
+	# @param	depth				Depth of the hand to adjust the threshold
+	# @param	hand_v				Vertical coordinate of the hand
+	# @param	hand_h				Horizontal coordinate of the hand
+	# @param	elbow_v				Vertical coordinate of the elbow
+	# @param	elbow_h				Horizontal coordinate of the elbow
+	# @param	handId				Identifier of the hand currently processed
+	# @return	array				Array of (-1|0|1)
 	def getElbowHandAlignment(self, depth, hand_v, hand_h, elbow_v, elbow_h, handId):
 		# Allow to discriminate gestures pointing left/right up, lateral and down
 		# Uses the disposition of the hand and the elbow
@@ -402,55 +348,12 @@ class FeatureExtractor():
 		return [h,v]
 		
 		
-	
-	
-	def getTipHandDepthDiff(self, depthMap, fingerTip, handId):
-		if fingerTip[1]<0 or fingerTip[1]>=480 or fingerTip[0]<0 or fingerTip[0]>=640 or len(self.currentBinary)==0:
-			return 0.0
-		
-		# Retrieve fingertip depth
-		fingerTipDepth = depthMap[fingerTip[1]][fingerTip[0]]
-		
-		# Retrieve non-empty values of the last row to get the coordinates of the middle value
-		index = np.nonzero(self.currentBinary[-1] == 1)
-		h = self.findNearestValue(self.currentBinary[-1], index[0][0]+int((index[0][-1]-index[0][0])/2))
-		
-		# Retrieve lower part depth
-		lowerDepth = self.currentExtracted[-1][h]+self.tar
-		
-		# Check difference
-		threshold = 100
-		
-		if fingerTipDepth+threshold < lowerDepth:
-			print "front {1}".format(self.orientation[handId])
-		elif fingerTipDepth > lowerDepth+threshold:
-			print "back {1}".format(self.orientation[handId])
-		else:
-			print "lateral {1}".format(self.orientation[handId])
-		
-		return self.normalizeInput([fingerTipDepth/lowerDepth], 0.9, 1.1)[0]
-	
-	def getTopHandSizeDiff(self):
-		# Get the height of the hand
-		height = len(self.currentBinary)
-		
-		# Count the average number of data in the top 8% part
-		upperIndex = int(height*0.08)
-		lowerIndex = int(height*0.75)
-		
-		
-		
-		lower = np.sum(self.currentBinary[upperIndex:upperIndex+1, :])
-		upper = np.sum(self.currentBinary[lowerIndex:lowerIndex+1, :], dtype=np.int32)
-		
-		print "lower= {0}\t upper= {1} \t divised={2}".format(lower, upper, lower/float(upper))
-		
-		return lower/float(upper)
-		
-		
-		
-	
-	
+	# Normalize the input array in a defined range
+	# 
+	# @param	input				Array to process
+	# @param	old_min				Minimal range limit to rebase
+	# @param	old_max				Maximal range limit to rebase
+	# @return	array				The processed input array of floats
 	def normalizeInput(self, input, old_min=0, old_max=100):
 		# Normalize the data in a range from -1 to 1
 		old_range = old_max-old_min
@@ -462,6 +365,11 @@ class FeatureExtractor():
 	
 		return [float((n-old_min) / float(old_range) * new_range + new_min) for n in input]
 	
+	
+	# Main function to get the features of a dataset item
+	# 
+	# @param	data				Dataset item
+	# @return	array				Array of input features
 	def getFeatures(self, data):
 		result = []
 		
@@ -478,6 +386,19 @@ class FeatureExtractor():
 		# Then, return the corresponding features
 		return result
 	
+	
+	# Retrieve the input features
+	# 
+	# @param	h					Horizontal coordinate of the pointing hand
+	# @param	v					Vertical coordinate of the pointing hand
+	# @param	d					Depth of the pointing hand
+	# @param	h2					Horizontal coordinate of the elbow
+	# @param	v2					Vertical coordinate of the elbow
+	# @param	d2					Depth of the elbow
+	# @param	depthMap			Array of the depth map of the captured scene
+	# @param	head				Cordinates of the head
+	# @param	handId				Identifier of the hand currently processed
+	# @return	array				Array of input features
 	def processFeatures(self, h,v,d, h2,v2,d2, depthMap, head, handId=0):
 		# Assert the validaity of the values
 		if depthMap.size==0 or len(depthMap.shape)<=1:
@@ -567,8 +488,6 @@ class FeatureExtractor():
 		# \------------------------------------/
 		
 		
-		
-		
 		# Hold the percentage of actual data within sub-areas
 		input.extend(self.diviseInSix())
 		
@@ -579,6 +498,10 @@ class FeatureExtractor():
 		return input
 	
 	
+	# Retrieve the coordinates of the fingertip
+	# 
+	# @param	None
+	# @return	array				Array of the coordinates of the fingertip
 	def getFingerTip(self):
 		# Prevent empty calls
 		if len(self.currentBinary)==0:
@@ -613,8 +536,13 @@ class FeatureExtractor():
 		# Revert empty columns/rows and initial crop
 		return [self.cropLeft+h+self.emptyLeft, self.cropTop+v+self.emptyTop]
 		
-		
-		
+	
+	# Retrieve the position of the virtual master eye
+	# 
+	# @param	depthMap			Array of the depth map of the captured scene
+	# @param	head				Coordinates of the head
+	# @param	elbowHand			Orientation of the pointing forearm
+	# @return	array				Array of the coordinates of the virtual master eye
 	def getEyePosition(self, depthMap, head, elbowHand):
 		# Assert the validaity of the values
 		if depthMap.size==0 or len(depthMap.shape)<=1:
@@ -643,7 +571,6 @@ class FeatureExtractor():
 		startH = shift-h+cropLeft
 		endV = shift+cropBottom-v
 		endH = shift+cropRight-h
-		
 	
 		max = (2*shift)+1
 		extracted = np.zeros(max*max).reshape(max, max)
@@ -657,11 +584,8 @@ class FeatureExtractor():
 		extracted = self.thresholdBinary(extracted, start, end)
 		
 		
-		
-		
 		# Re-initialise empty holders
 		emptyTop, emptyLeft, emptyBottom, emptyRight = 0, 0, 0, 0
-		
 		
 		# Remove all zeros columns and rows from both matrices
 		column = extracted.sum(axis=0).astype(int)
@@ -687,10 +611,7 @@ class FeatureExtractor():
 			extracted = extracted[1:,:]
 			emptyTop += 1
 			i += 1
-		
-		
-		
-		
+
 		
 		# The eyes are assumed to look at the finger tip
 		# Based on the alignment of the hand and the elbow, we can extrapolate their relative position

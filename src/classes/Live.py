@@ -13,6 +13,8 @@ from classes.Utils import *
 from classes.Testing import *
 
 
+
+# Definition of the Live class
 class Live():
 	
 	utils = Utils()
@@ -20,6 +22,11 @@ class Live():
 	bpn = BPNHandler(True)
 	testing = Testing()
 	
+	
+	# Constructor of the Live class
+	# 
+	# @param	None
+	# @return	None
 	def __init__(self):
 		# Retrieve all settings
 		self.settings = Settings()
@@ -52,7 +59,10 @@ class Live():
 		Timer(0.001, self.updateImage, ()).start()
 		
 	
-		
+	# Update the captured depth image
+	# 
+	# @param	None
+	# @return	None
 	def updateImage(self):
 		# Update to next frame
 		self.context.wait_and_update_all()

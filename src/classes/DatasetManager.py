@@ -8,6 +8,7 @@ import sys
 
 
 
+# Definition of the DatasetManager class
 class DatasetManager():
 	
 	# Load settings

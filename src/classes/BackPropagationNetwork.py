@@ -2,7 +2,12 @@
 import numpy as np
 
 
+
 # Transfer sigmoid function
+# 
+# @param	x					Numeric value to transform
+# @param	derivative			Flag to use an alternative formula
+# @return	float				Transformed value to use as a mean to update weights
 def sgm(x, derivative=False):
 	if not derivative:
 		return 1 / (1+np.exp(-x))
@@ -10,18 +15,36 @@ def sgm(x, derivative=False):
 		out = sgm(x)
 		return out*(1.0-out)
 
+
+# Transfer linear function
+# 
+# @param	x					Numeric value to transform
+# @param	derivative			Flag to use an alternative formula
+# @return	float				Transformed value to use as a mean to update weights
 def linear(x, derivative=False):
 	if not derivative:
-		return x
+		return float(x)
 	else:
 		return 1.0
 
+
+# Transfer gaussian function
+# 
+# @param	x					Numeric value to transform
+# @param	derivative			Flag to use an alternative formula
+# @return	float				Transformed value to use as a mean to update weights
 def gaussian(x, derivative=False):
 	if not derivative:
 		return np.exp(-x**2)
 	else:
 		return -2*x*np.exp(-x**2)
 
+
+# Transfer hyperbolic tangent function
+# 
+# @param	x					Numeric value to transform
+# @param	derivative			Flag to use an alternative formula
+# @return	float				Transformed value to use as a mean to update weights
 def tanh(x, derivative=False):
 	if not derivative:
 		return np.tanh(x)
@@ -29,20 +52,28 @@ def tanh(x, derivative=False):
 		return 1.0 - np.tanh(x)**2
 
 
+# Definition of the BackPropagationNetwork class
 class BackPropagationNetwork:
 	
-	layerCount = 0
-	shape = None
-	weights = []
-	tFuncs = []
+	layerCount = 0				# Number of layers used within the network
+	shape = None				# Size of the layers used within the network
+	weights = []				# Actual weights of the network
+	tFuncs = []					# Array of transfer functions chosen for the network
 	
+	
+	# Constructor of the BackPropagationNetwork class
+	# 
+	# @param	layerSize			Size of the layers used within the network
+	# @param	layerFunctions		Array of transfer functions chosen for the network
+	# @return	None
 	def __init__(self, layerSize, layerFunctions=None):
 		
-		# Layer information
+		# Layer informations
 		self.layerCount = len(layerSize)-1
 		self.shape = layerSize
 		self.weights = []
 		
+		# Attribute transfer functions to the layers accordingly
 		if layerFunctions is None:
 			lFuncs = []
 			for i in range(self.layerCount):
@@ -60,7 +91,7 @@ class BackPropagationNetwork:
 		
 		self.tFuncs = lFuncs
 		
-		# Data from last run
+		# Will hold data informations from the last run
 		self._layerInput = []
 		self._layerOutput = []
 		self._previousWeightDelta = []
@@ -70,6 +101,11 @@ class BackPropagationNetwork:
 			self.weights.append(np.random.normal(scale=0.1, size=(l2, l1+1)))
 			self._previousWeightDelta.append(np.zeros((l2, l1+1)))
 	
+	
+	# Run the network based on the input data
+	# 
+	# @param	input				Input features
+	# @return	array				Last output
 	def run(self, input):
 		
 		lnCases = input.shape[0]
@@ -93,7 +129,14 @@ class BackPropagationNetwork:
 		# Return the last output
 		return self._layerOutput[-1].T
 	
+	
 	# Trains the network for one epoch
+	# 
+	# @param	input				Input features
+	# @param	target				Target values to match as closely as possible
+	# @param	learningRate		Learning rate value to influence weights and bias changes
+	# @param	momentum			Momentum value to update the next weights by adding a defined fraction of the previous one
+		# @return	float				Error value between the current output and the target
 	def trainEpoch(self, input, target, learningRate=0.2, momentum=0.5):
 		
 		delta = []
@@ -123,9 +166,7 @@ class BackPropagationNetwork:
 			else:
 				layerOutput = np.vstack([self._layerOutput[index-1], np.ones([1, self._layerOutput[index-1].shape[1]])])
 			
-			currentWeightDelta = np.sum(\
-								 layerOutput[None, :, :].transpose(2, 0, 1)*delta[delta_index][None, :, :].transpose(2, 1, 0)\
-								 , axis=0)
+			currentWeightDelta = np.sum(layerOutput[None, :, :].transpose(2, 0, 1)*delta[delta_index][None, :, :].transpose(2, 1, 0), axis=0)
 			
 			weightDelta = learningRate*currentWeightDelta + momentum*self._previousWeightDelta[index]
 			
@@ -134,9 +175,17 @@ class BackPropagationNetwork:
 		
 		return error
 	
-	# Get the weights
+	
+	# Returns the current weights of the network
+	# 
+	# @return	array				Array of the actual weights
 	def getWeights(self):
 		return self.weights
 	
+	
+	# Replace the current weights of the network by new ones
+	# 
+	# @param	weights				Array of weights to use within the network
+	# @return	None
 	def setWeights(self, weights):
 		self.weights = weights

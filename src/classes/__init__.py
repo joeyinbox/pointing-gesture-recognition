@@ -1,6 +1,5 @@
 from accuracy import Accuracy
 
-
 from classes.BackPropagationNetwork import BackPropagationNetwork
 from classes.BPNHandler import BPNHandler
 

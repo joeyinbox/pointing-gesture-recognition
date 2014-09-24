@@ -6,6 +6,8 @@ from classes.Settings import *
 from classes.Utils import Utils
 
 
+
+# Definition of the Dataset class
 class Dataset:
 	TYPE_POSITIVE = 0
 	TYPE_NEGATIVE = 1
@@ -25,11 +27,22 @@ class Dataset:
 	DISTANCE_2000 = 3
 	
 	
+	# Constructor of the Dataset class
+	# 
+	# @param	camera_height		Value of the camera height while gathering informations
+	# @param	hand				Identifier of the hand (Ø|1|2)
+	# @param	skeleton			Skeletal joints of the detected subject
+	# @param	depth_map			Depth map of the captured scene
+	# @param	image				RGB image of the captured scene
+	# @param	type				Identifier of the type of data (0|1|2|3)
+	# @param	distance			Identifier of the type of distance chosen (0|1|2|3|4|5|6) or the actual distance between the fingertip and the target
+	# @param	target				Coordinates of the target
+	# @return	None
 	def __init__(self, camera_height=None, hand=None, skeleton=None, depth_map=None, image=None, type=None, distance=None, target=None):
 		self.settings = Settings()
 		self.utils = Utils()
 		
-		
+		# Initialise each attributes with respective parameters; otherwise with a default value
 		if camera_height is None:
 			camera_height = 1500
 		self.camera_height = camera_height
@@ -77,11 +90,20 @@ class Dataset:
 			target = []
 		self.target = target
 	
+	
+	
+	# Returns a JSON encoded string of the dataset object
+	# 
+	# @param	None
+	# @return	string				JSON encoded string of the dataset object
 	def to_JSON(self):
-		# Update the depth map and the image to prepare them
+		# Convert the depth map to a serializable state
 		self.depth_map = self.depth_map.tolist()
+		
+		# Encode the RGB image in a base64 string
 		self.image = self.utils.getBase64(self.image)
 		
+		# Get rid of extra attributes to clean the output
 		obj = deepcopy(self)
 		del obj.settings
 		del obj.utils
@@ -89,6 +111,11 @@ class Dataset:
 		return json.dumps(obj, default=lambda o: o.__dict__, separators=(',', ':'))
 	
 	
+	
+	# Save the dataset informations as a file
+	# 
+	# @param	None
+	# @return	None
 	def save(self):
 		print "Saving dataset informations..."
 		
@@ -108,24 +135,46 @@ class Dataset:
 		self.utils.dumpJsonToFile(self.to_JSON(), filename)
 	
 	
-	
-	
+	# Toggle the type identifier of the dataset
+	# 
+	# @param	value				Identifier of the new type of the dataset
+	# @return	None
 	def toggleType(self, value):
 		self.type = value
 		print "type toggled to {0}".format(value)
-		
+	
+	
+	# Toggle the distance identifier of the dataset
+	# 
+	# @param	value				Identifier of the new distance of the dataset
+	# @return	None
 	def toggleDistance(self, value):
 		self.distance = value
 		print "distance toggled to {0}".format(value)
-		
+	
+	
+	# Update the distance of the dataset
+	# 
+	# @param	value				Distance value
+	# @return	None
 	def setDistance(self, value):
 		self.distance = value
 		print "distance changed to {0}".format(value)
 	
+	
+	# Toggle the hand identifier of the dataset
+	# 
+	# @param	value				Identifier of the new hand of the dataset
+	# @return	None
 	def toggleHand(self, value):
 		self.hand = value
 		print "hand toggled"
 	
+	
+	# Returns the actual distance
+	# 
+	# @param	None
+	# @return	numeric				Actual distance value (translated if identifier)
 	def getWishedDistance(self):
 		if self.distance == Dataset.DISTANCE_550:
 			return 550
@@ -141,3 +190,5 @@ class Dataset:
 			return 1750
 		elif self.distance == Dataset.DISTANCE_2000:
 			return 2000
+		else:
+			return self.distance

@@ -14,6 +14,8 @@ from classes.Settings import *
 from classes.Utils import *
 
 
+
+# Definition of the DatasetGui class
 class DatasetGui(QtWidgets.QWidget):
 	
 	utils = Utils()
@@ -22,6 +24,10 @@ class DatasetGui(QtWidgets.QWidget):
 	accuracy = accuracy.Accuracy()
 	
 	
+	# Constructor of the DatasetGui class
+	# 
+	# @param	None
+	# @return	None
 	def __init__(self):
 		super(DatasetGui, self).__init__()
 		self.setWindowTitle("Pointing Gesture Recognition - Dataset recording")
@@ -113,10 +119,13 @@ class DatasetGui(QtWidgets.QWidget):
 		self.timerScreen.setSingleShot(True)
 		self.timerScreen.timeout.connect(self.updateImage)
 		self.timerScreen.start()
+		
 	
-		
+	# Update the depth image displayed within the main window
+	# 
+	# @param	None
+	# @return	None
 	def updateImage(self):
-		
 		# Update to next frame
 		self.context.wait_and_update_all()
 		
@@ -148,7 +157,6 @@ class DatasetGui(QtWidgets.QWidget):
 			# Get the pixel's depth from the coordinates of the hands
 			leftPixel = self.utils.getDepthFromMap(self.data.depth_map, self.data.skeleton["hand"]["left"])
 			rightPixel = self.utils.getDepthFromMap(self.data.depth_map, self.data.skeleton["hand"]["right"])
-			#print "Left hand depth: %d | Right hand depth: %d" % (leftPixel, rightPixel)
 			
 			if self.data.hand == self.settings.LEFT_HAND:
 				currentDepth = leftPixel
@@ -187,6 +195,10 @@ class DatasetGui(QtWidgets.QWidget):
 		self.timerScreen.start()
 	
 	
+	# Update the label indicating the number of dataset elements saved so far for the current type
+	# 
+	# @param	None
+	# @return	None
 	def updateDatasetNumberLabel(self):
 		if self.data.type == Dataset.TYPE_POSITIVE:
 			self.numberLabel.setText("Dataset #%d" % (self.utils.getFileNumberInFolder(self.settings.getPositiveFolder())))
@@ -198,6 +210,10 @@ class DatasetGui(QtWidgets.QWidget):
 			self.numberLabel.setText("Dataset #%d" % (self.utils.getFileNumberInFolder(self.settings.getDatasetFolder())))
 		
 	
+	# Record the actual informations
+	# 
+	# @param	obj					Initiator of the event
+	# @return	None
 	def record(self, obj):
 		# If the user collects data to check accuracy, prompts additional informations
 		if self.data.type == Dataset.TYPE_ACCURACY:
@@ -215,6 +231,11 @@ class DatasetGui(QtWidgets.QWidget):
 			self.countdownEndedSound.play()
 			self.updateDatasetNumberLabel()
 	
+	
+	# Handle a countdown as a mean to record the informations with a delay
+	# 
+	# @param	None
+	# @return	None
 	def recordCountdown(self):
 		# Decrease the countdown and check if it needs to continue
 		self.countdownRemaining -= 1
@@ -233,6 +254,10 @@ class DatasetGui(QtWidgets.QWidget):
 		self.countdownButton.setText("Save in %ds"%(self.countdownRemaining))
 	
 	
+	# Record a heatmap representation of the informations by successive captures
+	# 
+	# @param	None
+	# @return	None
 	def recordHeatmap(self):
 		if self.data.hand == self.settings.NO_HAND:
 			print "Unable to record as no hand is selected"
@@ -257,12 +282,21 @@ class DatasetGui(QtWidgets.QWidget):
 		# Loop timer
 		self.heatmapTimer.start()
 	
+	
+	# Start the recording of the heatmap
+	# 
+	# @param	None
+	# @return	None
 	def startRecordHeatmap(self):
 		self.saveButton.setText("Stop recording")
 		self.heatmapRunning = True
 		self.heatmapTimer.start()
 		
 	
+	# Stop the recording of the heatmap
+	# 
+	# @param	None
+	# @return	None
 	def stopRecordHeatmap(self):
 		self.heatmapTimer.stop()
 		self.heatmapRunning = False
@@ -274,11 +308,18 @@ class DatasetGui(QtWidgets.QWidget):
 		self.heatmap = []
 		
 		
-	
-	
+	# Raise a flag to record the informations when the chosen distance will be met
+	# 
+	# @param	None
+	# @return	None
 	def startRecordWhenReady(self):
 		self.recordIfReady = True
 	
+	
+	# Hold the current informations to indicate the position of the target thanks to the dialog window
+	# 
+	# @param	None
+	# @return	None
 	def saveForTarget(self):
 		# Freeze the data
 		self.timerScreen.stop()
@@ -292,6 +333,11 @@ class DatasetGui(QtWidgets.QWidget):
 		# Prompt the position of the target
 		self.dialogWindow.exec_()
 	
+	
+	# Toggle the type of dataset chosen
+	# 
+	# @param	value				Identifier of the new type of dataset
+	# @return	None
 	def toggleType(self, value):
 		self.data.toggleType(value)
 		
@@ -309,10 +355,16 @@ class DatasetGui(QtWidgets.QWidget):
 				self.countdownButton.setText("Save in %ds"%(self.countdownRemaining))
 				self.readyButton.setEnabled(True)
 	
+	
+	# Create the acquisition form of the main window
+	# 
+	# @param	None
+	# @return	None
 	def createAcquisitionForm(self):
 		globalLayout = QtWidgets.QHBoxLayout()
 		vlayout = QtWidgets.QVBoxLayout()
 		
+		# Drop down menu of the distance to record the informations when the pointing hand meet the corresponding value
 		hlayout = QtWidgets.QHBoxLayout()
 		label = QtWidgets.QLabel("Distance")
 		label.setFixedWidth(100)
@@ -331,7 +383,7 @@ class DatasetGui(QtWidgets.QWidget):
 		hlayout.addWidget(comboBox)
 		vlayout.addLayout(hlayout)
 		
-		
+		# Drop down menu to select the type of hand of the dataset
 		hlayout = QtWidgets.QHBoxLayout()
 		label = QtWidgets.QLabel("Pointing hand")
 		label.setFixedWidth(100)
@@ -346,6 +398,7 @@ class DatasetGui(QtWidgets.QWidget):
 		hlayout.addWidget(comboBox)
 		vlayout.addLayout(hlayout)
 		
+		# Drop down menu of the dataset type
 		hlayout = QtWidgets.QHBoxLayout()
 		label = QtWidgets.QLabel("Type")
 		label.setFixedWidth(100)
@@ -367,13 +420,12 @@ class DatasetGui(QtWidgets.QWidget):
 		self.numberLabel.setAlignment(QtCore.Qt.AlignCenter)
 		vlayout.addWidget(self.numberLabel)
 		
+		# Action buttons to record the way that suits the most
 		hLayout = QtWidgets.QHBoxLayout()
 		self.readyButton = QtWidgets.QPushButton('Save when ready', clicked=self.startRecordWhenReady)
 		self.saveButton = QtWidgets.QPushButton('Save', clicked=self.record)
 		hLayout.addWidget(self.readyButton)
 		vlayout.addLayout(hLayout)
-		
-		
 		
 		item_layout = QtWidgets.QHBoxLayout()
 		self.countdownButton = QtWidgets.QPushButton("Save in %ds"%(self.countdownRemaining), clicked=self.countdownTimer.start)

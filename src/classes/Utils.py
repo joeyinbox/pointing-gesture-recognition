@@ -6,14 +6,25 @@ from os import listdir
 from os.path import isfile, join
 
 
+
+# Definition of the Utils class
 class Utils:
 	
 	# Write array values to a file
+	# 
+	# @param	data				Data to write
+	# @param	filename			File to create or modify
+	# @return	None
 	def writeToFile(self, data, filename):
 	    f = open(filename, 'w')
 	    f.write(data)
 	
+	
 	# Dump the content of an object to a json file
+	# 
+	# @param	data				Data to write
+	# @param	filename			File to create or modify
+	# @return	None
 	def dumpJsonToFile(self, data, filename):
 		# Checks if the file already exists
 		if os.path.isfile(filename):
@@ -27,6 +38,9 @@ class Utils:
 	
 	
 	# Load the content of a json file to an array
+	# 
+	# @param	filename			File to read the data from
+	# @return	string				JSON encoded string of the data
 	def loadJsonFromFile(self, filename):
 		json_data = open(filename)
 		data = json.load(json_data)
@@ -36,12 +50,18 @@ class Utils:
 	
 	
 	# Encode a frame to base64
+	# 
+	# @param	frame				Value to process
+	# @return	string				Base64 encoded string of the parameter data
 	def getBase64(self, frame):
 		tmp = cv2.imencode('.png', frame)[1]
 		return base64.encodestring(tmp)
 	
 	
-	# Return the number of files within a folder
+	# Return the number of files within a folder (recursively)
+	# 
+	# @param	folder				Folder to evaluate
+	# @return	numeric				Total of files within the given folder
 	def getFileNumberInFolder(self, folder):
 		total = 0
 		
@@ -52,11 +72,20 @@ class Utils:
 		
 		return total
 	
+	
 	# Return all files from a folder
+	# 
+	# @param	path				Path to process
+	# @return	array				Array of the file paths contained in the given folder
 	def getFileList(self, path):
 		return [path+f for f in listdir(path) if isfile(join(path,f)) and f!=".DS_Store"]
 	
+	
 	# Return the python code to initialise a numpy array
+	# 
+	# @param	data				Array to process
+	# @param	name				Name of the Python variable
+	# @return	None
 	def getPythonInitCode(self, data, name):
 		print "if {0}:\n\treturn np.array([".format(name)
 		
@@ -75,6 +104,10 @@ class Utils:
 		
 	
 	# Return the depth value of a point from the depth map
+	# 
+	# @param	depthMap			Array of the depth map of the captured scene
+	# @param	position			Coordinates of the point to get the depth from
+	# @return	numeric				Depth of the given coordinates
 	def getDepthFromMap(self, depthMap, position):
 		if len(depthMap.shape)<=1 or len(position)!=2:
 			return 0
@@ -91,6 +124,9 @@ class Utils:
 	
 	
 	# At 1m, the hand is surrounded with a shift of 90 pixels around its center of gravity
+	# 
+	# @param	depth				Depth of the hand
+	# @return	numeric				Advised bound around the hand in relation with its depth
 	def getHandBoundShift(self, depth):
 		if depth == 0:
 			return 90

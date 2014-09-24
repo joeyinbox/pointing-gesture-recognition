@@ -7,11 +7,21 @@ import signal
 import heapq
 
 
+
+# Definition of the BPNHandler class
 class BPNHandler:
 	
 	# Hold eventual results
 	resultTestingScore, resultTrainingScore, resultInitialWeights, resultWeights, resultConfig, resultIteration = [], [], [], [], [], []
 	
+	
+	# Constructor of the BPNHandler class
+	# 
+	# @param	live				Flag to initialise the right network in case of a live utilisation
+	# @param	features			Number of features that will be handled by the network
+	# @param	hiddenLayers		Number of neurones in the hidden layer of the network
+	# @param	output				Number of neurones in the output layer of the network
+	# @return	None
 	def __init__(self, live=False, features=6, hiddenLayers=20, output=12):
 		# Define the functions that will be used
 		self.lFuncs = [None, gaussian, sgm]
@@ -24,6 +34,10 @@ class BPNHandler:
 			self.bpnTesting = BackPropagationNetwork((features, hiddenLayers, output), self.lFuncs)
 	
 	
+	# Check a set of feature values against the network to detect a pointing gesture
+	# 
+	# @param	features			Input values to input the network
+	# @return	array				Recognition result and corresponding hand identifier
 	def check(self, features):
 		lvInput = np.array(features)
 		lvOutput = self.bpnValidating.run(lvInput)
@@ -41,6 +55,16 @@ class BPNHandler:
 		return result
 	
 	
+	# Train the network
+	# 
+	# @param	trainingInput		2D Array of input feature values from the training set
+	# @param	trainingTarget		2D Array of targeted values from the training set
+	# @param	testingInput		2D Array of input feature values from the testing set
+	# @param	testingTarget		2D Array of targeted values from the testing set
+	# @param	learningRate		Learning rate value to influence weights and bias changes
+	# @param	momentum			Momentum value to update the next weights by adding a defined fraction of the previous one
+	# @param	optimal				Flag to train the network by iteratively changing its configuration
+	# @return	None
 	def run(self, trainingInput, trainingTarget, testingInput, testingTarget, learningRate=0.05, momentum=0.1, optimal=False):
 		# store the original SIGINT handler to display the results if interrupted
 		original_sigint = signal.getsignal(signal.SIGINT)
@@ -55,8 +79,7 @@ class BPNHandler:
 		
 		
 		# For research purpose, the number of hidden layers will be dynamic
-		#ran = np.arange(2, 50)
-		ran = np.tile([22], 20)
+		ran = np.arange(2, 50)
 		
 		# Loop the number of hidden layers
 		for hidden in ran:
@@ -85,7 +108,6 @@ class BPNHandler:
 					# For optimal research purpose, the network can be ran several times
 					if optimal:
 						repeatition = range(3)
-						#repeatition = [1]
 					else:
 						repeatition = [1]
 					
@@ -169,21 +191,29 @@ class BPNHandler:
 								break
 		            	
 						# Display output
-						print 
-						print("Stopped at Iteration {0}\tError: {1:0.6f}  \t{2:0.6f}".format(i, err, error))
+						print("\nStopped at Iteration {0}\tError: {1:0.6f}  \t{2:0.6f}".format(i, err, error))
 			        	
 			        	
 						# Keep this result if it is good
 						self.addResult(bestScore, bestScoreTraining, initialWeights, bestIteration, bestWeights, [hidden, locallearningRate, localMomentum])
 			        	
-						print "The best weights for a score of {0:0.6f} at iteration {1} while training was at  {2:0.6f}:".format(bestScore, bestIteration, bestScoreTraining)
-						print
+						print "The best weights for a score of {0:0.6f} at iteration {1} while training was at {2:0.6f}\n".format(bestScore, bestIteration, bestScoreTraining)
 		
 		# If all loops have finished, display the results (any interuption during the process will call this function anyways...)
 		self.displayResults(None, None)
 	
 	
+	# Add a result to the result array in order to display the top later
+	# 
+	# @param	bestScore			Best score over the testing set
+	# @param	bestScoreTraining	Best score over the training set
+	# @param	initialWeights		Array of the initial weights as a mean to be able to reproduce the same training
+	# @param	bestIteration		Number of epochs necessary to get such results
+	# @param	bestWeights			Array of the best weights found
+	# @param	config				Configuration of the training
+	# @return	None
 	def addResult(self, bestScore, bestScoreTraining, initialWeights, bestIteration, bestWeights, config):
+		# Fill an array to get the top 30 scores
 		if len(self.resultTestingScore) < 30:
 			self.resultTestingScore.append(bestScore)
 			self.resultTrainingScore.append(bestScoreTraining)
@@ -195,6 +225,7 @@ class BPNHandler:
 			# Retrieve the worst score
 			largest = heapq.nlargest(1, ((k, i) for i, k in enumerate(self.resultTestingScore)))
 			
+			# And eventually replace it by the new one
 			if bestScore < largest[0][0]:
 				self.resultTestingScore[largest[0][1]] = bestScore
 				self.resultTrainingScore[largest[0][1]] = bestScoreTraining
@@ -204,11 +235,16 @@ class BPNHandler:
 				self.resultConfig[largest[0][1]] = config
 	
 	
+	# Constructor of the BPNHandler class
+	# 
+	# @param	signum				Parameter returned by the signal handler
+	# @param	frame				Parameter returned by the signal handler
+	# @return	None
 	def displayResults(self, signum, frame):
 		print "\n\n"
 		
-		# Retrieve the 20 best results
-		best = heapq.nsmallest(20, ((k, i) for i, k in enumerate(self.resultTestingScore)))
+		# Retrieve the 30 best results
+		best = heapq.nsmallest(30, ((k, i) for i, k in enumerate(self.resultTestingScore)))
 		
 		# Display their informations
 		i = 1
@@ -226,6 +262,10 @@ class BPNHandler:
 		sys.exit(1)
 	
 	
+	# Return an array of the weights for a restrained training
+	# 
+	# @param	None
+	# @return	array				Weights for a restrained training
 	def getRestrainedWeights(self):
 		# 6 features
 		# 4 outputs
@@ -276,9 +316,11 @@ class BPNHandler:
 		       [ -0.12199234, -10.19219712, 8.06935235, 6.9182037 , 2.30406498, 0.24799988, -3.37224594, -3.10677015, -0.02090579, -8.85714068, 0.89119597, -3.21427397, 3.22807991, -12.88817591, -2.60296851, 3.22849161, -6.24018907, 12.64210081, -0.83880417, 1.36770577, -0.86057057, 1.3002273 , 8.33254584, 8.61110381, -5.88632128, -0.19032465, -10.66967749, -5.49616384, -0.38647148, 2.19894426, -6.6359804 , -0.13424704, -0.12125402, -8.02089844]])]
 	
 	
-	
-	
-	
+	# Returns the weights chosen by this porject so far
+	# 
+	# @param	initial				Flag to retrieve the initial weights as a mean to re-train the network
+	# @param	best				Flag to retrieve the best weights in order to detect pointing gestures
+	# @return	array				Chosen weights
 	def getWeights(self, initial=False, best=True):
 		# 6 features
 		# 12 outputs
@@ -293,7 +335,6 @@ class BPNHandler:
 		# Testing score: 88.10 %
 		# Training score: 98.50 %
 		# Validating score: 88.10 %
-		# Accuracy score: 70.83 %
 		
 		
 		

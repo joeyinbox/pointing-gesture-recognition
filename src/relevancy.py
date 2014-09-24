@@ -6,6 +6,8 @@ from classes.Utils import *
 import numpy as np
 
 
+
+# Definition of the Relevancy class
 class Relevancy():
 	
 	# Load required classes
@@ -42,7 +44,10 @@ class Relevancy():
 	]
 	
 	
-	
+	# Returns the repartition between positive and negative files
+	# 
+	# @param	None
+	# @return	tuple				Tuple of the repartition for positive and negative files
 	def getRepartition(self):
 		# Get detailed counts
 		positive = {}
@@ -65,13 +70,30 @@ class Relevancy():
 		return (positive, negative)
 	
 	
+	# Returns the number of files in a given positive folder
+	# 
+	# @param	type				Type of dataset
+	# @param	direction			Direction featured in the dataset
+	# @param	orientation			Orientation featured in the dataset
+	# @return	numeric				Number of files in a given positive folder
 	def getDetailedPositiveRepartition(self, type, direction, orientation=""):
 		return self.utils.getFileNumberInFolder(self.settings.getPositiveFolder()+type+"/"+direction+"/"+orientation+"/")
 	
+	
+	# Returns the number of files in a given negative folder
+	# 
+	# @param	type				Type of dataset
+	# @param	direction			Direction featured in the dataset
+	# @param	orientation			Orientation featured in the dataset
+	# @return	numeric				Number of files in a given negative folder
 	def getDetailedNegativeRepartition(self, type, direction, orientation=""):
 		return self.utils.getFileNumberInFolder(self.settings.getNegativeFolder()+type+"/"+direction+"/"+orientation+"/")
 	
 	
+	# Display the general repartition
+	# 
+	# @param	None
+	# @return	None
 	def showRepartition(self):
 		positive,negative = self.getRepartition()
 		
@@ -85,8 +107,10 @@ class Relevancy():
 		self.showTotalRepartition(positive, negative)
 		
 		
-	
-	
+	# Display and returns the positive repartition
+	# 
+	# @param	positive			Array of all positive file repartition
+	# @return	dict				Informations about the repartition of the positive dataset
 	def showPositiveRepartition(self, positive):
 		totalPositive = 0
 		
@@ -94,7 +118,6 @@ class Relevancy():
 		totalTesting = 0
 		totalValidating = 0
 		
-		# 
 		for direction in self.direction:
 			training = 0
 			testing = 0
@@ -136,13 +159,16 @@ class Relevancy():
 		return {"total":totalPositive,"totalTraining":totalTraining,"totalTesting":totalTesting,"totalValidating":totalValidating}
 		
 	
+	# Display and returns the negative repartition
+	# 
+	# @param	negative			Array of all negative file repartition
+	# @return	dict				Informations about the repartition of the negative dataset
 	def showNegativeRepartition(self, negative):
 		totalNegative = 0
 		
 		totalTraining = 0
 		totalTesting = 0
 		totalValidating = 0
-		
 		
 		for direction in self.direction:
 			training = 0
@@ -184,7 +210,12 @@ class Relevancy():
 
 		return {"total":totalNegative,"totalTraining":totalTraining,"totalTesting":totalTesting,"totalValidating":totalValidating}
 
-
+	
+	# Display the general repartition
+	# 
+	# @param	positive			Array of all positive file repartition informations
+	# @param	negative			Array of all negative file repartition informations
+	# @return	None
 	def showTotalRepartition(self, positive, negative):
 		total = positive["total"]+negative["total"]
 		totalTraining = positive["totalTraining"]+negative["totalTraining"]

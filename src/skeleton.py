@@ -5,7 +5,11 @@ from openni import *
 # Initialise a global variable used within this module
 skel_cap = 0
 
+
 # Initialise the skeleton tracking
+# 
+# @param	user			Reference to the user generator
+# @return	None
 def init(user):
 	global skel_cap
 	
@@ -22,18 +26,31 @@ def init(user):
 	
 
 # Callback used when a new user is detected
+# 
+# @param	src					Source of the detection
+# @param	id					Identifier of the new user
+# @return	None
 def newUser(src, id):
     #print "1/3 User {} detected." .format(id)
     skel_cap.request_calibration(id, True)
 
 
 # Callback used to calibrate a new user skeleton
+# 
+# @param	src					Source of the detection
+# @param	id					Identifier of the new user
+# @return	None
 def calibrationStart(src, id):
     #print "2/3 Calibration started for user {}." .format(id)
 	pass
 
 
 # Callback used to start tracking a user
+# 
+# @param	src					Source of the detection
+# @param	id					Identifier of the new user
+# @param	status				Status of the calibration
+# @return	None
 def calibrationComplete(src, id, status):
     if status == CALIBRATION_STATUS_OK:
         #print "3/3 User {} successfully calibrated! Starting to track." .format(id)
@@ -42,18 +59,31 @@ def calibrationComplete(src, id, status):
         #print "ERR User {} failed to calibrate." .format(id)
 		pass
 
+
+# Clear the detected users
+# 
+# @param	users				Array of all users
+# @return	None
 def clear(users):
     for id in users:
         skel_cap.stop_tracking(id)
 
 
 # Callback called when a user is lost
+# 
+# @param	src					Source of the detection
+# @param	id					Identifier of the new user
+# @return	None
 def lostUser(src, id):
     #print "User {} lost.." .format(id)
 	pass
 
 
 # Track detected users' skeletons
+# 
+# @param	depth				depth generator
+# @param	data				Dataset object instance
+# @return	object				Dataset informations with updated skeletal data
 def track(user, depth, data):
 	for id in user.users:
 		if skel_cap.is_tracking(id):

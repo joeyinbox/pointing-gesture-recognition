@@ -5,6 +5,8 @@ from classes.FeatureExtractor import *
 from classes.Utils import *
 
 
+
+# Definition of the UnitTesting class
 class UnitTesting:
 	
 	featureExtractor = FeatureExtractor()
@@ -18,6 +20,14 @@ class UnitTesting:
 	failed = 0
 	total = 0
 	
+	
+	# Check that the result parameter is conform to another expectation parameter
+	# 
+	# @param	expectation			Targeted result
+	# @param	result				Actual result to test
+	# @param	method				Name of the method currently tested
+	# @param	test				Name of the current assertion
+	# @return	None
 	def check(self, expectation, result, method, test):
 		self.currentTotal += 1
 		self.total += 1
@@ -74,8 +84,12 @@ class UnitTesting:
 			self.currentFailed += 1
 			self.failed += 1
 			print "--- Failure \t{0}: \t{1} \t{2} while expecting {3}".format(method, test, result, expectation)
-		
 	
+	
+	# Display the results of the unit-tests of a category
+	# 
+	# @param	None
+	# @return	None
 	def getResults(self):
 		print "------------------------\n--- Unit Testing results:"
 		if self.currentTotal>0:
@@ -91,6 +105,10 @@ class UnitTesting:
 		self.currentTotal = 0
 	
 	
+	# Display the final results of the unit-tests
+	# 
+	# @param	None
+	# @return	None
 	def getFinalResults(self):
 		print "\n------------------------\n--- Final Unit Testing results:"
 		if self.total>0:
@@ -106,6 +124,10 @@ class UnitTesting:
 		self.total = 0
 		
 	
+	# Assert the FeaturesExtractor class
+	# 
+	# @param	None
+	# @return	None
 	def assertFeatureExtractor(self):
 		print "\n--- FeaturesExtractor ---"
 		
@@ -445,6 +467,10 @@ class UnitTesting:
 		self.check([0,0], self.featureExtractor.getEyePosition(np.array([[0,0,0],[0,0,0],[0,0,0]]), [0,0,0], [0,0]), "getEyePosition", "zero array")
 	
 	
+	# Assert the Utils class
+	# 
+	# @param	None
+	# @return	None
 	def assertUtils(self):
 		print "\n--- Utils ---"
 		
@@ -470,6 +496,10 @@ class UnitTesting:
 		self.check(90, self.utils.getHandBoundShift(1000), "getHandBoundShift", "positive depth")
 	
 	
+	# Assert the BPNHandler class
+	# 
+	# @param	None
+	# @return	None
 	def assertBPNHandler(self):
 		print "\n--- BPNHandler ---"
 		

@@ -2,6 +2,8 @@
 import hashlib, time
 
 
+
+# Definition of the Testing class
 class Testing:
 	
 	enabled = False
@@ -10,14 +12,29 @@ class Testing:
 	sampleSize = 1000
 	data = {"stop":{"total":0,"count":0}}
 	
+	
+	# Constructor of the Dataset class
+	# 
+	# @param	None
+	# @return	None
 	def isEnabled(self):
 		return self.enabled
-		
+	
+	
+	# Start a new timer run
+	# 
+	# @param	None
+	# @return	None
 	def startTimer(self):
 		if self.enabled:
 			self.timer = time.time()
 			self.timerTotal = 0
 	
+	
+	# Record a new time for a given marker
+	# 
+	# @param	title				String of the title of the marker
+	# @return	None
 	def timerMarker(self, title):
 		if self.enabled:
 			timeElapsed = (time.time()-self.timer)*1000
@@ -34,6 +51,11 @@ class Testing:
 			self.timer = time.time()
 			self.timerTotal += timeElapsed
 	
+	
+	# Print the results of the Timer evaluation
+	# 
+	# @param	None
+	# @return	None
 	def stopTimer(self):
 		if self.enabled:
 			self.timerTotal += (time.time()-self.timer)*1000
@@ -52,29 +74,3 @@ class Testing:
 				
 				# Reinitialise the data
 				self.data = {"stop":{"total":0,"count":0}}
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				

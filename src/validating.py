@@ -10,6 +10,8 @@ import sys
 import cv2
 
 
+
+# Definition of the Validating class
 class Validating():
 	
 	# Load required classes
@@ -20,6 +22,10 @@ class Validating():
 	utils = Utils()
 	
 	
+	# Evaluate the complete dataset
+	# 
+	# @param	type					Type of dataset to be evaluated
+	# @return	None
 	def complete(self, type):
 		positiveValidating = self.datasetManager.getPositiveCompleteMixed(type)
 		negativeValidating = self.datasetManager.getMainNegative(type)
@@ -28,6 +34,10 @@ class Validating():
 		self.run(positiveValidating, negativeValidating)
 	
 	
+	# Evaluate the restrained dataset
+	# 
+	# @param	type					Type of dataset to be evaluated
+	# @return	None
 	def restrained(self, type):
 		positiveValidating = self.datasetManager.getPositiveRestrainedMixed(type)
 		negativeValidating = self.datasetManager.getNegativeMainRestrained(type)
@@ -36,9 +46,12 @@ class Validating():
 		self.run(positiveValidating, negativeValidating)
 		
 		
-		
-	
-	
+	# Evaluate the given informations
+	# 
+	# @param	positiveValidating		Array of all positive files to process
+	# @param	negativeValidating		Array of all negative files to process
+	# @param	getData					Flag to retrieve the data in order to bypass a future loading
+	# @return	None
 	def run(self, positiveValidating, negativeValidating, getData=False):
 		# Load all dataset files
 		positive = self.datasetManager.loadDataset(positiveValidating)
@@ -110,13 +123,13 @@ class Validating():
 
 if __name__ == "__main__":
 	app = Validating()
-	#app.restrained("training")
-	#app.complete("training")
-	#print "\n----------\t"
-	#
+	app.restrained("training")
+	app.complete("training")
+	print "\n----------\t"
+	
 	app.restrained("testing")
-	#app.complete("testing")
-	#print "\n----------\t"
-	#
-	#app.restrained("validating")
-	#app.complete("validating")
+	app.complete("testing")
+	print "\n----------\t"
+	
+	app.restrained("validating")
+	app.complete("validating")

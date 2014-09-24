@@ -2,34 +2,18 @@
 import sys, math
 
 
+
+# Definition of the Trigonometry class
 class Trigonometry:
-		
-	def retrieveCoordinates(self, y, angle, distance):
-		# Retrieve X and Z coordinates thanks to the angle and the distance relative to the camera
-		
-		# Avoid unecessary calculations
-		angle %= 360
-		coefX = 1
-		coefZ = 1
-		
-		# Every 90deg, the right-angle is moved clockwised (from the camera point of view)
-		if angle>=90 and angle<180:
-			angle = 180-angle
-		elif angle>=180 and angle<270:
-			angle = angle-180
-			coefZ = -1
-		elif angle>=270 and angle<360:
-			angle = 360-angle
-			coefX = -1
-			coefZ = -1
-		else:
-			coefX = -1
-		
-		x = coefX*int(math.cos(math.radians(angle))*distance)	# lateral shift
-		z = coefZ*int(math.sin(math.radians(angle))*distance)	# real depth
-		
-		return [x,y,z]
 	
+	
+	# Retrieve the intersection of the line of sight and the virtual sphere centered on the target
+	# 
+	# @param	eye					Coordinates of the master eye
+	# @param	fingerTip			Coordinates of the fingertip
+	# @param	target				Coordinates of the target
+	# @param	radius				Radius of the virtual sphere
+	# @return	array				Coordinates of the intersection
 	def findIntersection(self, eye, fingerTip, target, radius):
 		
 		# Retrieve coordinates
@@ -99,8 +83,13 @@ class Trigonometry:
 			return None
 	
 	
-	
-	
+	# Retrieve the distance from the target and the intersection of the line of sight and the virtual sphere centered on the target
+	# 
+	# @param	eye					Coordinates of the master eye
+	# @param	fingerTip			Coordinates of the fingertip
+	# @param	target				Coordinates of the target
+	# @param	radius				Radius of the virtual sphere
+	# @return	float				Distance of the closest impact; otherwise None
 	def findIntersectionDistance(self, eye, fingerTip, target, radius):
 		# Retrieve target coordinates
 		x3, y3, z3 = map(float, target)
@@ -120,6 +109,11 @@ class Trigonometry:
 			return None
 	
 	
+	# Returns the distance between two 3D points
+	# 
+	# @param	origin				Point A
+	# @param	end					Point B
+	# @return	float				Distance between the two points
 	def get3dDistance(self, origin, end):
 		x1, y1, z1 = map(float, origin)
 		x2, y2, z2 = map(float, end)

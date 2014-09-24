@@ -13,12 +13,19 @@ from classes.Settings import *
 from classes.Utils import *
 
 
+
+# Definition of the LiveGui class
 class LiveGui(QtWidgets.QWidget):
 	
 	utils = Utils()
 	featureExtractor = FeatureExtractor()
 	bpn = BPNHandler(True)
 	
+	
+	# Constructor of the LiveGui class
+	# 
+	# @param	None
+	# @return	None
 	def __init__(self):
 		super(LiveGui, self).__init__()
 		self.setWindowTitle("Pointing Gesture Recognition - Live")
@@ -78,6 +85,12 @@ class LiveGui(QtWidgets.QWidget):
 		self.timerScreen.start()
 	
 		
+	
+	
+	# Update the depth image displayed within the main window
+	# 
+	# @param	None
+	# @return	None
 	def updateImage(self):
 		
 		# Update to next frame
@@ -108,8 +121,6 @@ class LiveGui(QtWidgets.QWidget):
 			# Get the pixel's depth from the coordinates of the hands
 			leftPixel = self.utils.getDepthFromMap(self.data.depth_map, self.data.skeleton["hand"]["left"])
 			rightPixel = self.utils.getDepthFromMap(self.data.depth_map, self.data.skeleton["hand"]["right"])
-			#print "Left hand depth: %d | Right hand depth: %d" % (leftPixel, rightPixel)
-			
 			
 			# Get the shift of the boundaries around both hands
 			leftShift = self.utils.getHandBoundShift(leftPixel)
@@ -153,7 +164,10 @@ class LiveGui(QtWidgets.QWidget):
 		self.timerScreen.start()
 		
 	
-	# Create the acquisition interface form
+	# Create the acquisition form of the main window
+	# 
+	# @param	None
+	# @return	None
 	def createAcquisitionForm(self):
 		globalLayout = QtWidgets.QHBoxLayout()
 		
